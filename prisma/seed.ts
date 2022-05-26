@@ -29,6 +29,11 @@ async function seed() {
       title: "My first resenha",
       body: "Hello, world!",
       userId: user.id,
+      reviewAccesses: {
+        create: [
+          { userId: user.id, level: 0 },
+        ]
+      }
     },
   });
 
@@ -37,6 +42,11 @@ async function seed() {
       title: "My second resenha",
       body: "Hello, world!",
       userId: user.id,
+      reviewAccesses: {
+        create: [
+          { userId: user.id, level: 0 },
+        ]
+      }
     },
   });
 

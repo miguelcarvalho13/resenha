@@ -1,6 +1,7 @@
 import type { User, Review } from "@prisma/client";
 
 import { prisma } from "~/db.server";
+import { Level } from "~/models/review-access.server";
 
 export type { Review } from "@prisma/client";
 
@@ -39,6 +40,11 @@ export function createReview({
           id: userId,
         },
       },
+      reviewAccesses: {
+        create: [
+          { userId: userId, level: Level.ADMIN }
+        ]
+      }
     },
   });
 }
