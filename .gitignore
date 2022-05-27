@@ -39,3 +39,4 @@ yarn-error.log*
 
 # database data
 /data
+/backend/data

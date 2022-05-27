@@ -18,10 +18,10 @@ services:
     links:
       - postgresDB:postgresDB
     volumes:
-      - ./config:/opt/app/config
-      - ./src:/opt/app/src
-      - ./package.json:/opt/package.json
-      - ./yarn.lock:/opt/yarn.lock
+      - ./backend/config:/opt/app/config
+      - ./backend/src:/opt/app/src
+      - ./backend/package.json:/opt/package.json
+      - ./backend/yarn.lock:/opt/yarn.lock
       - ./.env:/opt/app/.env
     ports:
       - "1337:1337"
@@ -40,7 +40,7 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
     volumes:
-      - ./data:/var/lib/postgresql/data/
+      - ./backend/data:/var/lib/postgresql/data/
     ports:
       - "5432:5432"
     networks:
