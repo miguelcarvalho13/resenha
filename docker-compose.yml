@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  app:
+    platform: "linux/amd64"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+      args:
+        NEXT_PUBLIC_CLIENTVAR: "clientvar"
+    restart: always
+    command: yarn dev
+    # command: ash -c "ash"
+    # tty: true
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    image: resenha-web
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=database_url_goes_here
+    # env_file:
+    #   - .env
