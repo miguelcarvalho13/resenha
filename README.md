@@ -1,34 +1,58 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# react-trpc-turbo
 
-## Getting Started
+## Technologies used
 
-First, run the development server:
+- Turborepo
+- React Vite
+- Express.js
+- tRPC
+- TanStack Router
+- Tailwind CSS
 
-```bash
-npm run dev
-# or
-yarn dev
+### Apps and Packages
+
+- `@repo/web`: Vite, React, TanStack Router and tRPC Client
+- `@repo/api`: Express.js, Drizzle and tRPC Server
+- `@repo/eslint-config`: `eslint` configurations
+- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- `@repo/tailwind-config`: shared Tailwind configuration
+
+Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+
+### Utilities
+
+This Turborepo has some additional tools already setup for you:
+
+- [TypeScript](https://www.typescriptlang.org/) for static type checking
+- [ESLint](https://eslint.org/) for code linting
+- [Prettier](https://prettier.io) for code formatting
+
+## Setup
+
+To get started, clone the repository and install the dependencies:
+
+```
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then, copy the `.env.example` file to `.env` in the web/ folder and fill in the necessary environment variables. For local development, the defaul value will work. If you want to deploy the app, you will need to specify where the backend is hosted.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+```
+cp ./apps/web/.env.example ./apps/web/.env
+```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+### Build
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+To build all apps and packages, run the following command:
 
-## Learn More
+```
+pnpm build
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Develop
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+To run all apps and packages in development mode, run the following command:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+```
+pnpm dev
+```
