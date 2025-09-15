@@ -35,10 +35,16 @@ To get started, clone the repository and install the dependencies:
 pnpm install
 ```
 
-Then, copy the `.env.example` file to `.env` in the web/ folder and fill in the necessary environment variables. For local development, the defaul value will work. If you want to deploy the app, you will need to specify where the backend is hosted.
+Then, copy the `.env.example` file to `.env` in the apps/web/ folder and fill in the necessary environment variables. For local development, the default value will work. If you want to deploy the app, you will need to specify where the backend is hosted.
 
 ```
 cp ./apps/web/.env.example ./apps/web/.env
+```
+
+Then, copy the `.env.example` file to `.env` in the packages/database/ folder which should be have all the necessary env vars already set up for local development.
+
+```
+cp ./apps/database/.env.example ./apps/database/.env
 ```
 
 ### Build
