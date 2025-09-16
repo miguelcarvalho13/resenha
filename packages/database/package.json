@@ -1,7 +1,10 @@
 {
-  "name": "database",
+  "name": "@repo/database",
   "version": "0.0.0",
   "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsx src/index.ts",

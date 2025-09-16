@@ -12,7 +12,8 @@
 ### Apps and Packages
 
 - `@repo/web`: Vite, React, TanStack Router and tRPC Client
-- `@repo/api`: Express.js, Drizzle and tRPC Server
+- `@repo/api`: Express.js and tRPC Server
+- `@repo/database`: Drizzle and database connection
 - `@repo/eslint-config`: `eslint` configurations
 - `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
 - `@repo/tailwind-config`: shared Tailwind configuration
@@ -44,7 +45,13 @@ cp ./apps/web/.env.example ./apps/web/.env
 Then, copy the `.env.example` file to `.env` in the packages/database/ folder which should be have all the necessary env vars already set up for local development.
 
 ```
-cp ./apps/database/.env.example ./apps/database/.env
+cp ./packages/database/.env.example ./packages/database/.env
+```
+
+Then, copy the `.env.example` file to `.env` in the apps/api/ and generate the BETTER_AUTH_SECRET env following the steps described [here](https://www.better-auth.com/docs/installation#set-environment-variables).
+
+```
+cp ./apps/api/.env.example ./apps/api/.env
 ```
 
 ### Build
@@ -56,6 +63,12 @@ pnpm build
 ```
 
 ### Develop
+
+To run the local database:
+```
+docker compose up
+```
+**Note:** This also creates an adminer instance on http://localhost:8585 for manual inspection of the database.
 
 To run all apps and packages in development mode, run the following command:
 
