@@ -6,8 +6,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "dev": "tsx src/index.ts",
-    "build": "tsx src/index.ts",
+    "dev": "echo 'NOOP'",
+    "build": "echo 'NOOP'",
     "db:check": "drizzle-kit check",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
