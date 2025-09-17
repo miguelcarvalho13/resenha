@@ -4,6 +4,7 @@ import 'dotenv/config';
 import express from 'express';
 
 import { appRouter } from '@api/router';
+import { createTRPCContext } from '@api/trpc';
 
 
 async function main() {
@@ -18,7 +19,7 @@ async function main() {
     '/trpc',
     createExpressMiddleware({
       router: appRouter,
-      createContext: (ctx) => ({ req: ctx.req, res: ctx.res }),
+      createContext: ({ req }) => createTRPCContext({ headers: req.headers }),
       onError:
         process.env.NODE_ENV === 'development'
           ? ({ path, error }) => {

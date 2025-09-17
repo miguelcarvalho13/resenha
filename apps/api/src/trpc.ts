@@ -1,17 +1,22 @@
 import { initTRPC, TRPCError, type inferRouterInputs, type inferRouterOutputs } from '@trpc/server';
+import { type IncomingHttpHeaders } from 'http';
 import superjson from 'superjson';
 import { ZodError } from 'zod';
 
-import type { AppRouter } from '@api/router';
 import { auth } from '@api/auth';
 import { db } from "@api/db";
+import type { AppRouter } from '@api/router';
+import { convertIncomingHeadersToNativeHeaders } from './utils/headers';
 
-export const createTRPCContext = async (opts: { headers: Headers }) => {
+
+export const createTRPCContext = async (opts: { headers: IncomingHttpHeaders }) => {
+  const headers = convertIncomingHeadersToNativeHeaders(opts.headers);
+
   const authSession = await auth.api.getSession({
-    headers: opts.headers
+    headers,
   })
 
-  const source = opts.headers.get('x-trpc-source') ?? 'unknown'
+  const source = headers.get('x-trpc-source') ?? 'unknown'
   console.log('>>> tRPC Request from', source, 'by', authSession?.user.email)
 
   return {
