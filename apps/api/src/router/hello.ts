@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { publicProcedure, router } from '@api/trpc';
+import { protectedProcedure, publicProcedure, router } from '@api/trpc';
 
 export const schema = z.object({
   name: z.string(),
@@ -8,4 +8,5 @@ export const schema = z.object({
 
 export const helloRouter = router({
   get: publicProcedure.input(schema).query(async ({ input }) => ({ success: true, message: `Hello ${input.name}!` })),
+  getProtected: protectedProcedure.input(schema).query(async ({ input }) => ({ success: true, message: `Protected[Hello ${input.name}!]` })),
 });
