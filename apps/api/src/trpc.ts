@@ -1,4 +1,5 @@
 import { initTRPC, TRPCError, type inferRouterInputs, type inferRouterOutputs } from '@trpc/server';
+import { fromNodeHeaders } from 'better-auth/node';
 import { type IncomingHttpHeaders } from 'http';
 import superjson from 'superjson';
 import { ZodError } from 'zod';
@@ -6,11 +7,10 @@ import { ZodError } from 'zod';
 import { auth } from '@api/auth';
 import { db } from "@api/db";
 import type { AppRouter } from '@api/router';
-import { convertIncomingHeadersToNativeHeaders } from './utils/headers';
 
 
 export const createTRPCContext = async (opts: { headers: IncomingHttpHeaders }) => {
-  const headers = convertIncomingHeadersToNativeHeaders(opts.headers);
+  const headers = fromNodeHeaders(opts.headers);
 
   const authSession = await auth.api.getSession({
     headers,
