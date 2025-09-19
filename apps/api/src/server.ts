@@ -14,7 +14,11 @@ async function main() {
 
   const app = express();
 
-  app.use(cors());
+  app.use(cors({
+    origin: process.env.WEB_APP_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  }));
 
   app.all("/api/auth/*", toNodeHandler(auth));
 
