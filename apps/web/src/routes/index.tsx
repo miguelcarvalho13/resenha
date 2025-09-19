@@ -1,10 +1,20 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 
+import { LogoutButton } from '@/components/auth/LogoutButton';
 import { authClient } from '@/utils/authClient';
 import { trpc } from '@/utils/trpc';
 
 export const Route = createFileRoute('/')({
   component: Index,
+  loader: async () => {
+    const { data: session } = await authClient.getSession();
+
+    if (!session?.session) {
+      throw redirect({
+        to: '/sign-in',
+      })
+    }
+  }
 });
 
 function Index() {
@@ -15,5 +25,10 @@ function Index() {
     return <div>Loading...</div>;
   }
 
-  return <p className="text-xl">Message: {data?.message} | User: {session?.user.email}</p>;
+  return (
+    <div>
+      <p className="text-xl">Message: {data?.message} | User: {session?.user.email}</p>
+      <LogoutButton />
+    </div>
+  )
 }
