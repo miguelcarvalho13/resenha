@@ -12,7 +12,7 @@ function RootRoute() {
     >
       <AppShell.Header>
         <Group h="100%" px="md">
-          <Title order={1}>Resenha</Title>
+          <Title order={1}>Resenhaí</Title>
         </Group>
       </AppShell.Header>
 
