@@ -1,5 +1,7 @@
+import { Button, Stack, TextInput } from "@mantine/core";
+import { useForm } from "@mantine/form";
 import { useNavigate } from "@tanstack/react-router";
-import { type FormEventHandler } from "react";
+import { zodResolver } from "mantine-form-zod-resolver";
 import { z } from "zod";
 
 import { authClient } from "@/utils/authClient";
@@ -23,22 +25,28 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
   const navigate = useNavigate({
     from: "/",
   });
+
   const isSignUp = mode === 'sign-up';
+  const schema = isSignUp ? signUpSchema : signInSchema;
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
-    event.preventDefault();
+  const form = useForm({
+    mode: 'uncontrolled',
+    initialValues: {
+      email: '',
+      ...(isSignUp ? { name: '' } : {}),
+      password: '',
+    },
 
-    const formData = new FormData(event.currentTarget);
-    const formDataValue = Object.fromEntries(formData.entries());
+    validate: zodResolver(schema),
+  });
 
+  const handleSubmit = async (values: z.infer<typeof signInSchema> | z.infer<typeof signUpSchema>) => {
     if (isSignUp) {
-      const values = signUpSchema.parse(formDataValue)
-
       await authClient.signUp.email(
         {
           email: values.email,
           password: values.password,
-          name: values.name,
+          name: 'name' in values ? values.name : '',
         },
         {
           onSuccess: () => {
@@ -51,8 +59,6 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
         },
       );
     } else {
-      const values = signInSchema.parse(formDataValue)
-
       await authClient.signIn.email(
         {
           email: values.email,
@@ -72,27 +78,38 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      {isSignUp && (
-        <label>
-          Name:
-          <input type='text' name='name' />
-        </label>
-      )}
+    <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
+      <Stack>
 
-      <label>
-        Email:
-        <input type='email' name='email' />
-      </label>
+        {isSignUp && (
+          <TextInput
+            label="Name"
+            placeholder="Name"
+            key={form.key('name')}
+            {...form.getInputProps('name')}
+          />
+        )}
 
-      <label>
-        Password:
-        <input type='password' name='password' />
-      </label>
+        <TextInput
+          label="Email"
+          placeholder="Email"
+          key={form.key('email')}
+          type="email"
+          {...form.getInputProps('email')}
+        />
 
-      {isSignUp
-        ? <button type='submit'>Sign up</button>
-        : <button type='submit'>Sign in</button>}
+        <TextInput
+          label="Password"
+          placeholder="Password"
+          key={form.key('password')}
+          type="password"
+          {...form.getInputProps('password')}
+        />
+
+        {isSignUp
+          ? <Button type='submit'>Sign up</Button>
+          : <Button type='submit'>Sign in</Button>}
+      </Stack>
     </form>
   )
 }

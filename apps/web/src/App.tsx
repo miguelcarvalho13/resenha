@@ -1,3 +1,5 @@
+import { MantineProvider } from '@mantine/core';
+import '@mantine/core/styles.css';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 
 import { TrpcWrapper } from './components/TrpcWrapper';
@@ -15,7 +17,9 @@ declare module '@tanstack/react-router' {
 export function App() {
   return (
     <TrpcWrapper>
-      <RouterProvider router={router} />
+      <MantineProvider>
+        <RouterProvider router={router} />
+      </MantineProvider>
     </TrpcWrapper>
   );
 }
