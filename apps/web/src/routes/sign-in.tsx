@@ -12,13 +12,17 @@ export const Route = createFileRoute('/sign-in')({
 function SignIn() {
   return (
     <LoginAndSignUpFormLayout
-      form={<LoginAndSignUpForm mode='sign-in' />}
+      form={<LoginAndSignUpForm mode="sign-in" />}
       extra={
         <Text>
-          Not registered yet? <LinkStyled to='/sign-up'>Sign up</LinkStyled>
+          Not registered yet? <LinkStyled to="/sign-up">Sign up</LinkStyled>
         </Text>
       }
-      title={<Text size='lg' fw="bold">Sign-in</Text>}
+      title={
+        <Text size="lg" fw="bold">
+          Sign-in
+        </Text>
+      }
     />
   );
 }

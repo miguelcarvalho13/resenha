@@ -1,5 +1,5 @@
-import { Center, Paper, Stack } from "@mantine/core";
-import { type ReactNode } from "react"
+import { Center, Paper, Stack } from '@mantine/core';
+import { type ReactNode } from 'react';
 
 interface LoginAndSignUpFormLayoutProps {
   form: ReactNode;
@@ -10,9 +10,9 @@ interface LoginAndSignUpFormLayoutProps {
 export const LoginAndSignUpFormLayout = ({
   form,
   extra,
-  title
+  title,
 }: LoginAndSignUpFormLayoutProps) => (
-  <Center mt={"xl"}>
+  <Center mt={'xl'}>
     <Paper shadow="sm" p="xl" w={500}>
       <Stack>
         {title}
@@ -21,4 +21,4 @@ export const LoginAndSignUpFormLayout = ({
       </Stack>
     </Paper>
   </Center>
-)
+);

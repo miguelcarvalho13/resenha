@@ -58,9 +58,11 @@ pnpm build
 ### Develop
 
 To run the local database:
+
 ```
 docker compose up
 ```
+
 **Note:** This also creates an adminer instance on http://localhost:8585 for manual inspection of the database.
 
 To run all apps and packages in development mode, run the following command:

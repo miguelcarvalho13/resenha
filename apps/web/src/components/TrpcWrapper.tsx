@@ -11,7 +11,8 @@ export function TrpcWrapper({ children }: { children: React.ReactNode }) {
     trpc.createClient({
       links: [
         httpBatchLink({
-          fetch: (url, options) => fetch(url, {
+          fetch: (url, options) =>
+            fetch(url, {
               ...options,
               credentials: 'include',
             }),
@@ -19,7 +20,7 @@ export function TrpcWrapper({ children }: { children: React.ReactNode }) {
           transformer: superjson,
         }),
       ],
-    })
+    }),
   );
 
   return (

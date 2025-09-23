@@ -7,9 +7,7 @@ export const Route = createRootRoute({
 
 function RootRoute() {
   return (
-    <AppShell
-      header={{ height: 60 }}
-    >
+    <AppShell header={{ height: 60 }}>
       <AppShell.Header>
         <Group h="100%" px="md">
           <Title order={1}>Resenhaí</Title>
@@ -20,5 +18,5 @@ function RootRoute() {
         <Outlet />
       </AppShell.Main>
     </AppShell>
-  )
+  );
 }

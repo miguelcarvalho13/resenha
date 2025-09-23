@@ -7,6 +7,12 @@ export const schema = z.object({
 });
 
 export const helloRouter = router({
-  get: publicProcedure.input(schema).query(async ({ input }) => ({ success: true, message: `Hello ${input.name}!` })),
-  getProtected: protectedProcedure.input(schema).query(async ({ input }) => ({ success: true, message: `Protected[Hello ${input.name}!]` })),
+  get: publicProcedure.input(schema).query(async ({ input }) => ({
+    success: true,
+    message: `Hello ${input.name}!`,
+  })),
+  getProtected: protectedProcedure.input(schema).query(async ({ input }) => ({
+    success: true,
+    message: `Protected[Hello ${input.name}!]`,
+  })),
 });

@@ -1,29 +1,29 @@
-import { Button, Stack, TextInput } from "@mantine/core";
-import { useForm } from "@mantine/form";
-import { useNavigate } from "@tanstack/react-router";
-import { zodResolver } from "mantine-form-zod-resolver";
-import { z } from "zod";
+import { Button, Stack, TextInput } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { useNavigate } from '@tanstack/react-router';
+import { zodResolver } from 'mantine-form-zod-resolver';
+import { z } from 'zod';
 
-import { authClient } from "@/utils/authClient";
+import { authClient } from '@/utils/authClient';
 
 interface LoginAndSignUpFormProps {
   mode: 'sign-up' | 'sign-in';
 }
 
 export const signUpSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 export const signInSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
   const navigate = useNavigate({
-    from: "/",
+    from: '/',
   });
 
   const isSignUp = mode === 'sign-up';
@@ -40,7 +40,9 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
     validate: zodResolver(schema),
   });
 
-  const handleSubmit = async (values: z.infer<typeof signInSchema> | z.infer<typeof signUpSchema>) => {
+  const handleSubmit = async (
+    values: z.infer<typeof signInSchema> | z.infer<typeof signUpSchema>,
+  ) => {
     if (isSignUp) {
       await authClient.signUp.email(
         {
@@ -50,8 +52,8 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
         },
         {
           onSuccess: () => {
-            console.log("Sign up successful");
-            navigate({ to: "/" });
+            console.log('Sign up successful');
+            navigate({ to: '/' });
           },
           onError: (ctx) => {
             console.log(ctx.error.message);
@@ -66,21 +68,20 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
         },
         {
           onSuccess: () => {
-            console.log("Sign in successful");
-            navigate({ to: "/" });
+            console.log('Sign in successful');
+            navigate({ to: '/' });
           },
           onError: (ctx) => {
-            console.log(ctx.error.message)
+            console.log(ctx.error.message);
           },
         },
       );
     }
-  }
+  };
 
   return (
     <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
       <Stack>
-
         {isSignUp && (
           <TextInput
             label="Name"
@@ -106,10 +107,12 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
           {...form.getInputProps('password')}
         />
 
-        {isSignUp
-          ? <Button type='submit'>Sign up</Button>
-          : <Button type='submit'>Sign in</Button>}
+        {isSignUp ? (
+          <Button type="submit">Sign up</Button>
+        ) : (
+          <Button type="submit">Sign in</Button>
+        )}
       </Stack>
     </form>
-  )
-}
+  );
+};

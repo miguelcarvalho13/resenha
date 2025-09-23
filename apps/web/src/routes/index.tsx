@@ -12,14 +12,17 @@ export const Route = createFileRoute('/')({
     if (!session?.session) {
       throw redirect({
         to: '/sign-in',
-      })
+      });
     }
-  }
+  },
 });
 
 function Index() {
   const { data: session, isPending } = authClient.useSession();
-  const { data } = trpc.hello.getProtected.useQuery({ name: 'World' }, { enabled: !!session?.session });
+  const { data } = trpc.hello.getProtected.useQuery(
+    { name: 'World' },
+    { enabled: !!session?.session },
+  );
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -27,8 +30,10 @@ function Index() {
 
   return (
     <div>
-      <p className="text-xl">Message: {data?.message} | User: {session?.user.email}</p>
+      <p className="text-xl">
+        Message: {data?.message} | User: {session?.user.email}
+      </p>
       <LogoutButton />
     </div>
-  )
+  );
 }
