@@ -1,6 +1,11 @@
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
-  extends: ['./eslint', 'plugin:react/recommended', 'plugin:jsx-a11y/recommended'],
+  extends: [
+    './eslint',
+    'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
+    'plugin:jsx-a11y/recommended',
+  ],
   plugins: ['jsx-a11y'],
   globals: {
     React: true,
