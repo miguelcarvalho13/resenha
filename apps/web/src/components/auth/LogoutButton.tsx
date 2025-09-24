@@ -1,3 +1,4 @@
+import { Button } from '@mantine/core';
 import { useNavigate } from '@tanstack/react-router';
 
 import { authClient } from '@/utils/authClient';
@@ -15,5 +16,5 @@ export const LogoutButton = () => {
     });
   };
 
-  return <button onClick={handleLogout}>Logout</button>;
+  return <Button onClick={handleLogout}>Logout</Button>;
 };

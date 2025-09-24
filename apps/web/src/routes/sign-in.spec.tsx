@@ -3,9 +3,9 @@ import { type SetupWorker } from 'msw/browser';
 import { act } from 'react';
 import { expect, vi } from 'vitest';
 
+import { getSessionHandler } from '@/mocks/handlers';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
-import { getSessionHandler } from '@/mocks/handlers';
 
 test('should render sign in form fields', async () => {
   const { router, getByLabelText, getByRole, getByText } =
@@ -28,7 +28,7 @@ test('should render sign in form fields', async () => {
     .toHaveAttribute('href', '/sign-up');
 });
 
-test('should click on "Sign in" and if successful, be redirected to index', async ({
+test('should be redirected to index upon clicking on "Sign in"', async ({
   worker,
 }) => {
   (worker as SetupWorker).use(
