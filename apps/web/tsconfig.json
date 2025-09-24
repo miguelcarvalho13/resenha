@@ -19,7 +19,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "@api/*": ["../api/src/*"]
-    }
+    },
+
+    "types": ["@vitest/browser/providers/playwright"]
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
