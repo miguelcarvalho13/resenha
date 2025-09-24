@@ -7,47 +7,46 @@ import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 import { getSessionHandler } from '@/mocks/handlers';
 
-test('should render sign up form fields', async () => {
+test('should render sign in form fields', async () => {
   const { router, getByLabelText, getByRole, getByText } =
     await renderWithRouter();
 
-  await act(() => router.navigate({ to: '/sign-up' }));
+  await act(() => router.navigate({ to: '/sign-in' }));
 
-  await expect.element(getByLabelText('Name')).toBeInTheDocument();
+  await expect.element(getByLabelText('Name')).not.toBeInTheDocument();
   await expect.element(getByLabelText('Email')).toBeInTheDocument();
   await expect.element(getByLabelText('Password')).toBeInTheDocument();
   await expect
-    .element(getByRole('button', { name: /Sign up/ }))
+    .element(getByRole('button', { name: /Sign in/ }))
     .toBeInTheDocument();
 
-  const helperText = getByText('Already registered? Sign in');
+  const helperText = getByText('Not registered yet? Sign up');
 
   await expect.element(helperText).toBeInTheDocument();
   await expect
-    .element(helperText.getByRole('link', { name: /Sign in/ }))
-    .toHaveAttribute('href', '/sign-in');
+    .element(helperText.getByRole('link', { name: /Sign up/ }))
+    .toHaveAttribute('href', '/sign-up');
 });
 
-test('should click on "Sign up" and if successful, be redirected to index', async ({
+test('should click on "Sign in" and if successful, be redirected to index', async ({
   worker,
 }) => {
   (worker as SetupWorker).use(
     http.post(
-      '/api/auth/sign-up/email',
-      () => new HttpResponse(null, { status: 201 }),
+      '/api/auth/sign-in/email',
+      () => new HttpResponse(null, { status: 200 }),
     ),
     getSessionHandler(),
   );
 
   const { router, getByLabelText, getByRole } = await renderWithRouter();
 
-  await act(() => router.navigate({ to: '/sign-up' }));
+  await act(() => router.navigate({ to: '/sign-in' }));
 
-  await getByLabelText('Name').fill('Some name');
   await getByLabelText('Email').fill('some@example.com');
   await getByLabelText('Password').fill('MyPassword123!@');
 
-  await getByRole('button', { name: /Sign up/ }).click();
+  await getByRole('button', { name: /Sign in/ }).click();
 
   await vi.waitFor(() => expect(window.location.pathname).toBe('/'));
 });
