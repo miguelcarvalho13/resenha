@@ -6,8 +6,9 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "playwright:install": "pnpm exec playwright install",
     "preview": "vite preview",
-    "test": "pnpm exec playwright install && vitest --config=vitest.browser.config.ts --browser.headless",
+    "test": "vitest --config=vitest.browser.config.ts --browser.headless",
     "test:browser": "vitest --config=vitest.browser.config.ts",
     "ts:check": "tsc --noEmit"
   },
