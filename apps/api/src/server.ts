@@ -8,9 +8,11 @@ import { appRouter } from '@api/router';
 import { createTRPCContext } from '@api/trpc';
 import { auth } from '@api/auth';
 
-async function main() {
-  const port = process.env.PORT || 3000;
-
+export function startApp({
+  port = process.env.PORT || 3000,
+}: {
+  port?: string | number;
+} = {}) {
   const app = express();
 
   app.use(
@@ -44,9 +46,10 @@ async function main() {
   // For testing purposes, wait-on requests '/'
   app.get('/', (req, res) => res.send('Server is running!'));
 
-  app.listen(port, () => {
+  return app.listen(port, () => {
     console.log(`App listening on port: ${port}`);
   });
 }
 
-void main();
+// Only automatically runs if not in test mode
+export const app = process.env.VITEST ? null : startApp();

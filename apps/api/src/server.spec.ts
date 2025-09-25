@@ -1,0 +1,107 @@
+import { reset } from 'drizzle-seed';
+import { type Server } from 'http';
+import supertest from 'supertest';
+import { afterEach, beforeEach, expect, test } from 'vitest';
+
+import { db } from '@api/db';
+import * as schema from '@api/db/schema';
+import { startApp } from '@api/server';
+
+let app: Server | null = null;
+
+beforeEach(() => {
+  app = startApp({ port: 3001 });
+});
+
+afterEach(async () => {
+  app?.close();
+  await reset(db, schema);
+});
+
+test('POST /api/auth/sign-up/email should be correctly handled', async () => {
+  expect((await db.select().from(schema.users)).length).toBe(0);
+
+  const res = await supertest(app!).post('/api/auth/sign-up/email').send({
+    name: 'Some Name',
+    email: 'some@example.com',
+    password: 'SomePassword123@',
+  });
+
+  expect(res.status).toBe(200);
+
+  expect((await db.select().from(schema.users)).length).toBe(1);
+});
+
+test('POST /api/auth/sign-in/email should fail if user does not exist', async () => {
+  expect((await db.select().from(schema.users)).length).toBe(0);
+
+  const res = await supertest(app!).post('/api/auth/sign-in/email').send({
+    email: 'some@example.com',
+    password: 'SomePassword123@',
+  });
+
+  expect(res.status).toBe(401);
+});
+
+test('POST /api/auth/sign-in/email should fail if user exists but incorrect credentials are sent', async () => {
+  expect((await db.select().from(schema.users)).length).toBe(0);
+
+  await supertest(app!).post('/api/auth/sign-up/email').send({
+    name: 'Some Name',
+    email: 'some@example.com',
+    password: '12345678',
+  });
+
+  const res = await supertest(app!).post('/api/auth/sign-in/email').send({
+    email: 'some@example.com',
+    password: '1234567',
+  });
+
+  expect(res.status).toBe(401);
+});
+
+test('POST /api/auth/sign-in/email should succeed if user exists and correct credentials are sent', async () => {
+  expect((await db.select().from(schema.users)).length).toBe(0);
+
+  await supertest(app!).post('/api/auth/sign-up/email').send({
+    name: 'Some Name',
+    email: 'some@example.com',
+    password: '12345678',
+  });
+
+  const res = await supertest(app!).post('/api/auth/sign-in/email').send({
+    email: 'some@example.com',
+    password: '12345678',
+  });
+
+  expect(res.status).toBe(200);
+});
+
+test('POST /api/auth/sign-out should be correctly handled', async () => {
+  expect((await db.select().from(schema.users)).length).toBe(0);
+
+  await supertest(app!).post('/api/auth/sign-up/email').send({
+    name: 'Some Name',
+    email: 'some@example.com',
+    password: '12345678',
+  });
+
+  const signInResponse = await supertest(app!)
+    .post('/api/auth/sign-in/email')
+    .send({
+      email: 'some@example.com',
+      password: '12345678',
+    });
+
+  const authCookie = signInResponse.headers['set-cookie'];
+
+  const res = await supertest(app!)
+    .post('/api/auth/sign-out')
+    .send({
+      email: 'some@example.com',
+      password: '12345678',
+    })
+    .set('Cookie', authCookie);
+
+  expect(res.status).toBe(200);
+});
