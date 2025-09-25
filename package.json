@@ -11,8 +11,10 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "start:backend": "node apps/api/dist/server.js"
+    "prettier:check": "prettier --check \"**/*.{ts,tsx,md}\"",
+    "prettier:format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "start:backend": "node apps/api/dist/server.js",
+    "ts:check": "turbo ts:check"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -20,6 +22,6 @@
     "@repo/typescript-config": "workspace:*",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.5",
-    "turbo": "latest"
+    "turbo": "^2.5.8"
   }
 }
