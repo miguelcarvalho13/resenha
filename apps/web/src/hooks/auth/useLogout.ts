@@ -1,9 +1,8 @@
-import { Button } from '@mantine/core';
 import { useNavigate } from '@tanstack/react-router';
 
 import { authClient } from '@/utils/authClient';
 
-export const LogoutButton = () => {
+export const useLogout = () => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -16,5 +15,5 @@ export const LogoutButton = () => {
     });
   };
 
-  return <Button onClick={handleLogout}>Logout</Button>;
+  return handleLogout;
 };

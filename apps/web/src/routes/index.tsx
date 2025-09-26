@@ -1,6 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
-import { LogoutButton } from '@/components/auth/LogoutButton';
 import { authClient } from '@/utils/authClient';
 import { trpc } from '@/utils/trpc';
 
@@ -33,7 +32,6 @@ function Index() {
       <p className="text-xl">
         Message: {data?.message} | User: {session?.user.email}
       </p>
-      <LogoutButton />
     </div>
   );
 }
