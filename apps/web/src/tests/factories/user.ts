@@ -1,12 +1,12 @@
 import { type User } from 'better-auth';
 
 export const createUser = (data: Partial<User> = {}): User => ({
-  id: '',
+  id: '123456',
   createdAt: new Date(),
   updatedAt: new Date(),
-  email: '',
+  email: 'some@example.com',
   emailVerified: false,
-  name: '',
-  image: '',
+  name: 'Some Name',
+  image: 'https://www.example.com',
   ...data,
 });
