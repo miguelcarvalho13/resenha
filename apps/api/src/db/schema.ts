@@ -1,5 +1,7 @@
-import { pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { pgTable, text, timestamp, boolean, uuid } from 'drizzle-orm/pg-core';
 
+// Tables
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -59,3 +61,30 @@ export const verifications = pgTable('verifications', {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
+
+export const notes = pgTable('notes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  content: text('content').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  updatedAt: timestamp('updated_at')
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
+// Relations
+export const notesRelations = relations(notes, ({ one }) => ({
+  // Notes -> User
+  creator: one(users, {
+    fields: [notes.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  // User -> Notes
+  createdNotes: many(notes),
+}));

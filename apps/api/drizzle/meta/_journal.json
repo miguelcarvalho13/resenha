@@ -8,6 +8,13 @@
       "when": 1758049414167,
       "tag": "0000_parched_dark_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1759349911311,
+      "tag": "0001_glamorous_switch",
+      "breakpoints": true
     }
   ]
 }
