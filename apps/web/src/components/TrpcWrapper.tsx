@@ -5,6 +5,12 @@ import superjson from 'superjson';
 
 import { trpc } from '@/utils/trpc';
 
+const baseUrl =
+  import.meta.env.MODE === 'test'
+    ? // vitest default port
+      'http://localhost:63315'
+    : import.meta.env.VITE_API_URL;
+
 export function TrpcWrapper({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
@@ -16,7 +22,7 @@ export function TrpcWrapper({ children }: { children: React.ReactNode }) {
               ...options,
               credentials: 'include',
             }),
-          url: import.meta.env.VITE_API_URL + '/api/trpc',
+          url: baseUrl + '/api/trpc',
           transformer: superjson,
         }),
       ],

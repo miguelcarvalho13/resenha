@@ -1,3 +1,4 @@
+import CreateNoteButton from '@/components/note/CreateNoteButton';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
 import { authClient } from '@/utils/authClient';
@@ -31,6 +32,7 @@ function Index() {
     <div>
       <p className="text-xl">
         Message: {data?.message} | User: {session?.user.email}
+        <CreateNoteButton />
       </p>
     </div>
   );
