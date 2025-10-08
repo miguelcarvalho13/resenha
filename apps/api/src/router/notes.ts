@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 
 import { db } from '@api/db';
 import { notes } from '@api/db/schema';
@@ -27,7 +27,7 @@ export const notesRouter = router({
       .select()
       .from(notes)
       .where(eq(notes.createdBy, ctx.user.id))
-      .orderBy();
+      .orderBy(desc(notes.updatedAt));
 
     return {
       success: true,
