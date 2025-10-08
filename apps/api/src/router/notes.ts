@@ -1,3 +1,5 @@
+import { eq } from 'drizzle-orm';
+
 import { db } from '@api/db';
 import { notes } from '@api/db/schema';
 import { createNotesSchema } from '@api/schemas/notes';
@@ -19,4 +21,17 @@ export const notesRouter = router({
         note: newNote,
       };
     }),
+
+  findAll: protectedProcedure.query(async ({ ctx }) => {
+    const allNotes = await db
+      .select()
+      .from(notes)
+      .where(eq(notes.createdBy, ctx.user.id))
+      .orderBy();
+
+    return {
+      success: true,
+      notes: allNotes,
+    };
+  }),
 });
