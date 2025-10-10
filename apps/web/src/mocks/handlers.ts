@@ -5,7 +5,7 @@ import { type NoteForFindAll } from '@/models/notes';
 import { createSession } from '@/tests/factories/session';
 import { createTrpcBatchJson } from '@/tests/factories/trpc';
 import { createUser } from '@/tests/factories/user';
-import { type RouterOutput } from '@api/trpc';
+import { type RouterOutput } from '@/utils/trpc';
 
 export const getSessionHandler = ({
   session = createSession(),
