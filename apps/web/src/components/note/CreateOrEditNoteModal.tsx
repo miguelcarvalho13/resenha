@@ -20,6 +20,8 @@ const CreateOrEditNoteModal = ({
   close,
   opened,
 }: CreateOrEditNoteModalProps) => {
+  const utils = trpc.useUtils();
+
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
@@ -33,6 +35,7 @@ const CreateOrEditNoteModal = ({
     onSuccess: () => {
       form.reset();
       close();
+      utils.notes.findAll.invalidate();
     },
   });
 

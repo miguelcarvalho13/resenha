@@ -1,18 +1,12 @@
-import { http, HttpResponse } from 'msw';
 import { type SetupWorker } from 'msw/browser';
 import { expect, vi } from 'vitest';
 
-import { getSessionHandler } from '@/mocks/handlers';
+import { getSessionHandler, postCreateNoteHandler } from '@/mocks/handlers';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
 test('should correctly create a note', async ({ worker }) => {
-  (worker as SetupWorker).use(
-    http.post('/api/trpc/notes.createNote', () =>
-      HttpResponse.json([{ result: { data: { json: {} } } }]),
-    ),
-    getSessionHandler(),
-  );
+  (worker as SetupWorker).use(postCreateNoteHandler(), getSessionHandler());
 
   const { getByRole } = await renderWithRouter();
 

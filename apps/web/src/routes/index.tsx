@@ -1,8 +1,9 @@
-import CreateNoteButton from '@/components/note/CreateNoteButton';
+import { Stack, Text } from '@mantine/core';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
+import CreateNoteButton from '@/components/note/CreateNoteButton';
+import { RecentNotesGrid } from '@/components/note/RecentNotesGrid';
 import { authClient } from '@/utils/authClient';
-import { trpc } from '@/utils/trpc';
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -19,10 +20,6 @@ export const Route = createFileRoute('/')({
 
 function Index() {
   const { data: session, isPending } = authClient.useSession();
-  const { data } = trpc.hello.getProtected.useQuery(
-    { name: 'World' },
-    { enabled: !!session?.session },
-  );
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -30,10 +27,11 @@ function Index() {
 
   return (
     <div>
-      <p className="text-xl">
-        Message: {data?.message} | User: {session?.user.email}
+      <Stack p="xl">
+        <Text>User: {session?.user?.email}</Text>
         <CreateNoteButton />
-      </p>
+        <RecentNotesGrid />
+      </Stack>
     </div>
   );
 }
