@@ -6,12 +6,8 @@ interface NoteCardProps {
   note: NoteForFindAll;
 }
 
-export const NoteCard = ({ note }: NoteCardProps) => {
-  const content = note.content.substring(0, 50);
-
-  return (
-    <Paper data-testid="note-card" shadow="xs" p="xl">
-      <Text>{content}</Text>
-    </Paper>
-  );
-};
+export const NoteCard = ({ note }: NoteCardProps) => (
+  <Paper data-testid="note-card" shadow="xs" p="xl">
+    <Text className="line-clamp-2">{note.content}</Text>
+  </Paper>
+);
