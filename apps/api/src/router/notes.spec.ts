@@ -6,8 +6,12 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import { db } from '@api/db';
 import * as schema from '@api/db/schema';
-import { type CreateNotesSchemaType } from '@api/schemas/notes';
+import {
+  type CreateNoteSchemaType,
+  type EditNoteSchemaType,
+} from '@api/schemas/notes';
 import { startApp } from '@api/server';
+import { createNoteThroughApi } from '@api/tests/noteUtils';
 import { createAndSignInUser, createUser } from '@api/tests/sessionUtils';
 
 let app: Server | null = null;
@@ -31,18 +35,18 @@ describe('notes.createNote', () => {
       .send({
         json: {
           content: 'Lorem Ipsum!',
-        } satisfies CreateNotesSchemaType,
+        } satisfies CreateNoteSchemaType,
       })
       .set('Cookie', authCookie);
 
     expect(res.status).toBe(200);
 
-    const createdNode = (await db.select().from(schema.notes).limit(1))[0];
+    const createdNote = (await db.select().from(schema.notes).limit(1))[0];
 
-    expect(createdNode.content).toBe('Lorem Ipsum!');
-    expect(createdNode.createdAt).not.toBeNull();
-    expect(createdNode.updatedAt).not.toBeNull();
-    expect(createdNode.createdBy).toBe(user.id);
+    expect(createdNote.content).toBe('Lorem Ipsum!');
+    expect(createdNote.createdAt).not.toBeNull();
+    expect(createdNote.updatedAt).not.toBeNull();
+    expect(createdNote.createdBy).toBe(user.id);
   });
 
   test('should be a protected route', async () => {
@@ -53,7 +57,7 @@ describe('notes.createNote', () => {
       .send({
         json: {
           content: 'Lorem Ipsum!',
-        } satisfies CreateNotesSchemaType,
+        } satisfies CreateNoteSchemaType,
       });
 
     expect(res.status).toBe(401);
@@ -62,19 +66,104 @@ describe('notes.createNote', () => {
   });
 });
 
+describe('notes.editNote', () => {
+  test('should be correctly handled', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+
+    await createNoteThroughApi({ app: app!, authCookie });
+    const createdNote = (await db.select().from(schema.notes).limit(1))[0];
+
+    const res = await supertest(app!)
+      .post('/api/trpc/notes.editNote')
+      .send({
+        json: {
+          id: createdNote.id,
+          content: 'Lorem Ipsum! updated!',
+        } satisfies EditNoteSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const updatedNote = (await db.select().from(schema.notes).limit(1))[0];
+
+    expect(updatedNote.content).toBe('Lorem Ipsum! updated!');
+    expect(updatedNote.createdAt).not.toBeNull();
+    expect(updatedNote.updatedAt).not.toBeNull();
+
+    // the created user should be the same
+    expect(updatedNote.createdBy).toBe(user.id);
+    expect(createdNote.createdBy).toBe(updatedNote.createdBy);
+
+    // the created date should also remain the same
+    expect(updatedNote.createdAt).not.toBeNull();
+    expect(createdNote.createdAt).toEqual(updatedNote.createdAt);
+
+    // the updated date should be more recent than the created date
+    expect(updatedNote.updatedAt.getTime()).toBeGreaterThan(
+      createdNote.updatedAt.getTime(),
+    );
+  });
+
+  test('should not allow edition for a note created for a different user', async () => {
+    const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
+      app!,
+      {
+        name: 'Another User',
+        email: 'another@example.com',
+      },
+    );
+
+    await createNoteThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+    });
+
+    const noteCreatedForAnotherUser = (
+      await db.select().from(schema.notes).limit(1)
+    )[0];
+
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const res = await supertest(app!)
+      .post('/api/trpc/notes.editNote')
+      .send({
+        json: {
+          id: noteCreatedForAnotherUser.id,
+          content: 'Lorem Ipsum! updated!',
+        } satisfies EditNoteSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(401);
+
+    // note should remain the same
+    const updatedNote = (await db.select().from(schema.notes).limit(1))[0];
+    expect(updatedNote.content).toBe(noteCreatedForAnotherUser.content);
+    expect(updatedNote.createdAt).toEqual(noteCreatedForAnotherUser.createdAt);
+    expect(updatedNote.updatedAt).toEqual(noteCreatedForAnotherUser.updatedAt);
+    expect(updatedNote.createdBy).toBe(noteCreatedForAnotherUser.createdBy);
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!)
+      .post('/api/trpc/notes.editNote')
+      .send({
+        json: {
+          content: 'Lorem Ipsum!',
+        } satisfies CreateNoteSchemaType,
+      });
+
+    expect(res.status).toBe(401);
+  });
+});
+
 describe('notes.findAll', () => {
   test('should be correctly handled', async () => {
     const { authCookie } = await createAndSignInUser(app!);
 
     // First creates a note for the user
-    await supertest(app!)
-      .post('/api/trpc/notes.createNote')
-      .send({
-        json: {
-          content: 'Lorem Ipsum!',
-        } satisfies CreateNotesSchemaType,
-      })
-      .set('Cookie', authCookie);
+    await createNoteThroughApi({ app: app!, authCookie });
 
     const res = await supertest(app!)
       .get('/api/trpc/notes.findAll')
@@ -108,14 +197,7 @@ describe('notes.findAll', () => {
     });
 
     // First creates a note for the user
-    await supertest(app!)
-      .post('/api/trpc/notes.createNote')
-      .send({
-        json: {
-          content: 'Lorem Ipsum!',
-        } satisfies CreateNotesSchemaType,
-      })
-      .set('Cookie', authCookie);
+    await createNoteThroughApi({ app: app!, authCookie });
 
     const res = await supertest(app!)
       .get('/api/trpc/notes.findAll')

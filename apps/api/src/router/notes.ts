@@ -2,12 +2,13 @@ import { desc, eq } from 'drizzle-orm';
 
 import { db } from '@api/db';
 import { notes } from '@api/db/schema';
-import { createNotesSchema } from '@api/schemas/notes';
+import { createNoteSchema, editNoteSchema } from '@api/schemas/notes';
 import { protectedProcedure, router } from '@api/trpc';
+import { TRPCError } from '@trpc/server';
 
 export const notesRouter = router({
   createNote: protectedProcedure
-    .input(createNotesSchema())
+    .input(createNoteSchema())
     .mutation(async ({ input, ctx }) => {
       const { content } = input;
 
@@ -19,6 +20,33 @@ export const notesRouter = router({
       return {
         success: true,
         note: newNote,
+      };
+    }),
+
+  editNote: protectedProcedure
+    .input(editNoteSchema())
+    .mutation(async ({ input, ctx }) => {
+      const { content, id } = input;
+
+      const note = (
+        await db.select().from(notes).where(eq(notes.id, id)).limit(1)
+      )[0];
+
+      if (note.createdBy !== ctx.user.id) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        });
+      }
+
+      const updatedNote = await db
+        .update(notes)
+        .set({ content })
+        .where(eq(notes.id, id));
+
+      return {
+        success: true,
+        note: updatedNote,
       };
     }),
 

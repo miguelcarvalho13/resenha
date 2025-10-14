@@ -34,19 +34,23 @@ export const createUser = async (
  * Test helper to create a user and sign in with it. Specially useful for
  * returning the cookie to be used in future request calls.
  */
-export const createAndSignInUser = async (app: Server) => {
+export const createAndSignInUser = async (
+  app: Server,
+  {
+    name = 'Some Name',
+    email = 'some@example.com',
+    password = '12345678',
+  }: { name?: string; email?: string; password?: string } = {},
+) => {
   const user = await createUser(app, {
-    name: 'Some Name',
-    email: 'some@example.com',
-    password: '12345678',
+    name,
+    email,
+    password,
   });
 
   const signInResponse = await supertest(app!)
     .post('/api/auth/sign-in/email')
-    .send({
-      email: 'some@example.com',
-      password: '12345678',
-    });
+    .send({ email, password });
 
   const authCookie = signInResponse.headers['set-cookie'];
 
