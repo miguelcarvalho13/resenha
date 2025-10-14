@@ -5,6 +5,7 @@ import {
   getFindAllNotesHandler,
   getSessionHandler,
   postCreateNoteHandler,
+  postEditNoteHandler,
 } from '@/mocks/handlers';
 import { createNoteForFindAll } from '@/tests/factories/notes';
 import { renderWithRouter } from '@/tests/renderUtils';
@@ -75,4 +76,46 @@ test('should correctly refresh the list of notes after adding a note', async ({
 
   expect(notes.nth(0)).toHaveTextContent('A');
   expect(notes.nth(1)).toHaveTextContent('B');
+});
+
+test('should correctly refresh the list of notes after editing a note', async ({
+  worker,
+}) => {
+  const note = createNoteForFindAll({ content: 'A', id: '123' });
+
+  (worker as SetupWorker).use(
+    postEditNoteHandler(),
+    getFindAllNotesHandler({ notes: [note] }),
+    getSessionHandler(),
+  );
+
+  const { getByRole, getByTestId } = await renderWithRouter();
+
+  await vi.waitFor(() =>
+    expect(getByTestId('note-card').elements()).toHaveLength(1),
+  );
+
+  const notes = getByTestId('note-card');
+  expect(notes.nth(0)).toHaveTextContent('A');
+
+  // Edit note
+  await getByTestId('note-card')
+    .nth(0)
+    .getByRole('button', { name: /Edit note/ })
+    .click();
+
+  const modal = getByRole('dialog', { name: /Edit note/ });
+  await modal.getByLabelText('Content').clear();
+  await modal.getByLabelText('Content').fill('B');
+
+  (worker as SetupWorker).use(
+    getFindAllNotesHandler({
+      notes: [createNoteForFindAll({ ...note, content: 'B' })],
+    }),
+  );
+
+  await modal.getByRole('button', { name: /Save/ }).click();
+
+  // Wait for refreshed list
+  await vi.waitFor(() => expect(notes.nth(0)).toHaveTextContent('B'));
 });

@@ -8,7 +8,7 @@ const CreateNoteButton = () => {
 
   return (
     <>
-      <CreateOrEditNoteModal opened={opened} close={close} />
+      <CreateOrEditNoteModal mode="create" opened={opened} close={close} />
       <Button onClick={open}>Create note</Button>
     </>
   );

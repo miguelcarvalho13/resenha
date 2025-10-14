@@ -27,8 +27,12 @@ export const getFindAllNotesHandler = ({
       notes,
     } satisfies RouterOutput['notes']['findAll']),
   );
+
 export const postCreateNoteHandler = () =>
   http.post('/api/trpc/notes.createNote', () => createTrpcBatchJson({}));
+
+export const postEditNoteHandler = () =>
+  http.post('/api/trpc/notes.editNote', () => createTrpcBatchJson({}));
 
 export const handlers = [
   http.get('https://api.example.com/user', () =>

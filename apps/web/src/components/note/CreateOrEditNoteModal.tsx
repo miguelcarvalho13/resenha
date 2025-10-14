@@ -3,10 +3,13 @@ import { useForm } from '@mantine/form';
 import { zodResolver } from 'mantine-form-zod-resolver';
 import { z } from 'zod';
 
+import { type NoteForFindAll } from '@/models/notes';
 import { trpc } from '@/utils/trpc';
 
 interface CreateOrEditNoteModalProps {
   close: () => void;
+  mode: 'edit' | 'create';
+  note?: NoteForFindAll;
   opened: boolean;
 }
 
@@ -18,6 +21,8 @@ type CreateOrEditSchemaType = z.infer<typeof createOrEditSchema>;
 
 const CreateOrEditNoteModal = ({
   close,
+  mode,
+  note,
   opened,
 }: CreateOrEditNoteModalProps) => {
   const utils = trpc.useUtils();
@@ -25,7 +30,7 @@ const CreateOrEditNoteModal = ({
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
-      content: '',
+      content: note ? note.content : '',
     } satisfies CreateOrEditSchemaType,
 
     validate: zodResolver(createOrEditSchema),
@@ -39,13 +44,34 @@ const CreateOrEditNoteModal = ({
     },
   });
 
-  const handleSubmit = (values: CreateOrEditSchemaType) =>
-    createNote({
-      content: values.content,
-    });
+  const { mutateAsync: editNote } = trpc.notes.editNote.useMutation({
+    onSuccess: () => {
+      form.reset();
+      close();
+      utils.notes.findAll.invalidate();
+    },
+  });
+
+  const handleSubmit = (values: CreateOrEditSchemaType) => {
+    if (note) {
+      return editNote({
+        id: note.id,
+        content: values.content,
+      });
+    } else {
+      return createNote({
+        content: values.content,
+      });
+    }
+  };
 
   return (
-    <Modal opened={opened} onClose={close} title="Create note" centered>
+    <Modal
+      centered
+      onClose={close}
+      opened={opened}
+      title={mode === 'create' ? 'Create note' : 'Edit note'}
+    >
       <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
         <Stack>
           <Textarea
