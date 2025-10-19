@@ -1,0 +1,1 @@
+ALTER TABLE "tags" ADD CONSTRAINT "tags_created_by_name_unique" UNIQUE("created_by","name");

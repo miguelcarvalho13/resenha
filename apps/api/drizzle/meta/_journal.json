@@ -15,6 +15,27 @@
       "when": 1759349911311,
       "tag": "0001_glamorous_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760909066566,
+      "tag": "0002_green_roughhouse",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1760909750333,
+      "tag": "0003_perfect_jane_foster",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1760909795892,
+      "tag": "0004_violet_firelord",
+      "breakpoints": true
     }
   ]
 }

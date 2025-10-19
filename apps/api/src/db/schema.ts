@@ -1,5 +1,16 @@
 import { relations } from 'drizzle-orm';
-import { pgTable, text, timestamp, boolean, uuid } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  uuid,
+  pgEnum,
+  doublePrecision,
+  date,
+  primaryKey,
+  unique,
+} from 'drizzle-orm/pg-core';
 
 // Tables
 export const users = pgTable('users', {
@@ -75,6 +86,69 @@ export const notes = pgTable('notes', {
     .notNull(),
 });
 
+export const tagTypeEnum = pgEnum('tag_type', [
+  'string',
+  'number',
+  'date',
+  'boolean',
+]);
+
+export const tags = pgTable(
+  'tags',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: text('name').notNull(),
+    type: tagTypeEnum('type').notNull(),
+
+    // creatable + updatable
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    createdBy: text('created_by')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+    updatedBy: text('updated_by')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+  },
+  (table) => [
+    // unique per name and per user
+    unique().on(table.createdBy, table.name),
+  ],
+);
+
+export const noteTags = pgTable(
+  'note_tags',
+  {
+    noteId: uuid('note_id')
+      .notNull()
+      .references(() => notes.id, { onDelete: 'cascade' }),
+    tagId: uuid('tag_id')
+      .notNull()
+      .references(() => tags.id, { onDelete: 'cascade' }),
+
+    valueNumber: doublePrecision('value_number'),
+    valueDate: date('value_date'),
+    valueBoolean: boolean('value_boolean'),
+
+    // creatable + updatable
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    createdBy: text('created_by')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+    updatedBy: text('updated_by')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+  },
+  (table) => [primaryKey({ columns: [table.noteId, table.tagId] })],
+);
+
 // Relations
 export const notesRelations = relations(notes, ({ one }) => ({
   // Notes -> User
@@ -84,7 +158,52 @@ export const notesRelations = relations(notes, ({ one }) => ({
   }),
 }));
 
+export const tagsRelations = relations(tags, ({ many, one }) => ({
+  // Tags -> NoteTags
+  noteTags: many(noteTags),
+
+  // Tags -> User
+  creator: one(users, {
+    fields: [tags.createdBy],
+    references: [users.id],
+  }),
+  updater: one(users, {
+    fields: [tags.updatedBy],
+    references: [users.id],
+  }),
+}));
+
+export const noteTagsRelations = relations(noteTags, ({ one }) => ({
+  // NoteTags -> Notes
+  note: one(notes, {
+    fields: [noteTags.noteId],
+    references: [notes.id],
+  }),
+
+  // NoteTags -> Tags
+  tag: one(tags, {
+    fields: [noteTags.tagId],
+    references: [tags.id],
+  }),
+
+  // NoteTags -> User
+  creator: one(users, {
+    fields: [noteTags.createdBy],
+    references: [users.id],
+  }),
+  updater: one(users, {
+    fields: [noteTags.updatedBy],
+    references: [users.id],
+  }),
+}));
+
 export const usersRelations = relations(users, ({ many }) => ({
-  // User -> Notes
+  // Users -> Notes
   createdNotes: many(notes),
+
+  // Users -> Tags
+  createdTags: many(tags),
+
+  // Users -> NoteTags
+  createdNoteTags: many(noteTags),
 }));
