@@ -19,6 +19,14 @@ const createOrEditSchema = z.object({
 
 type CreateOrEditSchemaType = z.infer<typeof createOrEditSchema>;
 
+const getFormValues = ({
+  note,
+}: {
+  note?: NoteForFindAll;
+}): CreateOrEditSchemaType => ({
+  content: note ? note.content : '',
+});
+
 const CreateOrEditNoteModal = ({
   close,
   mode,
@@ -29,27 +37,23 @@ const CreateOrEditNoteModal = ({
 
   const form = useForm({
     mode: 'uncontrolled',
-    initialValues: {
-      content: note ? note.content : '',
-    } satisfies CreateOrEditSchemaType,
+    initialValues: getFormValues({ note }),
 
     validate: zodResolver(createOrEditSchema),
   });
 
+  const onSuccess = async () => {
+    close();
+    form.resetDirty();
+    await utils.notes.findAll.invalidate();
+  };
+
   const { mutateAsync: createNote } = trpc.notes.createNote.useMutation({
-    onSuccess: () => {
-      form.reset();
-      close();
-      utils.notes.findAll.invalidate();
-    },
+    onSuccess,
   });
 
   const { mutateAsync: editNote } = trpc.notes.editNote.useMutation({
-    onSuccess: () => {
-      form.reset();
-      close();
-      utils.notes.findAll.invalidate();
-    },
+    onSuccess,
   });
 
   const handleSubmit = (values: CreateOrEditSchemaType) => {

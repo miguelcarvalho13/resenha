@@ -75,3 +75,55 @@ test('should require at least 1 char for editing a note', async ({
     'String must contain at least 1 character(s)',
   );
 });
+
+test('should update modal content when reopening the modal after a save', async ({
+  worker,
+}) => {
+  const note = createNoteForFindAll({ content: 'A', id: '123' });
+
+  (worker as SetupWorker).use(
+    getFindAllNotesHandler({ notes: [note] }),
+    postEditNoteHandler(),
+    getSessionHandler(),
+  );
+
+  const { getByRole, getByTestId } = await renderWithRouter();
+
+  await vi.waitFor(() =>
+    expect(getByTestId('note-card').elements()).toHaveLength(1),
+  );
+
+  // Open the modal for the first time and edit it
+  await getByTestId('note-card')
+    .nth(0)
+    .getByRole('button', { name: /Edit note/ })
+    .click();
+
+  const modal = getByRole('dialog', { name: /Edit note/ });
+  await modal.getByLabelText('Content').clear();
+  await modal.getByLabelText('Content').fill('B');
+
+  (worker as SetupWorker).use(
+    getFindAllNotesHandler({
+      notes: [createNoteForFindAll({ ...note, content: 'B' })],
+    }),
+  );
+
+  await modal.getByRole('button', { name: /Save/ }).click();
+
+  // Waits the modal to close
+  const modalElement = modal.element();
+  await vi.waitFor(() =>
+    expect(document.body.contains(modalElement)).not.toBeTruthy(),
+  );
+
+  // Reopen the modal
+  await getByTestId('note-card')
+    .nth(0)
+    .getByRole('button', { name: /Edit note/ })
+    .click();
+
+  expect(
+    getByRole('dialog', { name: /Edit note/ }).getByLabelText('Content'),
+  ).toHaveValue('B');
+});
