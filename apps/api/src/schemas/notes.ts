@@ -7,7 +7,7 @@ export const createNoteSchema = () =>
 
 export const editNoteSchema = () =>
   z.object({
-    id: z.string(),
+    id: z.string().uuid(),
     content: z.string(),
   });
 
