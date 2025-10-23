@@ -7,10 +7,12 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { db } from '@api/db';
 import * as schema from '@api/db/schema';
 import {
+  type CreateNoteTagSchemaType,
   type CreateTagSchemaType,
   type EditTagSchemaType,
 } from '@api/schemas/tags';
 import { startApp } from '@api/server';
+import { createNoteThroughApi } from '@api/tests/noteUtils';
 import { createAndSignInUser, createUser } from '@api/tests/sessionUtils';
 import { createTagThroughApi } from '@api/tests/tagUtils';
 
@@ -174,8 +176,6 @@ describe('tags.findAllTags', () => {
       .get('/api/trpc/tags.findAllTags')
       .set('Cookie', authCookie);
 
-    console.log(JSON.stringify(res.body, null, 2));
-
     expect(res.status).toBe(200);
 
     const allTags = await db.select().from(schema.tags);
@@ -228,6 +228,254 @@ describe('tags.findAllTags', () => {
 
   test('should be a protected route', async () => {
     const res = await supertest(app!).get('/api/trpc/tags.findAllTags');
+
+    expect(res.status).toBe(401);
+  });
+});
+
+describe('tags.createNoteTag', () => {
+  test('should correctly handle note tag [string]', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+    await createNoteThroughApi({ app: app!, authCookie });
+
+    const createdNote = (await db.select().from(schema.notes).limit(1))[0];
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.createNoteTag')
+      .send({
+        json: {
+          name: 'my tag',
+          noteId: createdNote.id,
+          type: 'string',
+        } satisfies CreateNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+    expect((await db.select().from(schema.tags)).length).toBe(1);
+    expect((await db.select().from(schema.noteTags)).length).toBe(1);
+
+    const createdTag = (await db.select().from(schema.tags).limit(1))[0];
+    const createdNoteTag = (
+      await db.select().from(schema.noteTags).limit(1)
+    )[0];
+
+    // Assert tag fields
+    expect(createdTag.name).toBe('my tag');
+    expect(createdTag.type).toBe('string');
+    expect(createdTag.createdAt).not.toBeNull();
+    expect(createdTag.updatedAt).not.toBeNull();
+    expect(createdTag.createdBy).toBe(user.id);
+    expect(createdTag.updatedBy).toBe(user.id);
+
+    // Assert note tag fields
+    expect(createdNoteTag.tagId).toBe(createdTag.id);
+    expect(createdNoteTag.noteId).toBe(createdNote.id);
+    expect(createdNoteTag.valueBoolean).toBeNull();
+    expect(createdNoteTag.valueDate).toBeNull();
+    expect(createdNoteTag.valueNumber).toBeNull();
+    expect(createdNoteTag.createdAt).not.toBeNull();
+    expect(createdNoteTag.updatedAt).not.toBeNull();
+    expect(createdNoteTag.createdBy).toBe(user.id);
+    expect(createdNoteTag.updatedBy).toBe(user.id);
+  });
+
+  test('should correctly handle note tag [number]', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+    await createNoteThroughApi({ app: app!, authCookie });
+
+    const createdNote = (await db.select().from(schema.notes).limit(1))[0];
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.createNoteTag')
+      .send({
+        json: {
+          name: 'my tag',
+          noteId: createdNote.id,
+          value: 15.5,
+          type: 'number',
+        } satisfies CreateNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+    expect((await db.select().from(schema.tags)).length).toBe(1);
+    expect((await db.select().from(schema.noteTags)).length).toBe(1);
+
+    const createdTag = (await db.select().from(schema.tags).limit(1))[0];
+    const createdNoteTag = (
+      await db.select().from(schema.noteTags).limit(1)
+    )[0];
+
+    // Assert tag fields
+    expect(createdTag.name).toBe('my tag');
+    expect(createdTag.type).toBe('number');
+    expect(createdTag.createdAt).not.toBeNull();
+    expect(createdTag.updatedAt).not.toBeNull();
+    expect(createdTag.createdBy).toBe(user.id);
+    expect(createdTag.updatedBy).toBe(user.id);
+
+    // Assert note tag fields
+    expect(createdNoteTag.tagId).toBe(createdTag.id);
+    expect(createdNoteTag.noteId).toBe(createdNote.id);
+    expect(createdNoteTag.valueBoolean).toBeNull();
+    expect(createdNoteTag.valueDate).toBeNull();
+    expect(createdNoteTag.valueNumber).toBe(15.5);
+    expect(createdNoteTag.createdAt).not.toBeNull();
+    expect(createdNoteTag.updatedAt).not.toBeNull();
+    expect(createdNoteTag.createdBy).toBe(user.id);
+    expect(createdNoteTag.updatedBy).toBe(user.id);
+  });
+
+  test('should correctly handle note tag [date]', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+    await createNoteThroughApi({ app: app!, authCookie });
+
+    const createdNote = (await db.select().from(schema.notes).limit(1))[0];
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.createNoteTag')
+      .send({
+        json: {
+          name: 'my tag',
+          noteId: createdNote.id,
+          value: '2025-10-23',
+          type: 'date',
+        } satisfies CreateNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+    expect((await db.select().from(schema.tags)).length).toBe(1);
+    expect((await db.select().from(schema.noteTags)).length).toBe(1);
+
+    const createdTag = (await db.select().from(schema.tags).limit(1))[0];
+    const createdNoteTag = (
+      await db.select().from(schema.noteTags).limit(1)
+    )[0];
+
+    // Assert tag fields
+    expect(createdTag.name).toBe('my tag');
+    expect(createdTag.type).toBe('date');
+    expect(createdTag.createdAt).not.toBeNull();
+    expect(createdTag.updatedAt).not.toBeNull();
+    expect(createdTag.createdBy).toBe(user.id);
+    expect(createdTag.updatedBy).toBe(user.id);
+
+    // Assert note tag fields
+    expect(createdNoteTag.tagId).toBe(createdTag.id);
+    expect(createdNoteTag.noteId).toBe(createdNote.id);
+    expect(createdNoteTag.valueBoolean).toBeNull();
+    expect(createdNoteTag.valueDate).toBe('2025-10-23');
+    expect(createdNoteTag.valueNumber).toBeNull();
+    expect(createdNoteTag.createdAt).not.toBeNull();
+    expect(createdNoteTag.updatedAt).not.toBeNull();
+    expect(createdNoteTag.createdBy).toBe(user.id);
+    expect(createdNoteTag.updatedBy).toBe(user.id);
+  });
+
+  test('should correctly handle note tag [boolean]', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+    await createNoteThroughApi({ app: app!, authCookie });
+
+    const createdNote = (await db.select().from(schema.notes).limit(1))[0];
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.createNoteTag')
+      .send({
+        json: {
+          name: 'my tag',
+          noteId: createdNote.id,
+          value: true,
+          type: 'boolean',
+        } satisfies CreateNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+    expect((await db.select().from(schema.tags)).length).toBe(1);
+    expect((await db.select().from(schema.noteTags)).length).toBe(1);
+
+    const createdTag = (await db.select().from(schema.tags).limit(1))[0];
+    const createdNoteTag = (
+      await db.select().from(schema.noteTags).limit(1)
+    )[0];
+
+    // Assert tag fields
+    expect(createdTag.name).toBe('my tag');
+    expect(createdTag.type).toBe('boolean');
+    expect(createdTag.createdAt).not.toBeNull();
+    expect(createdTag.updatedAt).not.toBeNull();
+    expect(createdTag.createdBy).toBe(user.id);
+    expect(createdTag.updatedBy).toBe(user.id);
+
+    // Assert note tag fields
+    expect(createdNoteTag.tagId).toBe(createdTag.id);
+    expect(createdNoteTag.noteId).toBe(createdNote.id);
+    expect(createdNoteTag.valueBoolean).toBe(true);
+    expect(createdNoteTag.valueDate).toBeNull();
+    expect(createdNoteTag.valueNumber).toBeNull();
+    expect(createdNoteTag.createdAt).not.toBeNull();
+    expect(createdNoteTag.updatedAt).not.toBeNull();
+    expect(createdNoteTag.createdBy).toBe(user.id);
+    expect(createdNoteTag.updatedBy).toBe(user.id);
+  });
+
+  test('should not create a new tag if a tag of same name and type already exists', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+    await createNoteThroughApi({ app: app!, authCookie });
+    await createTagThroughApi({
+      app: app!,
+      authCookie,
+      tag: { name: 'my tag', type: 'string' },
+    });
+
+    const createdNote = (await db.select().from(schema.notes).limit(1))[0];
+    const createdTag = (await db.select().from(schema.tags).limit(1))[0];
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.createNoteTag')
+      .send({
+        json: {
+          name: 'my tag',
+          noteId: createdNote.id,
+          type: 'string',
+        } satisfies CreateNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+    expect((await db.select().from(schema.tags)).length).toBe(1);
+    expect((await db.select().from(schema.noteTags)).length).toBe(1);
+
+    const createdNoteTag = (
+      await db.select().from(schema.noteTags).limit(1)
+    )[0];
+
+    // Assert tag fields
+    expect(createdTag.name).toBe('my tag');
+    expect(createdTag.type).toBe('string');
+    expect(createdTag.createdAt).not.toBeNull();
+    expect(createdTag.updatedAt).not.toBeNull();
+    expect(createdTag.createdBy).toBe(user.id);
+    expect(createdTag.updatedBy).toBe(user.id);
+
+    // Assert note tag fields
+    expect(createdNoteTag.tagId).toBe(createdTag.id);
+    expect(createdNoteTag.noteId).toBe(createdNote.id);
+    expect(createdNoteTag.valueBoolean).toBeNull();
+    expect(createdNoteTag.valueDate).toBeNull();
+    expect(createdNoteTag.valueNumber).toBeNull();
+    expect(createdNoteTag.createdAt).not.toBeNull();
+    expect(createdNoteTag.updatedAt).not.toBeNull();
+    expect(createdNoteTag.createdBy).toBe(user.id);
+    expect(createdNoteTag.updatedBy).toBe(user.id);
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.createNoteTag')
+      .send({ json: {} });
 
     expect(res.status).toBe(401);
   });

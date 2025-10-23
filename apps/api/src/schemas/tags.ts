@@ -14,6 +14,24 @@ export const editTagSchema = () =>
     name: z.string(),
   });
 
+export const createNoteTagSchema = () =>
+  z.intersection(
+    z.object({
+      name: z.string(),
+      noteId: z.string().uuid(),
+    }),
+    z.discriminatedUnion('type', [
+      z.object({ type: z.literal('string') }),
+      z.object({ type: z.literal('number'), value: z.number() }),
+      z.object({ type: z.literal('date'), value: z.string().date() }),
+      z.object({ type: z.literal('boolean'), value: z.boolean() }),
+    ]),
+  );
+
 export type CreateTagSchemaType = z.infer<ReturnType<typeof createTagSchema>>;
 
 export type EditTagSchemaType = z.infer<ReturnType<typeof editTagSchema>>;
+
+export type CreateNoteTagSchemaType = z.infer<
+  ReturnType<typeof createNoteTagSchema>
+>;
