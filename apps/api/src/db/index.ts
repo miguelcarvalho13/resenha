@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import * as schema from '@api/db/schema';
 import { drizzle } from 'drizzle-orm/node-postgres';
 
 if (!process.env.DATABASE_URL && !process.env.VITEST) {
@@ -7,4 +8,9 @@ if (!process.env.DATABASE_URL && !process.env.VITEST) {
   );
 }
 
-export const db = drizzle(process.env.DATABASE_URL);
+export const db = drizzle(process.env.DATABASE_URL, { schema });
+
+export type DatabaseType = typeof db;
+export type TransactionType = Parameters<
+  Parameters<DatabaseType['transaction']>[0]
+>[0];

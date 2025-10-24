@@ -472,6 +472,40 @@ describe('tags.createNoteTag', () => {
     expect(createdNoteTag.updatedBy).toBe(user.id);
   });
 
+  test('should return an error if user does not have access to passed note', async () => {
+    const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
+      app!,
+      { name: 'Another User', email: 'another@example.com' },
+    );
+
+    await createNoteThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+    });
+
+    const noteCreatedForAnotherUser = (
+      await db.select().from(schema.notes).limit(1)
+    )[0];
+
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.createNoteTag')
+      .send({
+        json: {
+          name: 'my tag',
+          noteId: noteCreatedForAnotherUser.id,
+          type: 'string',
+        } satisfies CreateNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(401);
+    expect((await db.select().from(schema.tags)).length).toBe(0);
+    expect((await db.select().from(schema.noteTags)).length).toBe(0);
+    expect((await db.select().from(schema.notes)).length).toBe(1);
+  });
+
   test('should be a protected route', async () => {
     const res = await supertest(app!)
       .post('/api/trpc/tags.createNoteTag')
