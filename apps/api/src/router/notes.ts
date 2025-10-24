@@ -12,10 +12,13 @@ export const notesRouter = router({
     .mutation(async ({ input, ctx }) => {
       const { content } = input;
 
-      const newNote = await db.insert(notes).values({
-        content,
-        createdBy: ctx.user.id,
-      });
+      const [newNote] = await db
+        .insert(notes)
+        .values({
+          content,
+          createdBy: ctx.user.id,
+        })
+        .returning();
 
       return {
         success: true,
@@ -39,10 +42,11 @@ export const notesRouter = router({
         });
       }
 
-      const updatedNote = await db
+      const [updatedNote] = await db
         .update(notes)
         .set({ content })
-        .where(eq(notes.id, id));
+        .where(eq(notes.id, id))
+        .returning();
 
       return {
         success: true,
