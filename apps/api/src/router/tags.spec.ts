@@ -9,12 +9,16 @@ import * as schema from '@api/db/schema';
 import {
   type CreateNoteTagSchemaType,
   type CreateTagSchemaType,
+  type EditNoteTagSchemaType,
   type EditTagSchemaType,
 } from '@api/schemas/tags';
 import { startApp } from '@api/server';
 import { createNoteThroughApi } from '@api/tests/noteUtils';
 import { createAndSignInUser, createUser } from '@api/tests/sessionUtils';
-import { createTagThroughApi } from '@api/tests/tagUtils';
+import {
+  createNoteTagThroughApi,
+  createTagThroughApi,
+} from '@api/tests/tagUtils';
 
 let app: Server | null = null;
 
@@ -115,7 +119,7 @@ describe('tags.editTag', () => {
     );
   });
 
-  test('should not allow edition for a tag created for a different user', async () => {
+  test('should not allow edition for a tag created by a different user', async () => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       {
@@ -509,6 +513,322 @@ describe('tags.createNoteTag', () => {
   test('should be a protected route', async () => {
     const res = await supertest(app!)
       .post('/api/trpc/tags.createNoteTag')
+      .send({ json: {} });
+
+    expect(res.status).toBe(401);
+  });
+});
+
+describe('tags.editNoteTag', () => {
+  test('should be correctly handled [string]', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+
+    await createNoteTagThroughApi({ app: app!, authCookie });
+    const [createdNoteTag] = await db.select().from(schema.noteTags).limit(1);
+    const [createdTag] = await db.select().from(schema.tags).limit(1);
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.editNoteTag')
+      .send({
+        json: {
+          noteId: createdNoteTag.noteId,
+          tagId: createdNoteTag.tagId,
+          value: 'new-string-tag-value',
+        } satisfies EditNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const [updatedTag] = await db.select().from(schema.tags).limit(1);
+    const [updatedNoteTag] = await db.select().from(schema.noteTags).limit(1);
+
+    // Assert tag fields
+    expect(updatedTag.name).toBe('new-string-tag-value');
+    expect(updatedTag.type).toBe('string');
+
+    // Assert note tag fields
+    expect(updatedNoteTag.tagId).toBe(createdNoteTag.tagId);
+    expect(updatedNoteTag.noteId).toBe(createdNoteTag.noteId);
+    expect(updatedNoteTag.valueBoolean).toBeNull();
+    expect(updatedNoteTag.valueDate).toBeNull();
+    expect(updatedNoteTag.valueNumber).toBeNull();
+
+    // the created user should be the same
+    expect(updatedNoteTag.createdBy).toBe(user.id);
+    expect(createdNoteTag.createdBy).toBe(updatedNoteTag.createdBy);
+
+    // the updated user should be the same
+    expect(updatedNoteTag.updatedBy).toBe(user.id);
+    expect(createdNoteTag.updatedBy).toBe(updatedNoteTag.updatedBy);
+
+    // the created date should also remain the same
+    expect(updatedNoteTag.createdAt).not.toBeNull();
+    expect(createdNoteTag.createdAt).toEqual(updatedNoteTag.createdAt);
+
+    // the updated date should be more recent than the created date
+    expect(updatedTag.updatedAt.getTime()).toBeGreaterThan(
+      createdTag.updatedAt.getTime(),
+    );
+
+    // the updated date should remain the same at note tag level, as only the tag was updated
+    expect(updatedNoteTag.updatedAt.getTime()).toBe(
+      createdNoteTag.updatedAt.getTime(),
+    );
+  });
+
+  test('should be correctly handled [number]', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+
+    await createNoteTagThroughApi({
+      app: app!,
+      authCookie,
+      noteTag: {
+        name: 'number-tag',
+        noteId: '',
+        type: 'number',
+        value: 5,
+      },
+    });
+    const [createdNoteTag] = await db.select().from(schema.noteTags).limit(1);
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.editNoteTag')
+      .send({
+        json: {
+          noteId: createdNoteTag.noteId,
+          tagId: createdNoteTag.tagId,
+          value: 13.5,
+        } satisfies EditNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const [updatedTag] = await db.select().from(schema.tags).limit(1);
+    const [updatedNoteTag] = await db.select().from(schema.noteTags).limit(1);
+
+    // Assert tag fields
+    expect(updatedTag.name).toBe('number-tag');
+    expect(updatedTag.type).toBe('number');
+
+    // Assert note tag fields
+    expect(updatedNoteTag.tagId).toBe(createdNoteTag.tagId);
+    expect(updatedNoteTag.noteId).toBe(createdNoteTag.noteId);
+    expect(updatedNoteTag.valueBoolean).toBeNull();
+    expect(updatedNoteTag.valueDate).toBeNull();
+    expect(updatedNoteTag.valueNumber).toBe(13.5);
+
+    // the created user should be the same
+    expect(updatedNoteTag.createdBy).toBe(user.id);
+    expect(createdNoteTag.createdBy).toBe(updatedNoteTag.createdBy);
+
+    // the updated user should be the same
+    expect(updatedNoteTag.updatedBy).toBe(user.id);
+    expect(createdNoteTag.updatedBy).toBe(updatedNoteTag.updatedBy);
+
+    // the created date should also remain the same
+    expect(updatedNoteTag.createdAt).not.toBeNull();
+    expect(createdNoteTag.createdAt).toEqual(updatedNoteTag.createdAt);
+
+    // the updated date should be more recent than the created date
+    expect(updatedNoteTag.updatedAt.getTime()).toBeGreaterThan(
+      createdNoteTag.updatedAt.getTime(),
+    );
+  });
+
+  test('should be correctly handled [date]', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+
+    await createNoteTagThroughApi({
+      app: app!,
+      authCookie,
+      noteTag: {
+        name: 'date-tag',
+        noteId: '',
+        type: 'date',
+        value: '2025-10-25',
+      },
+    });
+    const [createdNoteTag] = await db.select().from(schema.noteTags).limit(1);
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.editNoteTag')
+      .send({
+        json: {
+          noteId: createdNoteTag.noteId,
+          tagId: createdNoteTag.tagId,
+          value: '2025-10-26',
+        } satisfies EditNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const [updatedTag] = await db.select().from(schema.tags).limit(1);
+    const [updatedNoteTag] = await db.select().from(schema.noteTags).limit(1);
+
+    // Assert tag fields
+    expect(updatedTag.name).toBe('date-tag');
+    expect(updatedTag.type).toBe('date');
+
+    // Assert note tag fields
+    expect(updatedNoteTag.tagId).toBe(createdNoteTag.tagId);
+    expect(updatedNoteTag.noteId).toBe(createdNoteTag.noteId);
+    expect(updatedNoteTag.valueBoolean).toBeNull();
+    expect(updatedNoteTag.valueDate).toBe('2025-10-26');
+    expect(updatedNoteTag.valueNumber).toBeNull;
+
+    // the created user should be the same
+    expect(updatedNoteTag.createdBy).toBe(user.id);
+    expect(createdNoteTag.createdBy).toBe(updatedNoteTag.createdBy);
+
+    // the updated user should be the same
+    expect(updatedNoteTag.updatedBy).toBe(user.id);
+    expect(createdNoteTag.updatedBy).toBe(updatedNoteTag.updatedBy);
+
+    // the created date should also remain the same
+    expect(updatedNoteTag.createdAt).not.toBeNull();
+    expect(createdNoteTag.createdAt).toEqual(updatedNoteTag.createdAt);
+
+    // the updated date should be more recent than the created date
+    expect(updatedNoteTag.updatedAt.getTime()).toBeGreaterThan(
+      createdNoteTag.updatedAt.getTime(),
+    );
+  });
+
+  test('should be correctly handled [boolean]', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+
+    await createNoteTagThroughApi({
+      app: app!,
+      authCookie,
+      noteTag: {
+        name: 'boolean-tag',
+        noteId: '',
+        type: 'boolean',
+        value: true,
+      },
+    });
+    const [createdNoteTag] = await db.select().from(schema.noteTags).limit(1);
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.editNoteTag')
+      .send({
+        json: {
+          noteId: createdNoteTag.noteId,
+          tagId: createdNoteTag.tagId,
+          value: false,
+        } satisfies EditNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const [updatedTag] = await db.select().from(schema.tags).limit(1);
+    const [updatedNoteTag] = await db.select().from(schema.noteTags).limit(1);
+
+    // Assert tag fields
+    expect(updatedTag.name).toBe('boolean-tag');
+    expect(updatedTag.type).toBe('boolean');
+
+    // Assert note tag fields
+    expect(updatedNoteTag.tagId).toBe(createdNoteTag.tagId);
+    expect(updatedNoteTag.noteId).toBe(createdNoteTag.noteId);
+    expect(updatedNoteTag.valueBoolean).toBe(false);
+    expect(updatedNoteTag.valueDate).toBeNull();
+    expect(updatedNoteTag.valueNumber).toBeNull;
+
+    // the created user should be the same
+    expect(updatedNoteTag.createdBy).toBe(user.id);
+    expect(createdNoteTag.createdBy).toBe(updatedNoteTag.createdBy);
+
+    // the updated user should be the same
+    expect(updatedNoteTag.updatedBy).toBe(user.id);
+    expect(createdNoteTag.updatedBy).toBe(updatedNoteTag.updatedBy);
+
+    // the created date should also remain the same
+    expect(updatedNoteTag.createdAt).not.toBeNull();
+    expect(createdNoteTag.createdAt).toEqual(updatedNoteTag.createdAt);
+
+    // the updated date should be more recent than the created date
+    expect(updatedNoteTag.updatedAt.getTime()).toBeGreaterThan(
+      createdNoteTag.updatedAt.getTime(),
+    );
+  });
+
+  test('should not allow edition for a note tag created by a different user', async () => {
+    const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
+      app!,
+      {
+        name: 'Another User',
+        email: 'another@example.com',
+      },
+    );
+
+    await createNoteTagThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+    });
+
+    const [noteTagCreatedForAnotherUser] = await db
+      .select()
+      .from(schema.noteTags)
+      .limit(1);
+    const [noteCreatedForAnotherUser] = await db
+      .select()
+      .from(schema.notes)
+      .limit(1);
+    const [tagCreatedForAnotherUser] = await db
+      .select()
+      .from(schema.tags)
+      .limit(1);
+
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.editNoteTag')
+      .send({
+        json: {
+          noteId: noteCreatedForAnotherUser.id,
+          tagId: tagCreatedForAnotherUser.id,
+          value: 'tag-updated',
+        } satisfies EditNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(401);
+
+    // noteTag should remain the same
+    const updatedNoteTag = (
+      await db.select().from(schema.noteTags).limit(1)
+    )[0];
+    expect(updatedNoteTag.valueBoolean).toBe(
+      noteTagCreatedForAnotherUser.valueBoolean,
+    );
+    expect(updatedNoteTag.valueDate).toBe(
+      noteTagCreatedForAnotherUser.valueDate,
+    );
+    expect(updatedNoteTag.valueNumber).toBe(
+      noteTagCreatedForAnotherUser.valueNumber,
+    );
+    expect(updatedNoteTag.createdAt).toEqual(
+      noteTagCreatedForAnotherUser.createdAt,
+    );
+    expect(updatedNoteTag.updatedAt).toEqual(
+      noteTagCreatedForAnotherUser.updatedAt,
+    );
+    expect(updatedNoteTag.createdBy).toBe(
+      noteTagCreatedForAnotherUser.createdBy,
+    );
+    expect(updatedNoteTag.updatedBy).toBe(
+      noteTagCreatedForAnotherUser.updatedBy,
+    );
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.editNoteTag')
       .send({ json: {} });
 
     expect(res.status).toBe(401);

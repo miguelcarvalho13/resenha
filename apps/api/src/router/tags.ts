@@ -6,6 +6,7 @@ import {
   createNoteTagSchema,
   createTagSchema,
   type CreateTagSchemaType,
+  editNoteTagSchema,
   editTagSchema,
 } from '@api/schemas/tags';
 import { protectedProcedure, router } from '@api/trpc';
@@ -153,6 +154,91 @@ export const tagsRouter = router({
           success: true,
           tag,
           noteTag: newNoteTag,
+        };
+      });
+    }),
+
+  editNoteTag: protectedProcedure
+    .input(editNoteTagSchema())
+    .mutation(async ({ input, ctx }) => {
+      const { tagId, noteId, value } = input;
+
+      const [noteTag] = await db
+        .select()
+        .from(noteTags)
+        .where(and(eq(noteTags.tagId, tagId), eq(noteTags.noteId, noteId)))
+        .limit(1);
+
+      if (noteTag.createdBy !== ctx.user.id) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        });
+      }
+
+      const [tag] = await db
+        .select()
+        .from(tags)
+        .where(eq(tags.id, tagId))
+        .limit(1);
+
+      return db.transaction(async (tx) => {
+        const { type } = tag;
+
+        // if string type, we need to update the tag name with the ne value
+        if (type === 'string') {
+          if (typeof value !== 'string') {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'Wrong `value` type provided',
+            });
+          }
+
+          const [updatedTag] = await tx
+            .update(tags)
+            .set({
+              name: value,
+              updatedBy: ctx.user.id,
+            })
+            .where(eq(tags.id, tag.id))
+            .returning();
+
+          return {
+            success: true,
+            tag: updatedTag,
+            noteTag,
+          };
+        }
+
+        if (
+          (type === 'date' && typeof value !== 'string') ||
+          (type === 'boolean' && typeof value !== 'boolean') ||
+          (type === 'number' && typeof value !== 'number')
+        ) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Wrong `value` type provided',
+          });
+        }
+
+        const [updatedNoteTag] = await tx
+          .update(noteTags)
+          .set({
+            valueBoolean:
+              type === 'boolean' && typeof value === 'boolean' ? value : null,
+            valueDate:
+              type === 'date' && typeof value === 'string' ? value : null,
+            valueNumber:
+              type === 'number' && typeof value === 'number' ? value : null,
+            updatedBy: ctx.user.id,
+          })
+          .where(and(eq(noteTags.tagId, tagId), eq(noteTags.noteId, noteId)))
+          .returning();
+
+        return {
+          success: true,
+          tag,
+          noteTag: updatedNoteTag,
         };
       });
     }),

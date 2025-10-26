@@ -169,8 +169,6 @@ describe('notes.findAll', () => {
       .get('/api/trpc/notes.findAll')
       .set('Cookie', authCookie);
 
-    console.log(JSON.stringify(res.body, null, 2));
-
     expect(res.status).toBe(200);
 
     const allNotes = await db.select().from(schema.notes);
@@ -202,8 +200,6 @@ describe('notes.findAll', () => {
     const res = await supertest(app!)
       .get('/api/trpc/notes.findAll')
       .set('Cookie', authCookie);
-
-    console.log(JSON.stringify(res.body, null, 2));
 
     expect(res.status).toBe(200);
 
