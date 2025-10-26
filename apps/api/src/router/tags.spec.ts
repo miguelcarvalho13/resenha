@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { db } from '@api/db';
 import * as schema from '@api/db/schema';
 import {
+  type FindAllNoteTagsSchemaType,
   type CreateNoteTagSchemaType,
   type CreateTagSchemaType,
   type EditNoteTagSchemaType,
@@ -830,6 +831,208 @@ describe('tags.editNoteTag', () => {
     const res = await supertest(app!)
       .post('/api/trpc/tags.editNoteTag')
       .send({ json: {} });
+
+    expect(res.status).toBe(401);
+  });
+});
+
+describe('tags.findAllNoteTags', () => {
+  test('should be correctly handled [string]', async () => {
+    const { authCookie } = await createAndSignInUser(app!);
+
+    await createNoteTagThroughApi({ app: app!, authCookie });
+    const [createdNoteTag] = await db.select().from(schema.noteTags).limit(1);
+
+    const res = await supertest(app!)
+      .get('/api/trpc/tags.findAllNoteTags')
+      .query({
+        input: JSON.stringify({
+          json: {
+            noteId: createdNoteTag.noteId,
+          } satisfies FindAllNoteTagsSchemaType,
+        }),
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const allTags = await db.select().from(schema.tags);
+    const allNotesTags = await db.select().from(schema.noteTags);
+    expect(res.body.result.data.json.noteTags).to.deep.equal([
+      {
+        createdAt: allNotesTags[0].createdAt.toISOString(),
+        name: allTags[0].name,
+        type: allTags[0].type,
+        updatedAt: allTags[0].updatedAt.toISOString(),
+        value: allTags[0].name,
+      },
+    ]);
+  });
+
+  test('should be correctly handled [number]', async () => {
+    const { authCookie } = await createAndSignInUser(app!);
+
+    await createNoteTagThroughApi({
+      app: app!,
+      authCookie,
+      noteTag: {
+        name: 'number-tag',
+        noteId: '',
+        type: 'number',
+        value: 13,
+      },
+    });
+
+    const [createdNoteTag] = await db.select().from(schema.noteTags).limit(1);
+
+    const res = await supertest(app!)
+      .get('/api/trpc/tags.findAllNoteTags')
+      .query({
+        input: JSON.stringify({
+          json: {
+            noteId: createdNoteTag.noteId,
+          } satisfies FindAllNoteTagsSchemaType,
+        }),
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const allTags = await db.select().from(schema.tags);
+    const allNotesTags = await db.select().from(schema.noteTags);
+    expect(res.body.result.data.json.noteTags).to.deep.equal([
+      {
+        createdAt: allNotesTags[0].createdAt.toISOString(),
+        name: allTags[0].name,
+        type: allTags[0].type,
+        updatedAt: allNotesTags[0].updatedAt.toISOString(),
+        value: allNotesTags[0].valueNumber,
+      },
+    ]);
+  });
+
+  test('should be correctly handled [date]', async () => {
+    const { authCookie } = await createAndSignInUser(app!);
+
+    await createNoteTagThroughApi({
+      app: app!,
+      authCookie,
+      noteTag: {
+        name: 'date-tag',
+        noteId: '',
+        type: 'date',
+        value: '2025-10-26',
+      },
+    });
+
+    const [createdNoteTag] = await db.select().from(schema.noteTags).limit(1);
+
+    const res = await supertest(app!)
+      .get('/api/trpc/tags.findAllNoteTags')
+      .query({
+        input: JSON.stringify({
+          json: {
+            noteId: createdNoteTag.noteId,
+          } satisfies FindAllNoteTagsSchemaType,
+        }),
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const allTags = await db.select().from(schema.tags);
+    const allNotesTags = await db.select().from(schema.noteTags);
+    expect(res.body.result.data.json.noteTags).to.deep.equal([
+      {
+        createdAt: allNotesTags[0].createdAt.toISOString(),
+        name: allTags[0].name,
+        type: allTags[0].type,
+        updatedAt: allNotesTags[0].updatedAt.toISOString(),
+        value: allNotesTags[0].valueDate,
+      },
+    ]);
+  });
+
+  test('should be correctly handled [boolean]', async () => {
+    const { authCookie } = await createAndSignInUser(app!);
+
+    await createNoteTagThroughApi({
+      app: app!,
+      authCookie,
+      noteTag: {
+        name: 'boolean-tag',
+        noteId: '',
+        type: 'boolean',
+        value: true,
+      },
+    });
+
+    const [createdNoteTag] = await db.select().from(schema.noteTags).limit(1);
+
+    const res = await supertest(app!)
+      .get('/api/trpc/tags.findAllNoteTags')
+      .query({
+        input: JSON.stringify({
+          json: {
+            noteId: createdNoteTag.noteId,
+          } satisfies FindAllNoteTagsSchemaType,
+        }),
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const allTags = await db.select().from(schema.tags);
+    const allNotesTags = await db.select().from(schema.noteTags);
+    expect(res.body.result.data.json.noteTags).to.deep.equal([
+      {
+        createdAt: allNotesTags[0].createdAt.toISOString(),
+        name: allTags[0].name,
+        type: allTags[0].type,
+        updatedAt: allNotesTags[0].updatedAt.toISOString(),
+        value: allNotesTags[0].valueBoolean,
+      },
+    ]);
+  });
+
+  test('should only return note tags for notes created by the user', async () => {
+    const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
+      app!,
+      {
+        name: 'Another User',
+        email: 'another@example.com',
+      },
+    );
+
+    await createNoteTagThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+    });
+
+    const [noteCreatedForAnotherUser] = await db
+      .select()
+      .from(schema.notes)
+      .limit(1);
+
+    // Logins with another user
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const res = await supertest(app!)
+      .get('/api/trpc/tags.findAllNoteTags')
+      .query({
+        input: JSON.stringify({
+          json: {
+            noteId: noteCreatedForAnotherUser.id,
+          } satisfies FindAllNoteTagsSchemaType,
+        }),
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(401);
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!).get('/api/trpc/tags.findAllNoteTags');
 
     expect(res.status).toBe(401);
   });

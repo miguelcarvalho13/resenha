@@ -8,6 +8,7 @@ import {
   type CreateTagSchemaType,
   editNoteTagSchema,
   editTagSchema,
+  findAllNoteTagsSchema,
 } from '@api/schemas/tags';
 import { protectedProcedure, router } from '@api/trpc';
 import { TRPCError } from '@trpc/server';
@@ -241,5 +242,77 @@ export const tagsRouter = router({
           noteTag: updatedNoteTag,
         };
       });
+    }),
+
+  findAllNoteTags: protectedProcedure
+    .input(findAllNoteTagsSchema())
+    .query(async ({ input, ctx }) => {
+      const { noteId } = input;
+
+      const [requestedNote] = await db
+        .select()
+        .from(notes)
+        .where(eq(notes.id, noteId))
+        .limit(1);
+
+      if (requestedNote.createdBy !== ctx.user.id) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        });
+      }
+
+      const queryResult = await db
+        .select()
+        .from(noteTags)
+        .where(eq(noteTags.noteId, noteId))
+        .innerJoin(tags, eq(noteTags.tagId, tags.id));
+
+      const noteTagsResult = queryResult.reduce(
+        (result, current) => {
+          const { tags: tag, note_tags: noteTag } = current;
+          const isStringType = tag.type === 'string';
+          const value = (() => {
+            switch (tag.type) {
+              case 'string':
+                return tag.name;
+              case 'number':
+                return noteTag.valueNumber;
+              case 'boolean':
+                return noteTag.valueBoolean;
+              case 'date':
+                return noteTag.valueDate;
+              default:
+                throw new TRPCError({
+                  code: 'NOT_IMPLEMENTED',
+                  message: 'Unsupported tag type found',
+                });
+            }
+          })();
+
+          return [
+            ...result,
+            {
+              createdAt: isStringType ? tag.createdAt : noteTag.createdAt,
+              name: tag.name,
+              type: tag.type,
+              updatedAt: isStringType ? tag.updatedAt : noteTag.updatedAt,
+              value,
+            },
+          ];
+        },
+        [] as {
+          createdAt: Date;
+          name: string;
+          type: 'string' | 'number' | 'boolean' | 'date';
+          updatedAt: Date;
+          value: string | number | boolean | null;
+        }[],
+      );
+
+      return {
+        success: true,
+        noteTags: noteTagsResult,
+      };
     }),
 });

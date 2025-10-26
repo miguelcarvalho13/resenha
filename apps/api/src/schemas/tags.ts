@@ -35,6 +35,11 @@ export const editNoteTagSchema = () =>
     value: z.union([z.string(), z.number(), z.string().date(), z.boolean()]),
   });
 
+export const findAllNoteTagsSchema = () =>
+  z.object({
+    noteId: z.string().uuid(),
+  });
+
 export type CreateTagSchemaType = z.infer<ReturnType<typeof createTagSchema>>;
 
 export type EditTagSchemaType = z.infer<ReturnType<typeof editTagSchema>>;
@@ -45,4 +50,8 @@ export type CreateNoteTagSchemaType = z.infer<
 
 export type EditNoteTagSchemaType = z.infer<
   ReturnType<typeof editNoteTagSchema>
+>;
+
+export type FindAllNoteTagsSchemaType = z.infer<
+  ReturnType<typeof findAllNoteTagsSchema>
 >;
