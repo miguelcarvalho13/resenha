@@ -6,6 +6,7 @@ import {
   createNoteTagSchema,
   createTagSchema,
   type CreateTagSchemaType,
+  deleteNoteTagSchema,
   editNoteTagSchema,
   editTagSchema,
   findAllNoteTagsSchema,
@@ -157,6 +158,35 @@ export const tagsRouter = router({
           noteTag: newNoteTag,
         };
       });
+    }),
+
+  deleteNoteTag: protectedProcedure
+    .input(deleteNoteTagSchema())
+    .mutation(async ({ input, ctx }) => {
+      const { tagId, noteId } = input;
+
+      const [requestedNote] = await db
+        .select()
+        .from(notes)
+        .where(eq(notes.id, noteId))
+        .limit(1);
+
+      if (requestedNote.createdBy !== ctx.user.id) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        });
+      }
+
+      const [deletedNoteTag] = await db
+        .delete(noteTags)
+        .where(and(eq(noteTags.tagId, tagId), eq(noteTags.noteId, noteId)))
+        .returning();
+
+      return {
+        success: true,
+        noteTag: deletedNoteTag,
+      };
     }),
 
   editNoteTag: protectedProcedure

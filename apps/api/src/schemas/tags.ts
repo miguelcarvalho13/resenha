@@ -28,6 +28,12 @@ export const createNoteTagSchema = () =>
     ]),
   );
 
+export const deleteNoteTagSchema = () =>
+  z.object({
+    noteId: z.string().uuid(),
+    tagId: z.string().uuid(),
+  });
+
 export const editNoteTagSchema = () =>
   z.object({
     noteId: z.string().uuid(),
@@ -46,6 +52,10 @@ export type EditTagSchemaType = z.infer<ReturnType<typeof editTagSchema>>;
 
 export type CreateNoteTagSchemaType = z.infer<
   ReturnType<typeof createNoteTagSchema>
+>;
+
+export type DeleteNoteTagSchemaType = z.infer<
+  ReturnType<typeof deleteNoteTagSchema>
 >;
 
 export type EditNoteTagSchemaType = z.infer<

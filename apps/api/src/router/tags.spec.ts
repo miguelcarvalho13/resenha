@@ -7,11 +7,12 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { db } from '@api/db';
 import * as schema from '@api/db/schema';
 import {
-  type FindAllNoteTagsSchemaType,
   type CreateNoteTagSchemaType,
   type CreateTagSchemaType,
+  type DeleteNoteTagSchemaType,
   type EditNoteTagSchemaType,
   type EditTagSchemaType,
+  type FindAllNoteTagsSchemaType,
 } from '@api/schemas/tags';
 import { startApp } from '@api/server';
 import { createNoteThroughApi } from '@api/tests/noteUtils';
@@ -514,6 +515,83 @@ describe('tags.createNoteTag', () => {
   test('should be a protected route', async () => {
     const res = await supertest(app!)
       .post('/api/trpc/tags.createNoteTag')
+      .send({ json: {} });
+
+    expect(res.status).toBe(401);
+  });
+});
+
+describe('tags.deleteNoteTag', () => {
+  test('should be correctly handled', async () => {
+    const { authCookie } = await createAndSignInUser(app!);
+
+    await createNoteTagThroughApi({ app: app!, authCookie });
+    const [createdNoteTag] = await db.select().from(schema.noteTags).limit(1);
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.deleteNoteTag')
+      .send({
+        json: {
+          noteId: createdNoteTag.noteId,
+          tagId: createdNoteTag.tagId,
+        } satisfies DeleteNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    // tag and note should still exist
+    const [updatedTag] = await db.select().from(schema.tags).limit(1);
+    const [updatedNote] = await db.select().from(schema.notes).limit(1);
+    expect(updatedTag).toBeTruthy();
+    expect(updatedNote).toBeTruthy();
+
+    // note tag should no longer exist
+    const [updatedNoteTag] = await db.select().from(schema.noteTags).limit(1);
+    expect(updatedNoteTag).toBeFalsy();
+  });
+
+  test('should not allow deletion for a note tag created in a note by a different user', async () => {
+    const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
+      app!,
+      {
+        name: 'Another User',
+        email: 'another@example.com',
+      },
+    );
+
+    await createNoteTagThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+    });
+
+    const [noteTagCreatedForAnotherUser] = await db
+      .select()
+      .from(schema.noteTags)
+      .limit(1);
+
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.deleteNoteTag')
+      .send({
+        json: {
+          noteId: noteTagCreatedForAnotherUser.noteId,
+          tagId: noteTagCreatedForAnotherUser.tagId,
+        } satisfies DeleteNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(401);
+
+    // note tag should still exist
+    const [updatedNoteTag] = await db.select().from(schema.noteTags).limit(1);
+    expect(updatedNoteTag).toBeTruthy();
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.deleteNoteTag')
       .send({ json: {} });
 
     expect(res.status).toBe(401);
