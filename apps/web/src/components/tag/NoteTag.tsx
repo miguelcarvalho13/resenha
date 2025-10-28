@@ -1,38 +1,35 @@
-import { Badge, type BadgeProps } from '@mantine/core';
-
 import { type NoteTag as NoteTagModel } from '@/models/tags';
+import { NoteTagWrapper } from './NoteTagWrapper';
 
 interface NoteTagProps {
   noteTag: NoteTagModel;
 }
 
 export const NoteTag = ({ noteTag }: NoteTagProps) => {
-  const commonProps: BadgeProps = { size: 'md' };
-
   switch (noteTag.type) {
     case 'string':
       return (
-        <Badge color="orange" data-testid="tag" {...commonProps}>
+        <NoteTagWrapper color="orange" data-testid="tag">
           {noteTag.name}
-        </Badge>
+        </NoteTagWrapper>
       );
     case 'number':
       return (
-        <Badge color="blue" data-testid="tag" {...commonProps}>
+        <NoteTagWrapper color="blue" data-testid="tag">
           {noteTag.name}: {noteTag.value}
-        </Badge>
+        </NoteTagWrapper>
       );
     case 'boolean':
       return (
-        <Badge color="green" data-testid="tag" {...commonProps}>
+        <NoteTagWrapper color="green" data-testid="tag">
           {noteTag.name}: {noteTag.value === true ? 'yes' : 'no'}
-        </Badge>
+        </NoteTagWrapper>
       );
     case 'date':
       return (
-        <Badge color="red" data-testid="tag" {...commonProps}>
+        <NoteTagWrapper color="red" data-testid="tag">
           {noteTag.name}: {noteTag.value}
-        </Badge>
+        </NoteTagWrapper>
       );
   }
 };

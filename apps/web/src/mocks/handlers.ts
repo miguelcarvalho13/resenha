@@ -39,7 +39,7 @@ export const getFindAllNoteTagsHandler = ({
   noteTags = [],
 }: {
   noteTags?: NoteTag[];
-}) =>
+} = {}) =>
   http.get('/api/trpc/tags.findAllNoteTags', () =>
     createTrpcBatchJson({
       success: true,

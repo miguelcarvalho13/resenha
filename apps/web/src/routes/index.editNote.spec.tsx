@@ -171,3 +171,44 @@ test('should be able to list tags in a note', async ({ worker }) => {
   expect(tags.nth(2)).toHaveTextContent('created: 2025-10-27');
   expect(tags.nth(3)).toHaveTextContent('active: yes');
 });
+
+test('should list all kinds of tags that are possible to add tags in a note', async ({
+  worker,
+}) => {
+  const note = createNoteForFindAll({ content: 'A', id: '123' });
+
+  (worker as SetupWorker).use(
+    getFindAllNotesHandler({ notes: [note] }),
+    postEditNoteHandler(),
+    getFindAllNoteTagsHandler(),
+    getSessionHandler(),
+  );
+
+  const { getByRole, getByTestId } = await renderWithRouter();
+
+  await vi.waitFor(() =>
+    expect(getByTestId('note-card').elements()).toHaveLength(1),
+  );
+
+  // Open the modal for the first time and edit it
+  await getByTestId('note-card')
+    .nth(0)
+    .getByRole('button', { name: /Edit note/ })
+    .click();
+
+  const tagsContainer = getByRole('dialog', { name: /Edit note/ }).getByTestId(
+    'tags-container',
+  );
+
+  const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
+
+  await addTagButton.click();
+
+  const addTagMenu = getByRole('menu', { name: 'Add tag' });
+  const addTagMenuItems = addTagMenu.getByRole('menuitem');
+  expect(addTagMenuItems.elements()).toHaveLength(4);
+  expect(addTagMenuItems.nth(0)).toHaveTextContent('new');
+  expect(addTagMenuItems.nth(1)).toHaveTextContent('new: number');
+  expect(addTagMenuItems.nth(2)).toHaveTextContent('new: date');
+  expect(addTagMenuItems.nth(3)).toHaveTextContent('new: yes/no');
+});
