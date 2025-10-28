@@ -940,6 +940,8 @@ describe('tags.findAllNoteTags', () => {
       {
         createdAt: allNotesTags[0].createdAt.toISOString(),
         name: allTags[0].name,
+        noteId: allNotesTags[0].noteId,
+        tagId: allNotesTags[0].tagId,
         type: allTags[0].type,
         updatedAt: allTags[0].updatedAt.toISOString(),
         value: allTags[0].name,
@@ -982,6 +984,8 @@ describe('tags.findAllNoteTags', () => {
       {
         createdAt: allNotesTags[0].createdAt.toISOString(),
         name: allTags[0].name,
+        noteId: allNotesTags[0].noteId,
+        tagId: allNotesTags[0].tagId,
         type: allTags[0].type,
         updatedAt: allNotesTags[0].updatedAt.toISOString(),
         value: allNotesTags[0].valueNumber,
@@ -1024,6 +1028,8 @@ describe('tags.findAllNoteTags', () => {
       {
         createdAt: allNotesTags[0].createdAt.toISOString(),
         name: allTags[0].name,
+        noteId: allNotesTags[0].noteId,
+        tagId: allNotesTags[0].tagId,
         type: allTags[0].type,
         updatedAt: allNotesTags[0].updatedAt.toISOString(),
         value: allNotesTags[0].valueDate,
@@ -1066,6 +1072,8 @@ describe('tags.findAllNoteTags', () => {
       {
         createdAt: allNotesTags[0].createdAt.toISOString(),
         name: allTags[0].name,
+        noteId: allNotesTags[0].noteId,
+        tagId: allNotesTags[0].tagId,
         type: allTags[0].type,
         updatedAt: allNotesTags[0].updatedAt.toISOString(),
         value: allNotesTags[0].valueBoolean,

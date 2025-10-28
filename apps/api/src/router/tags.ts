@@ -325,6 +325,8 @@ export const tagsRouter = router({
             {
               createdAt: isStringType ? tag.createdAt : noteTag.createdAt,
               name: tag.name,
+              noteId: noteTag.noteId,
+              tagId: noteTag.tagId,
               type: tag.type,
               updatedAt: isStringType ? tag.updatedAt : noteTag.updatedAt,
               value,
