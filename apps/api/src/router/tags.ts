@@ -336,6 +336,8 @@ export const tagsRouter = router({
         [] as {
           createdAt: Date;
           name: string;
+          noteId: string;
+          tagId: string;
           type: 'string' | 'number' | 'boolean' | 'date';
           updatedAt: Date;
           value: string | number | boolean | null;
