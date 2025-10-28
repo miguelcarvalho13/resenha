@@ -3,12 +3,14 @@ import { expect, vi } from 'vitest';
 
 import {
   getFindAllNotesHandler,
+  getFindAllNoteTagsHandler,
   getSessionHandler,
   postEditNoteHandler,
 } from '@/mocks/handlers';
+import { createNoteForFindAll } from '@/tests/factories/notes';
+import { createNoteTag } from '@/tests/factories/tags';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
-import { createNoteForFindAll } from '@/tests/factories/notes';
 
 test('should correctly edit a note', async ({ worker }) => {
   const note = createNoteForFindAll({ content: 'A', id: '123' });
@@ -126,4 +128,46 @@ test('should update modal content when reopening the modal after a save', async 
   expect(
     getByRole('dialog', { name: /Edit note/ }).getByLabelText('Content'),
   ).toHaveValue('B');
+});
+
+test('should be able to list tags in a note', async ({ worker }) => {
+  const note = createNoteForFindAll({ content: 'A', id: '123' });
+  const noteTags = [
+    createNoteTag({ name: 'abc', value: 'abc', type: 'string' }),
+    createNoteTag({ name: 'score', value: 10.5, type: 'number' }),
+    createNoteTag({ name: 'created', value: '2025-10-27', type: 'date' }),
+    createNoteTag({ name: 'active', value: true, type: 'boolean' }),
+  ];
+
+  (worker as SetupWorker).use(
+    getFindAllNotesHandler({ notes: [note] }),
+    postEditNoteHandler(),
+    getFindAllNoteTagsHandler({ noteTags }),
+    getSessionHandler(),
+  );
+
+  const { getByRole, getByTestId } = await renderWithRouter();
+
+  await vi.waitFor(() =>
+    expect(getByTestId('note-card').elements()).toHaveLength(1),
+  );
+
+  // Open the modal for the first time and edit it
+  await getByTestId('note-card')
+    .nth(0)
+    .getByRole('button', { name: /Edit note/ })
+    .click();
+
+  const tagsContainer = getByRole('dialog', { name: /Edit note/ }).getByTestId(
+    'tags-container',
+  );
+  const tags = tagsContainer.getByTestId('tag');
+
+  await vi.waitFor(() => expect(tags.elements()).toHaveLength(4));
+
+  expect(tags.elements()).toHaveLength(4);
+  expect(tags.nth(0)).toHaveTextContent('abc');
+  expect(tags.nth(1)).toHaveTextContent('score: 10.5');
+  expect(tags.nth(2)).toHaveTextContent('created: 2025-10-27');
+  expect(tags.nth(3)).toHaveTextContent('active: yes');
 });

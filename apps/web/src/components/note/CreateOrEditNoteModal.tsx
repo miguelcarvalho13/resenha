@@ -3,6 +3,7 @@ import { useForm } from '@mantine/form';
 import { zodResolver } from 'mantine-form-zod-resolver';
 import { z } from 'zod';
 
+import { NoteTagContainer } from '@/components/tag/NoteTagContainer';
 import { type NoteForFindAll } from '@/models/notes';
 import { trpc } from '@/utils/trpc';
 
@@ -84,6 +85,8 @@ const CreateOrEditNoteModal = ({
             key={form.key('content')}
             {...form.getInputProps('content')}
           />
+
+          {note && <NoteTagContainer note={note} />}
 
           <Button type="submit">Save</Button>
         </Stack>
