@@ -204,8 +204,8 @@ test('should list all kinds of tags that are possible to add tags in a note', as
 
   await addTagButton.click();
 
-  const addTagMenu = getByRole('menu', { name: 'Add tag' });
-  const addTagMenuItems = addTagMenu.getByRole('menuitem');
+  const addTagMenu = getByRole('listbox', { name: 'List of tags' });
+  const addTagMenuItems = addTagMenu.getByRole('option');
   expect(addTagMenuItems.elements()).toHaveLength(4);
   expect(addTagMenuItems.nth(0)).toHaveTextContent('new');
   expect(addTagMenuItems.nth(1)).toHaveTextContent('new: number');
