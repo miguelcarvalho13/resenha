@@ -184,7 +184,7 @@ test('should list all kinds of tags that are possible to add tags in a note', as
     getSessionHandler(),
   );
 
-  const { getByRole, getByTestId } = await renderWithRouter();
+  const { getByLabelText, getByRole, getByTestId } = await renderWithRouter();
 
   await vi.waitFor(() =>
     expect(getByTestId('note-card').elements()).toHaveLength(1),
@@ -204,11 +204,18 @@ test('should list all kinds of tags that are possible to add tags in a note', as
 
   await addTagButton.click();
 
+  // Initially no tags should be shown
   const addTagMenu = getByRole('listbox', { name: 'List of tags' });
   const addTagMenuItems = addTagMenu.getByRole('option');
+  expect(addTagMenuItems.elements()).toHaveLength(0);
+
+  await getByLabelText('Search tags').fill('abc');
+
+  // After typing something, at least the creatable tags should be shown
   expect(addTagMenuItems.elements()).toHaveLength(4);
-  expect(addTagMenuItems.nth(0)).toHaveTextContent('new');
-  expect(addTagMenuItems.nth(1)).toHaveTextContent('new: number');
-  expect(addTagMenuItems.nth(2)).toHaveTextContent('new: date');
-  expect(addTagMenuItems.nth(3)).toHaveTextContent('new: yes/no');
+  expect(addTagMenuItems.nth(0)).toHaveTextContent('abc');
+  expect(addTagMenuItems.nth(1)).toHaveTextContent('abc: number');
+  expect(addTagMenuItems.nth(2)).toHaveTextContent('abc: date');
+  expect(addTagMenuItems.nth(3)).toHaveTextContent('abc: yes/no');
+});
 });

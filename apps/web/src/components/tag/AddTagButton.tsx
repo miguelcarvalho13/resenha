@@ -1,4 +1,5 @@
 import { Button, Combobox, useCombobox } from '@mantine/core';
+import { useState } from 'react';
 import { TbCirclePlus } from 'react-icons/tb';
 
 import { NoteTagWrapper } from '@/components/tag/NoteTagWrapper';
@@ -12,10 +13,13 @@ const FIXED_OPTION_VALUES = {
 } satisfies { [key in NoteTag['type']]: string };
 
 export const AddTagButton = () => {
+  const [search, setSearch] = useState('');
+
   const combobox = useCombobox({
     onDropdownClose: () => {
       combobox.resetSelectedOption();
       combobox.focusTarget();
+      setSearch('');
     },
 
     onDropdownOpen: () => {
@@ -26,6 +30,9 @@ export const AddTagButton = () => {
   const onOptionSubmit = () => {
     combobox.closeDropdown();
   };
+
+  const newTagLabel = search.trim();
+  const isNewTagAllowed = search.trim().length >= 1;
 
   return (
     <Combobox
@@ -48,27 +55,38 @@ export const AddTagButton = () => {
       </Combobox.Target>
 
       <Combobox.Dropdown>
+        <Combobox.Search
+          aria-label="Search tags"
+          onChange={(event) => setSearch(event.currentTarget.value)}
+          placeholder="Search tags"
+          value={search}
+        />
         <Combobox.Options aria-label="List of tags">
-          <Combobox.Option value={FIXED_OPTION_VALUES.string}>
-            <NoteTagWrapper color="gray" data-testid="tag-new">
-              new
-            </NoteTagWrapper>
-          </Combobox.Option>
-          <Combobox.Option value={FIXED_OPTION_VALUES.number}>
-            <NoteTagWrapper color="gray" data-testid="tag-new">
-              new: number
-            </NoteTagWrapper>
-          </Combobox.Option>
-          <Combobox.Option value={FIXED_OPTION_VALUES.date}>
-            <NoteTagWrapper color="gray" data-testid="tag-new">
-              new: date
-            </NoteTagWrapper>
-          </Combobox.Option>
-          <Combobox.Option value={FIXED_OPTION_VALUES.boolean}>
-            <NoteTagWrapper color="gray" data-testid="tag-new">
-              new: yes/no
-            </NoteTagWrapper>
-          </Combobox.Option>
+          {isNewTagAllowed && (
+            <>
+              <Combobox.Option value={FIXED_OPTION_VALUES.string}>
+                <NoteTagWrapper color="gray" data-testid="tag-new">
+                  {newTagLabel}
+                </NoteTagWrapper>
+              </Combobox.Option>
+              <Combobox.Option value={FIXED_OPTION_VALUES.number}>
+                <NoteTagWrapper color="gray" data-testid="tag-new">
+                  {newTagLabel}: number
+                </NoteTagWrapper>
+              </Combobox.Option>
+              <Combobox.Option value={FIXED_OPTION_VALUES.date}>
+                <NoteTagWrapper color="gray" data-testid="tag-new">
+                  {newTagLabel}: date
+                </NoteTagWrapper>
+              </Combobox.Option>
+              <Combobox.Option value={FIXED_OPTION_VALUES.boolean}>
+                <NoteTagWrapper color="gray" data-testid="tag-new">
+                  {newTagLabel}: yes/no
+                </NoteTagWrapper>
+              </Combobox.Option>
+            </>
+          )}
+          {!isNewTagAllowed && <Combobox.Empty>No tags found</Combobox.Empty>}
         </Combobox.Options>
       </Combobox.Dropdown>
     </Combobox>
