@@ -23,8 +23,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Get Playwright installed version
+        run: "echo \"PLAYWRIGHT_VERSION=$(grep -A2 '^\\s*playwright:' ./pnpm-lock.yaml | grep 'version: ' | awk '{print $2}')\" >> $GITHUB_ENV"
+
+      - name: Cache playwright binaries
+        uses: actions/cache@v3
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+
       - name: Install playwright browsers
         run: pnpm --filter=web playwright:install
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
 
       - name: Run lint
         run: pnpm lint
