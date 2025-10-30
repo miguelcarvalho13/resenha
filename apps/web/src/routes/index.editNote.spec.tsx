@@ -218,4 +218,3 @@ test('should list all kinds of tags that are possible to add tags in a note', as
   expect(addTagMenuItems.nth(2)).toHaveTextContent('abc: date');
   expect(addTagMenuItems.nth(3)).toHaveTextContent('abc: yes/no');
 });
-});
