@@ -5,6 +5,7 @@ import {
   getFindAllNotesHandler,
   getFindAllNoteTagsHandler,
   getSessionHandler,
+  postCreateNoteTagHandler,
   postEditNoteHandler,
 } from '@/mocks/handlers';
 import { createNoteForFindAll } from '@/tests/factories/notes';
@@ -217,4 +218,204 @@ test('should list all kinds of tags that are possible to add tags in a note', as
   expect(addTagMenuItems.nth(1)).toHaveTextContent('abc: number');
   expect(addTagMenuItems.nth(2)).toHaveTextContent('abc: date');
   expect(addTagMenuItems.nth(3)).toHaveTextContent('abc: yes/no');
+});
+
+test('should be able to add tags in a note [string]', async ({ worker }) => {
+  const name = 'string-tag';
+  const note = createNoteForFindAll({ content: 'A', id: '123' });
+
+  (worker as SetupWorker).use(
+    getFindAllNotesHandler({ notes: [note] }),
+    postEditNoteHandler(),
+    getFindAllNoteTagsHandler(),
+    postCreateNoteTagHandler({ wait: 200 }),
+    getSessionHandler(),
+  );
+
+  const { getByLabelText, getByRole, getByTestId } = await renderWithRouter();
+
+  await vi.waitFor(() =>
+    expect(getByTestId('note-card').elements()).toHaveLength(1),
+  );
+
+  // Open the modal for the first time and edit it
+  await getByTestId('note-card')
+    .nth(0)
+    .getByRole('button', { name: /Edit note/ })
+    .click();
+
+  const tagsContainer = getByRole('dialog', { name: /Edit note/ }).getByTestId(
+    'tags-container',
+  );
+
+  const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
+
+  await addTagButton.click();
+  await getByLabelText('Search tags').fill(name);
+
+  (worker as SetupWorker).use(
+    getFindAllNoteTagsHandler({
+      noteTags: [createNoteTag({ name, type: 'string' })],
+    }),
+  );
+
+  await getByRole('listbox', { name: 'List of tags' })
+    .getByRole('option')
+    .getByText(new RegExp(`${name}$`))
+    .click();
+  expect(addTagButton).toBeDisabled();
+  const tags = tagsContainer.getByTestId('tag');
+
+  await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
+  expect(tags.nth(0)).toHaveTextContent(name);
+});
+
+test('should be able to add tags in a note [number]', async ({ worker }) => {
+  const name = 'number-tag';
+  const note = createNoteForFindAll({ content: 'A', id: '123' });
+
+  (worker as SetupWorker).use(
+    getFindAllNotesHandler({ notes: [note] }),
+    postEditNoteHandler(),
+    getFindAllNoteTagsHandler(),
+    postCreateNoteTagHandler({ wait: 200 }),
+    getSessionHandler(),
+  );
+
+  const { getByLabelText, getByRole, getByTestId } = await renderWithRouter();
+
+  await vi.waitFor(() =>
+    expect(getByTestId('note-card').elements()).toHaveLength(1),
+  );
+
+  // Open the modal for the first time and edit it
+  await getByTestId('note-card')
+    .nth(0)
+    .getByRole('button', { name: /Edit note/ })
+    .click();
+
+  const tagsContainer = getByRole('dialog', { name: /Edit note/ }).getByTestId(
+    'tags-container',
+  );
+
+  const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
+
+  await addTagButton.click();
+  await getByLabelText('Search tags').fill(name);
+
+  (worker as SetupWorker).use(
+    getFindAllNoteTagsHandler({
+      noteTags: [createNoteTag({ name, type: 'number', value: 10 })],
+    }),
+  );
+
+  await getByRole('listbox', { name: 'List of tags' })
+    .getByRole('option')
+    .getByText(new RegExp(`${name}: number`))
+    .click();
+  expect(addTagButton).toBeDisabled();
+  const tags = tagsContainer.getByTestId('tag');
+
+  await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
+  expect(tags.nth(0)).toHaveTextContent(`${name}: 10`);
+});
+
+test('should be able to add tags in a note [date]', async ({ worker }) => {
+  const name = 'date-tag';
+  const note = createNoteForFindAll({ content: 'A', id: '123' });
+
+  (worker as SetupWorker).use(
+    getFindAllNotesHandler({ notes: [note] }),
+    postEditNoteHandler(),
+    getFindAllNoteTagsHandler(),
+    postCreateNoteTagHandler({ wait: 200 }),
+    getSessionHandler(),
+  );
+
+  const { getByLabelText, getByRole, getByTestId } = await renderWithRouter();
+
+  await vi.waitFor(() =>
+    expect(getByTestId('note-card').elements()).toHaveLength(1),
+  );
+
+  // Open the modal for the first time and edit it
+  await getByTestId('note-card')
+    .nth(0)
+    .getByRole('button', { name: /Edit note/ })
+    .click();
+
+  const tagsContainer = getByRole('dialog', { name: /Edit note/ }).getByTestId(
+    'tags-container',
+  );
+
+  const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
+
+  await addTagButton.click();
+  await getByLabelText('Search tags').fill(name);
+
+  (worker as SetupWorker).use(
+    getFindAllNoteTagsHandler({
+      noteTags: [createNoteTag({ name, type: 'date', value: '2025-10-30' })],
+    }),
+  );
+
+  await getByRole('listbox', { name: 'List of tags' })
+    .getByRole('option')
+    .getByText(new RegExp(`${name}: date`))
+    .click();
+  expect(addTagButton).toBeDisabled();
+  const tags = tagsContainer.getByTestId('tag');
+
+  await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
+  expect(tags.nth(0)).toHaveTextContent(`${name}: 2025-10-30`);
+});
+
+test('should be able to add tags in a note [boolean]', async ({ worker }) => {
+  const name = 'boolean-tag';
+  const note = createNoteForFindAll({ content: 'A', id: '123' });
+
+  (worker as SetupWorker).use(
+    getFindAllNotesHandler({ notes: [note] }),
+    postEditNoteHandler(),
+    getFindAllNoteTagsHandler(),
+    postCreateNoteTagHandler({ wait: 200 }),
+    getSessionHandler(),
+  );
+
+  const { getByLabelText, getByRole, getByTestId } = await renderWithRouter();
+
+  await vi.waitFor(() =>
+    expect(getByTestId('note-card').elements()).toHaveLength(1),
+  );
+
+  // Open the modal for the first time and edit it
+  await getByTestId('note-card')
+    .nth(0)
+    .getByRole('button', { name: /Edit note/ })
+    .click();
+
+  const tagsContainer = getByRole('dialog', { name: /Edit note/ }).getByTestId(
+    'tags-container',
+  );
+
+  const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
+
+  await addTagButton.click();
+  await getByLabelText('Search tags').fill(name);
+
+  (worker as SetupWorker).use(
+    getFindAllNoteTagsHandler({
+      noteTags: [createNoteTag({ name, type: 'boolean', value: true })],
+    }),
+  );
+
+  await getByRole('listbox', { name: 'List of tags' })
+    .getByRole('option')
+    .getByText(new RegExp(`${name}: yes/no`))
+    .click();
+  expect(addTagButton).toBeDisabled();
+  const tags = tagsContainer.getByTestId('tag');
+
+  await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
+  expect(tags.nth(0)).toHaveTextContent(`${name}: yes`);
 });

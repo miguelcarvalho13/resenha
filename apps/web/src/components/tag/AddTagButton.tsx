@@ -4,6 +4,7 @@ import { TbCirclePlus } from 'react-icons/tb';
 
 import { NoteTagWrapper } from '@/components/tag/NoteTagWrapper';
 import { type NoteTag } from '@/models/tags';
+import { trpc } from '@/utils/trpc';
 
 const FIXED_OPTION_VALUES = {
   boolean: 'new:boolean',
@@ -12,8 +13,28 @@ const FIXED_OPTION_VALUES = {
   string: 'new:string',
 } satisfies { [key in NoteTag['type']]: string };
 
-export const AddTagButton = () => {
+interface AddTagButtonProps {
+  noteId: string;
+}
+
+const getNowDateValue = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  const date = now.getDate().toString().padStart(2, '0');
+
+  return `${year}-${month}-${date}`;
+};
+
+export const AddTagButton = ({ noteId }: AddTagButtonProps) => {
   const [search, setSearch] = useState('');
+  const utils = trpc.useUtils();
+  const { mutate: createNoteTag, isPending } =
+    trpc.tags.createNoteTag.useMutation({
+      onSuccess: async () => {
+        await utils.tags.findAllNoteTags.invalidate({ noteId });
+      },
+    });
 
   const combobox = useCombobox({
     onDropdownClose: () => {
@@ -27,7 +48,24 @@ export const AddTagButton = () => {
     },
   });
 
-  const onOptionSubmit = () => {
+  const onOptionSubmit = (value: string) => {
+    const name = search;
+
+    switch (value) {
+      case FIXED_OPTION_VALUES.boolean:
+        createNoteTag({ name, type: 'boolean', noteId, value: true });
+        break;
+      case FIXED_OPTION_VALUES.date:
+        createNoteTag({ name, type: 'date', noteId, value: getNowDateValue() });
+        break;
+      case FIXED_OPTION_VALUES.number:
+        createNoteTag({ name, type: 'number', noteId, value: 10 });
+        break;
+      case FIXED_OPTION_VALUES.string:
+        createNoteTag({ name, type: 'string', noteId });
+        break;
+    }
+
     combobox.closeDropdown();
   };
 
@@ -36,6 +74,7 @@ export const AddTagButton = () => {
 
   return (
     <Combobox
+      disabled={isPending}
       onOptionSubmit={onOptionSubmit}
       position="bottom-start"
       store={combobox}
@@ -43,6 +82,7 @@ export const AddTagButton = () => {
     >
       <Combobox.Target withAriaAttributes={false}>
         <Button
+          disabled={isPending}
           justify="center"
           leftSection={<TbCirclePlus className="-mr-2" />}
           onClick={() => combobox.toggleDropdown()}

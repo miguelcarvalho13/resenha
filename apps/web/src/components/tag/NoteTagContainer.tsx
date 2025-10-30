@@ -23,7 +23,7 @@ export const NoteTagContainer = ({ note }: NoteTagContainerProps) => {
       {data?.noteTags.map((noteTag) => (
         <NoteTag key={`${noteTag.noteId}|${noteTag.tagId}`} noteTag={noteTag} />
       ))}
-      <AddTagButton />
+      <AddTagButton noteId={note.id} />
     </Group>
   );
 };

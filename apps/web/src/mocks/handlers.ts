@@ -1,5 +1,5 @@
 import { type Session, type User } from 'better-auth';
-import { http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 
 import { type NoteForFindAll } from '@/models/notes';
 import { type NoteTag } from '@/models/tags';
@@ -29,32 +29,55 @@ export const getFindAllNotesHandler = ({
     } satisfies RouterOutput['notes']['findAll']),
   );
 
-export const postCreateNoteHandler = () =>
-  http.post('/api/trpc/notes.createNote', () => createTrpcBatchJson({}));
+export const postCreateNoteHandler = ({ wait = 0 }: { wait?: number } = {}) =>
+  http.post('/api/trpc/notes.createNote', async () => {
+    await delay(wait);
+    return createTrpcBatchJson({});
+  });
 
-export const postEditNoteHandler = () =>
-  http.post('/api/trpc/notes.editNote', () => createTrpcBatchJson({}));
+export const postEditNoteHandler = ({ wait = 0 }: { wait?: number } = {}) =>
+  http.post('/api/trpc/notes.editNote', async () => {
+    await delay(wait);
+    return createTrpcBatchJson({});
+  });
 
 export const getFindAllNoteTagsHandler = ({
   noteTags = [],
+  wait = 0,
 }: {
   noteTags?: NoteTag[];
+  wait?: number;
 } = {}) =>
-  http.get('/api/trpc/tags.findAllNoteTags', () =>
-    createTrpcBatchJson({
+  http.get('/api/trpc/tags.findAllNoteTags', async () => {
+    await delay(wait);
+
+    return createTrpcBatchJson({
       success: true,
       noteTags,
-    } satisfies RouterOutput['tags']['findAllNoteTags']),
-  );
+    } satisfies RouterOutput['tags']['findAllNoteTags']);
+  });
 
-export const postCreateNoteTagHandler = () =>
-  http.post('/api/trpc/tags.createNoteTag', () => createTrpcBatchJson({}));
+export const postCreateNoteTagHandler = ({
+  wait = 0,
+}: { wait?: number } = {}) =>
+  http.post('/api/trpc/tags.createNoteTag', async () => {
+    await delay(wait);
+    return createTrpcBatchJson({});
+  });
 
-export const postDeleteNoteTagHandler = () =>
-  http.post('/api/trpc/tags.deleteNoteTag', () => createTrpcBatchJson({}));
+export const postDeleteNoteTagHandler = ({
+  wait = 0,
+}: { wait?: number } = {}) =>
+  http.post('/api/trpc/tags.deleteNoteTag', async () => {
+    await delay(wait);
+    return createTrpcBatchJson({});
+  });
 
-export const postEditNoteTagHandler = () =>
-  http.post('/api/trpc/tags.editNoteTag', () => createTrpcBatchJson({}));
+export const postEditNoteTagHandler = ({ wait = 0 }: { wait?: number } = {}) =>
+  http.post('/api/trpc/tags.editNoteTag', async () => {
+    await delay(wait);
+    return createTrpcBatchJson({});
+  });
 
 export const handlers = [
   http.get('https://api.example.com/user', () =>
