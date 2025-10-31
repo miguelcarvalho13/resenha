@@ -3,11 +3,13 @@ import { expect, vi } from 'vitest';
 
 import {
   getFindAllNotesHandler,
-  getFindAllNoteTagsHandler,
-  getSessionHandler,
-  postCreateNoteTagHandler,
   postEditNoteHandler,
-} from '@/mocks/handlers';
+} from '@/mocks/routes/notes';
+import { getSessionHandler } from '@/mocks/routes/session';
+import {
+  getFindAllNoteTagsHandler,
+  postCreateNoteTagHandler,
+} from '@/mocks/routes/tags';
 import { createNoteForFindAll } from '@/tests/factories/notes';
 import { createNoteTag } from '@/tests/factories/tags';
 import { renderWithRouter } from '@/tests/renderUtils';

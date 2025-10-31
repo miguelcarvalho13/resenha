@@ -3,7 +3,7 @@ import { type SetupWorker } from 'msw/browser';
 import { act } from 'react';
 import { expect, vi } from 'vitest';
 
-import { getSessionHandler } from '@/mocks/handlers';
+import { getSessionHandler } from '@/mocks/routes/session';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 

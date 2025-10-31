@@ -1,7 +1,8 @@
 import { type SetupWorker } from 'msw/browser';
 import { expect, vi } from 'vitest';
 
-import { getSessionHandler, postCreateNoteHandler } from '@/mocks/handlers';
+import { postCreateNoteHandler } from '@/mocks/routes/notes';
+import { getSessionHandler } from '@/mocks/routes/session';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 

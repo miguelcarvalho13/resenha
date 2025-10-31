@@ -2,10 +2,10 @@ import { http, HttpResponse } from 'msw';
 import { type SetupWorker } from 'msw/browser';
 import { expect, vi } from 'vitest';
 
-import { getSessionHandler } from '@/mocks/handlers';
+import { getSessionHandler } from '@/mocks/routes/session';
+import { createUser } from '@/tests/factories/user';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
-import { createUser } from '@/tests/factories/user';
 
 test('should correctly render the side navbar', async ({ worker }) => {
   (worker as SetupWorker).use(getSessionHandler());
