@@ -1,14 +1,33 @@
+import { faker } from '@faker-js/faker/locale/en';
 import { type Session } from 'better-auth';
 
+import {
+  sessionMock,
+  type SessionMockSchemaType,
+} from '@/mocks/models/sessions';
+import { createUserMock } from './user';
+
 export const createSession = (data: Partial<Session> = {}): Session => ({
-  id: '123456',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  userId: '123456',
-  expiresAt: new Date(),
-  token: 'abc123',
-  ipAddress: '127.0.01',
-  userAgent:
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+  id: faker.string.uuid(),
+  createdAt: faker.date.past(),
+  updatedAt: faker.date.recent(),
+  userId: faker.string.uuid(),
+  expiresAt: faker.date.future(),
+  token: faker.internet.jwt(),
+  ipAddress: faker.internet.ipv4(),
+  userAgent: faker.internet.userAgent(),
   ...data,
 });
+
+export const createSessionMock = async ({
+  user,
+  ...data
+}: Partial<SessionMockSchemaType> = {}) => {
+  const userRelation = user ?? (await createUserMock());
+
+  return sessionMock.create({
+    ...createSession(data),
+    user: userRelation,
+    userId: userRelation.id,
+  });
+};

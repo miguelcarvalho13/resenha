@@ -1,28 +1,15 @@
-import { type SetupWorker } from 'msw/browser';
 import { expect, vi } from 'vitest';
 
-import {
-  getFindAllNotesHandler,
-  postEditNoteHandler,
-} from '@/mocks/routes/notes';
-import { getSessionHandler } from '@/mocks/routes/session';
-import {
-  getFindAllNoteTagsHandler,
-  postCreateNoteTagHandler,
-} from '@/mocks/routes/tags';
-import { createNoteForFindAll } from '@/tests/factories/notes';
-import { createNoteTag } from '@/tests/factories/tags';
+import { createNoteMock } from '@/tests/factories/notes';
+import { createSessionMock } from '@/tests/factories/session';
+import { createNoteTagMock } from '@/tests/factories/tags';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
-test('should correctly edit a note', async ({ worker }) => {
-  const note = createNoteForFindAll({ content: 'A', id: '123' });
-
-  (worker as SetupWorker).use(
-    getFindAllNotesHandler({ notes: [note] }),
-    postEditNoteHandler(),
-    getSessionHandler(),
-  );
+test('should correctly edit a note', async () => {
+  // create mock server data
+  await createSessionMock();
+  await createNoteMock({ content: 'A' });
 
   const { getByRole, getByTestId } = await renderWithRouter();
 
@@ -50,15 +37,10 @@ test('should correctly edit a note', async ({ worker }) => {
   );
 });
 
-test('should require at least 1 char for editing a note', async ({
-  worker,
-}) => {
-  const note = createNoteForFindAll({ content: 'A', id: '123' });
-
-  (worker as SetupWorker).use(
-    getFindAllNotesHandler({ notes: [note] }),
-    getSessionHandler(),
-  );
+test('should require at least 1 char for editing a note', async () => {
+  // create mock server data
+  await createSessionMock();
+  await createNoteMock({ content: 'A' });
 
   const { getByRole, getByTestId } = await renderWithRouter();
 
@@ -81,16 +63,10 @@ test('should require at least 1 char for editing a note', async ({
   );
 });
 
-test('should update modal content when reopening the modal after a save', async ({
-  worker,
-}) => {
-  const note = createNoteForFindAll({ content: 'A', id: '123' });
-
-  (worker as SetupWorker).use(
-    getFindAllNotesHandler({ notes: [note] }),
-    postEditNoteHandler(),
-    getSessionHandler(),
-  );
+test('should update modal content when reopening the modal after a save', async () => {
+  // create mock server data
+  await createSessionMock();
+  await createNoteMock({ content: 'A' });
 
   const { getByRole, getByTestId } = await renderWithRouter();
 
@@ -107,13 +83,6 @@ test('should update modal content when reopening the modal after a save', async 
   const modal = getByRole('dialog', { name: /Edit note/ });
   await modal.getByLabelText('Content').clear();
   await modal.getByLabelText('Content').fill('B');
-
-  (worker as SetupWorker).use(
-    getFindAllNotesHandler({
-      notes: [createNoteForFindAll({ ...note, content: 'B' })],
-    }),
-  );
-
   await modal.getByRole('button', { name: /Save/ }).click();
 
   // Waits the modal to close
@@ -133,21 +102,24 @@ test('should update modal content when reopening the modal after a save', async 
   ).toHaveValue('B');
 });
 
-test('should be able to list tags in a note', async ({ worker }) => {
-  const note = createNoteForFindAll({ content: 'A', id: '123' });
-  const noteTags = [
-    createNoteTag({ name: 'abc', value: 'abc', type: 'string' }),
-    createNoteTag({ name: 'score', value: 10.5, type: 'number' }),
-    createNoteTag({ name: 'created', value: '2025-10-27', type: 'date' }),
-    createNoteTag({ name: 'active', value: true, type: 'boolean' }),
-  ];
-
-  (worker as SetupWorker).use(
-    getFindAllNotesHandler({ notes: [note] }),
-    postEditNoteHandler(),
-    getFindAllNoteTagsHandler({ noteTags }),
-    getSessionHandler(),
-  );
+test('should be able to list tags in a note', async () => {
+  // create mock server data
+  await createSessionMock();
+  const note = await createNoteMock({ content: 'A' });
+  await createNoteTagMock({ name: 'abc', value: 'abc', type: 'string', note });
+  await createNoteTagMock({ name: 'score', value: 10.5, type: 'number', note });
+  await createNoteTagMock({
+    name: 'created',
+    value: '2025-10-27',
+    type: 'date',
+    note,
+  });
+  await createNoteTagMock({
+    name: 'active',
+    value: true,
+    type: 'boolean',
+    note,
+  });
 
   const { getByRole, getByTestId } = await renderWithRouter();
 
@@ -175,17 +147,10 @@ test('should be able to list tags in a note', async ({ worker }) => {
   expect(tags.nth(3)).toHaveTextContent('active: yes');
 });
 
-test('should list all kinds of tags that are possible to add tags in a note', async ({
-  worker,
-}) => {
-  const note = createNoteForFindAll({ content: 'A', id: '123' });
-
-  (worker as SetupWorker).use(
-    getFindAllNotesHandler({ notes: [note] }),
-    postEditNoteHandler(),
-    getFindAllNoteTagsHandler(),
-    getSessionHandler(),
-  );
+test('should list all kinds of tags that are possible to add tags in a note', async () => {
+  // create mock server data
+  await createSessionMock();
+  await createNoteMock({ content: 'A' });
 
   const { getByLabelText, getByRole, getByTestId } = await renderWithRouter();
 
@@ -222,17 +187,12 @@ test('should list all kinds of tags that are possible to add tags in a note', as
   expect(addTagMenuItems.nth(3)).toHaveTextContent('abc: yes/no');
 });
 
-test('should be able to add tags in a note [string]', async ({ worker }) => {
-  const name = 'string-tag';
-  const note = createNoteForFindAll({ content: 'A', id: '123' });
+test('should be able to add tags in a note [string]', async () => {
+  // create mock server data
+  await createSessionMock();
+  await createNoteMock({ content: 'A' });
 
-  (worker as SetupWorker).use(
-    getFindAllNotesHandler({ notes: [note] }),
-    postEditNoteHandler(),
-    getFindAllNoteTagsHandler(),
-    postCreateNoteTagHandler({ wait: 200 }),
-    getSessionHandler(),
-  );
+  const name = 'string-tag';
 
   const { getByLabelText, getByRole, getByTestId } = await renderWithRouter();
 
@@ -254,13 +214,6 @@ test('should be able to add tags in a note [string]', async ({ worker }) => {
 
   await addTagButton.click();
   await getByLabelText('Search tags').fill(name);
-
-  (worker as SetupWorker).use(
-    getFindAllNoteTagsHandler({
-      noteTags: [createNoteTag({ name, type: 'string' })],
-    }),
-  );
-
   await getByRole('listbox', { name: 'List of tags' })
     .getByRole('option')
     .getByText(new RegExp(`${name}$`))
@@ -272,17 +225,12 @@ test('should be able to add tags in a note [string]', async ({ worker }) => {
   expect(tags.nth(0)).toHaveTextContent(name);
 });
 
-test('should be able to add tags in a note [number]', async ({ worker }) => {
-  const name = 'number-tag';
-  const note = createNoteForFindAll({ content: 'A', id: '123' });
+test('should be able to add tags in a note [number]', async () => {
+  // create mock server data
+  await createSessionMock();
+  await createNoteMock({ content: 'A' });
 
-  (worker as SetupWorker).use(
-    getFindAllNotesHandler({ notes: [note] }),
-    postEditNoteHandler(),
-    getFindAllNoteTagsHandler(),
-    postCreateNoteTagHandler({ wait: 200 }),
-    getSessionHandler(),
-  );
+  const name = 'number-tag';
 
   const { getByLabelText, getByRole, getByTestId } = await renderWithRouter();
 
@@ -304,13 +252,6 @@ test('should be able to add tags in a note [number]', async ({ worker }) => {
 
   await addTagButton.click();
   await getByLabelText('Search tags').fill(name);
-
-  (worker as SetupWorker).use(
-    getFindAllNoteTagsHandler({
-      noteTags: [createNoteTag({ name, type: 'number', value: 10 })],
-    }),
-  );
-
   await getByRole('listbox', { name: 'List of tags' })
     .getByRole('option')
     .getByText(new RegExp(`${name}: number`))
@@ -322,17 +263,14 @@ test('should be able to add tags in a note [number]', async ({ worker }) => {
   expect(tags.nth(0)).toHaveTextContent(`${name}: 10`);
 });
 
-test('should be able to add tags in a note [date]', async ({ worker }) => {
-  const name = 'date-tag';
-  const note = createNoteForFindAll({ content: 'A', id: '123' });
+test('should be able to add tags in a note [date]', async () => {
+  vi.setSystemTime(new Date(2025, 9, 30));
 
-  (worker as SetupWorker).use(
-    getFindAllNotesHandler({ notes: [note] }),
-    postEditNoteHandler(),
-    getFindAllNoteTagsHandler(),
-    postCreateNoteTagHandler({ wait: 200 }),
-    getSessionHandler(),
-  );
+  // create mock server data
+  await createSessionMock();
+  await createNoteMock({ content: 'A' });
+
+  const name = 'date-tag';
 
   const { getByLabelText, getByRole, getByTestId } = await renderWithRouter();
 
@@ -354,13 +292,6 @@ test('should be able to add tags in a note [date]', async ({ worker }) => {
 
   await addTagButton.click();
   await getByLabelText('Search tags').fill(name);
-
-  (worker as SetupWorker).use(
-    getFindAllNoteTagsHandler({
-      noteTags: [createNoteTag({ name, type: 'date', value: '2025-10-30' })],
-    }),
-  );
-
   await getByRole('listbox', { name: 'List of tags' })
     .getByRole('option')
     .getByText(new RegExp(`${name}: date`))
@@ -370,19 +301,15 @@ test('should be able to add tags in a note [date]', async ({ worker }) => {
 
   await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
   expect(tags.nth(0)).toHaveTextContent(`${name}: 2025-10-30`);
+  vi.useRealTimers();
 });
 
-test('should be able to add tags in a note [boolean]', async ({ worker }) => {
-  const name = 'boolean-tag';
-  const note = createNoteForFindAll({ content: 'A', id: '123' });
+test('should be able to add tags in a note [boolean]', async () => {
+  // create mock server data
+  await createSessionMock();
+  await createNoteMock({ content: 'A' });
 
-  (worker as SetupWorker).use(
-    getFindAllNotesHandler({ notes: [note] }),
-    postEditNoteHandler(),
-    getFindAllNoteTagsHandler(),
-    postCreateNoteTagHandler({ wait: 200 }),
-    getSessionHandler(),
-  );
+  const name = 'boolean-tag';
 
   const { getByLabelText, getByRole, getByTestId } = await renderWithRouter();
 
@@ -404,13 +331,6 @@ test('should be able to add tags in a note [boolean]', async ({ worker }) => {
 
   await addTagButton.click();
   await getByLabelText('Search tags').fill(name);
-
-  (worker as SetupWorker).use(
-    getFindAllNoteTagsHandler({
-      noteTags: [createNoteTag({ name, type: 'boolean', value: true })],
-    }),
-  );
-
   await getByRole('listbox', { name: 'List of tags' })
     .getByRole('option')
     .getByText(new RegExp(`${name}: yes/no`))

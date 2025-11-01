@@ -1,14 +1,12 @@
-import { http, HttpResponse } from 'msw';
-import { type SetupWorker } from 'msw/browser';
 import { expect, vi } from 'vitest';
 
-import { getSessionHandler } from '@/mocks/routes/session';
-import { createUser } from '@/tests/factories/user';
+import { createSessionMock } from '@/tests/factories/session';
+import { createUserMock } from '@/tests/factories/user';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
-test('should correctly render the side navbar', async ({ worker }) => {
-  (worker as SetupWorker).use(getSessionHandler());
+test('should correctly render the side navbar', async () => {
+  await createSessionMock();
 
   const { getByRole } = await renderWithRouter();
 
@@ -35,10 +33,10 @@ test('should correctly render the side navbar', async ({ worker }) => {
   expect(links.nth(3)).toHaveAttribute('href', '/config');
 });
 
-test('should correctly display user menu in the header', async ({ worker }) => {
-  (worker as SetupWorker).use(
-    getSessionHandler({ user: createUser({ name: 'Some Name' }) }),
-  );
+test('should correctly display user menu in the header', async () => {
+  await createSessionMock({
+    user: await createUserMock({ name: 'Some Name' }),
+  });
 
   const { getByRole } = await renderWithRouter();
 
@@ -53,16 +51,10 @@ test('should correctly display user menu in the header', async ({ worker }) => {
   expect(menu.getByRole('menuitem').nth(0)).toHaveTextContent('Logout');
 });
 
-test('should be redirected to /sign-in upon clicking on "Logout"', async ({
-  worker,
-}) => {
-  (worker as SetupWorker).use(
-    http.post(
-      '/api/auth/sign-out',
-      () => new HttpResponse(null, { status: 200 }),
-    ),
-    getSessionHandler(),
-  );
+test('should be redirected to /sign-in upon clicking on "Logout"', async () => {
+  await createSessionMock({
+    user: await createUserMock({ name: 'Some Name' }),
+  });
 
   const { getByRole } = await renderWithRouter();
 

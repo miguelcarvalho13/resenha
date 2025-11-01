@@ -307,11 +307,11 @@ export const tagsRouter = router({
               case 'string':
                 return tag.name;
               case 'number':
-                return noteTag.valueNumber;
+                return noteTag.valueNumber!;
               case 'boolean':
-                return noteTag.valueBoolean;
+                return noteTag.valueBoolean!;
               case 'date':
-                return noteTag.valueDate;
+                return noteTag.valueDate!;
               default:
                 throw new TRPCError({
                   code: 'NOT_IMPLEMENTED',
@@ -340,7 +340,7 @@ export const tagsRouter = router({
           tagId: string;
           type: 'string' | 'number' | 'boolean' | 'date';
           updatedAt: Date;
-          value: string | number | boolean | null;
+          value: string | number | boolean;
         }[],
       );
 

@@ -1,9 +1,7 @@
-import { http, HttpResponse } from 'msw';
-import { type SetupWorker } from 'msw/browser';
 import { act } from 'react';
 import { expect, vi } from 'vitest';
 
-import { getSessionHandler } from '@/mocks/routes/session';
+import { createSessionMock } from '@/tests/factories/session';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
@@ -28,23 +26,16 @@ test('should render sign in form fields', async () => {
     .toHaveAttribute('href', '/sign-up');
 });
 
-test('should be redirected to index upon clicking on "Sign in"', async ({
-  worker,
-}) => {
-  (worker as SetupWorker).use(
-    http.post(
-      '/api/auth/sign-in/email',
-      () => new HttpResponse(null, { status: 200 }),
-    ),
-    getSessionHandler(),
-  );
-
+test('should be redirected to index upon clicking on "Sign in"', async () => {
   const { router, getByLabelText, getByRole } = await renderWithRouter();
 
   await act(() => router.navigate({ to: '/sign-in' }));
 
   await getByLabelText('Email').fill('some@example.com');
   await getByLabelText('Password').fill('MyPassword123!@');
+
+  // creates a session in the mock server
+  await createSessionMock();
 
   await getByRole('button', { name: /Sign in/ }).click();
 

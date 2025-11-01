@@ -1,6 +1,6 @@
 import { Button, Modal, Stack, Textarea } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { zodResolver } from 'mantine-form-zod-resolver';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { z } from 'zod';
 
 import { NoteTagContainer } from '@/components/tag/NoteTagContainer';
@@ -15,7 +15,9 @@ interface CreateOrEditNoteModalProps {
 }
 
 const createOrEditSchema = z.object({
-  content: z.string().min(1),
+  content: z
+    .string()
+    .min(1, { error: 'String must contain at least 1 character(s)' }),
 });
 
 type CreateOrEditSchemaType = z.infer<typeof createOrEditSchema>;
@@ -40,7 +42,7 @@ const CreateOrEditNoteModal = ({
     mode: 'uncontrolled',
     initialValues: getFormValues({ note }),
 
-    validate: zodResolver(createOrEditSchema),
+    validate: zod4Resolver(createOrEditSchema),
   });
 
   const onSuccess = async () => {
@@ -73,7 +75,10 @@ const CreateOrEditNoteModal = ({
   return (
     <Modal
       centered
-      onClose={close}
+      onClose={() => {
+        close();
+        form.reset();
+      }}
       opened={opened}
       title={mode === 'create' ? 'Create note' : 'Edit note'}
     >

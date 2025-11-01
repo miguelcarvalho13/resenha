@@ -1,12 +1,20 @@
+import { faker } from '@faker-js/faker/locale/en';
 import { type User } from 'better-auth';
 
+import { userMock, type UserMockSchemaType } from '@/mocks/models/users';
+
 export const createUser = (data: Partial<User> = {}): User => ({
-  id: '123456',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  email: 'some@example.com',
-  emailVerified: false,
-  name: 'Some Name',
-  image: 'https://www.example.com',
+  id: faker.string.uuid(),
+  createdAt: faker.date.past(),
+  updatedAt: faker.date.recent(),
+  email: faker.internet.email(),
+  emailVerified: faker.datatype.boolean(),
+  name: faker.person.fullName(),
+  image: faker.image.avatar(),
   ...data,
 });
+
+export const createUserMock = (data: Partial<UserMockSchemaType> = {}) =>
+  userMock.create({
+    ...createUser(data),
+  });

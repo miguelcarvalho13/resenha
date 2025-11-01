@@ -1,14 +1,18 @@
-import { delay, http } from 'msw';
+import { delay, http, type PathParams } from 'msw';
 
-import { type NoteTag } from '@/models/tags';
-import { type RouterOutput } from '@/utils/trpc';
-import { createTrpcBatchJson } from '@/tests/factories/trpc';
+import { createNoteTagMock, createTagMock } from '@/tests/factories/tags';
+import {
+  createTrpcBatchJson,
+  extractTrpcInput,
+  type TrpcBatchInput,
+} from '@/tests/factories/trpc';
+import { type RouterInput, type RouterOutput } from '@/utils/trpc';
+import { noteMock } from '../models/notes';
+import { noteTagMock } from '../models/tags';
 
 export const getFindAllNoteTagsHandler = ({
-  noteTags = [],
   wait = 0,
 }: {
-  noteTags?: NoteTag[];
   wait?: number;
 } = {}) =>
   http.get('/api/trpc/tags.findAllNoteTags', async () => {
@@ -16,28 +20,132 @@ export const getFindAllNoteTagsHandler = ({
 
     return createTrpcBatchJson({
       success: true,
-      noteTags,
+      noteTags: noteTagMock.all(),
     } satisfies RouterOutput['tags']['findAllNoteTags']);
   });
 
 export const postCreateNoteTagHandler = ({
   wait = 0,
 }: { wait?: number } = {}) =>
-  http.post('/api/trpc/tags.createNoteTag', async () => {
-    await delay(wait);
-    return createTrpcBatchJson({});
-  });
+  http.post<PathParams, TrpcBatchInput<RouterInput['tags']['createNoteTag']>>(
+    '/api/trpc/tags.createNoteTag',
+    async ({ request }) => {
+      await delay(wait);
+
+      const input = extractTrpcInput(await request.clone().json());
+
+      const tag = await createTagMock({
+        name: input.name,
+        type: input.type,
+      });
+
+      const noteTag = await createNoteTagMock({
+        name: tag.name,
+        note: noteMock.findFirst((q) => q.where({ id: input.noteId })),
+        tag,
+        type: input.type,
+        value: 'value' in input ? input.value : input.name,
+      });
+
+      return createTrpcBatchJson({
+        success: true,
+        noteTag: {
+          ...noteTag,
+          createdBy: tag.createdBy,
+          updatedBy: tag.updatedBy,
+          valueBoolean: input.type === 'boolean' ? input.value : null,
+          valueDate: input.type === 'date' ? input.value : null,
+          valueNumber: input.type === 'number' ? input.value : null,
+        },
+        tag,
+      } satisfies RouterOutput['tags']['createNoteTag']);
+    },
+  );
 
 export const postDeleteNoteTagHandler = ({
   wait = 0,
 }: { wait?: number } = {}) =>
-  http.post('/api/trpc/tags.deleteNoteTag', async () => {
-    await delay(wait);
-    return createTrpcBatchJson({});
-  });
+  http.post<PathParams, TrpcBatchInput<RouterInput['tags']['deleteNoteTag']>>(
+    '/api/trpc/tags.deleteNoteTag',
+    async ({ request }) => {
+      await delay(wait);
+
+      const input = extractTrpcInput(await request.clone().json());
+
+      const noteTag = noteTagMock.findFirst((q) => q.where({ ...input }))!;
+      const tag = noteTag.tag!;
+
+      noteTagMock.delete((q) => q.where({ ...input }));
+
+      return createTrpcBatchJson({
+        success: true,
+        noteTag: {
+          ...noteTag,
+          createdBy: tag.createdBy,
+          updatedBy: tag.updatedBy,
+          valueBoolean:
+            tag.type === 'boolean' && typeof noteTag.value === 'boolean'
+              ? noteTag.value
+              : null,
+          valueDate:
+            tag.type === 'date' && typeof noteTag.value === 'string'
+              ? noteTag.value
+              : null,
+          valueNumber:
+            tag.type === 'number' && typeof noteTag.value === 'number'
+              ? noteTag.value
+              : null,
+        },
+      } satisfies RouterOutput['tags']['deleteNoteTag']);
+    },
+  );
 
 export const postEditNoteTagHandler = ({ wait = 0 }: { wait?: number } = {}) =>
-  http.post('/api/trpc/tags.editNoteTag', async () => {
-    await delay(wait);
-    return createTrpcBatchJson({});
-  });
+  http.post<PathParams, TrpcBatchInput<RouterInput['tags']['editNoteTag']>>(
+    '/api/trpc/tags.editNoteTag',
+    async ({ request }) => {
+      await delay(wait);
+
+      const input = extractTrpcInput(await request.clone().json());
+
+      const updatedNoteTag = (await noteTagMock.update(
+        (q) => q.where({ noteId: input.noteId, tagId: input.tagId }),
+        {
+          data(noteTag) {
+            noteTag.value = input.value;
+
+            if (
+              noteTag.tag!.type === 'string' &&
+              typeof input.value === 'string'
+            ) {
+              noteTag.tag!.name = input.value;
+            }
+          },
+        },
+      ))!;
+
+      const tag = updatedNoteTag.tag!;
+
+      return createTrpcBatchJson({
+        success: true,
+        noteTag: {
+          ...updatedNoteTag,
+          createdBy: tag.createdBy,
+          updatedBy: tag.updatedBy,
+          valueBoolean:
+            tag.type === 'boolean' && typeof updatedNoteTag.value === 'boolean'
+              ? updatedNoteTag.value
+              : null,
+          valueDate:
+            tag.type === 'date' && typeof updatedNoteTag.value === 'string'
+              ? updatedNoteTag.value
+              : null,
+          valueNumber:
+            tag.type === 'number' && typeof updatedNoteTag.value === 'number'
+              ? updatedNoteTag.value
+              : null,
+        },
+        tag,
+      } satisfies RouterOutput['tags']['editNoteTag']);
+    },
+  );

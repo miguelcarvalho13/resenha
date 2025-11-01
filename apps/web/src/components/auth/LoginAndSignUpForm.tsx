@@ -1,7 +1,7 @@
 import { Button, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useNavigate } from '@tanstack/react-router';
-import { zodResolver } from 'mantine-form-zod-resolver';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { z } from 'zod';
 
 import { authClient } from '@/utils/authClient';
@@ -11,14 +11,18 @@ interface LoginAndSignUpFormProps {
 }
 
 export const signUpSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  name: z.string().min(2, { error: 'Name must be at least 2 characters' }),
+  email: z.email({ error: 'Invalid email address' }),
+  password: z
+    .string()
+    .min(6, { error: 'Password must be at least 6 characters' }),
 });
 
 export const signInSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.email({ error: 'Invalid email address' }),
+  password: z
+    .string()
+    .min(6, { error: 'Password must be at least 6 characters' }),
 });
 
 export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
@@ -37,7 +41,7 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
       password: '',
     },
 
-    validate: zodResolver(schema),
+    validate: zod4Resolver(schema),
   });
 
   const handleSubmit = async (

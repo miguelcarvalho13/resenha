@@ -1,27 +1,16 @@
-import { type SetupWorker } from 'msw/browser';
 import { expect, vi } from 'vitest';
 
-import {
-  getFindAllNotesHandler,
-  postCreateNoteHandler,
-  postEditNoteHandler,
-} from '@/mocks/routes/notes';
-import { getSessionHandler } from '@/mocks/routes/session';
-import { createNoteForFindAll } from '@/tests/factories/notes';
+import { createNoteMock } from '@/tests/factories/notes';
+import { createSessionMock } from '@/tests/factories/session';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
-test('should correctly list the notes', async ({ worker }) => {
-  (worker as SetupWorker).use(
-    getFindAllNotesHandler({
-      notes: [
-        createNoteForFindAll({ content: 'A' }),
-        createNoteForFindAll({ content: 'B' }),
-        createNoteForFindAll({ content: 'C' }),
-      ],
-    }),
-    getSessionHandler(),
-  );
+test('should correctly list the notes', async () => {
+  // create mock server data
+  await createSessionMock();
+  await createNoteMock({ content: 'A' });
+  await createNoteMock({ content: 'B' });
+  await createNoteMock({ content: 'C' });
 
   const { getByTestId } = await renderWithRouter();
 
@@ -35,14 +24,10 @@ test('should correctly list the notes', async ({ worker }) => {
   expect(notes.nth(2)).toHaveTextContent('C');
 });
 
-test('should correctly refresh the list of notes after adding a note', async ({
-  worker,
-}) => {
-  (worker as SetupWorker).use(
-    postCreateNoteHandler(),
-    getFindAllNotesHandler({ notes: [createNoteForFindAll({ content: 'A' })] }),
-    getSessionHandler(),
-  );
+test('should correctly refresh the list of notes after adding a note', async () => {
+  // create mock server data
+  await createSessionMock();
+  await createNoteMock({ content: 'A' });
 
   const { getByRole, getByTestId } = await renderWithRouter();
 
@@ -56,17 +41,7 @@ test('should correctly refresh the list of notes after adding a note', async ({
   // Create note
   await getByRole('button', { name: /Create note/ }).click();
   const modal = getByRole('dialog', { name: /Create note/ });
-  await modal.getByLabelText('Content').fill('Lorem Ipsum!');
-
-  (worker as SetupWorker).use(
-    getFindAllNotesHandler({
-      notes: [
-        createNoteForFindAll({ content: 'A' }),
-        createNoteForFindAll({ content: 'B' }),
-      ],
-    }),
-  );
-
+  await modal.getByLabelText('Content').fill('B');
   await modal.getByRole('button', { name: /Save/ }).click();
 
   // Wait for refreshed list
@@ -78,16 +53,10 @@ test('should correctly refresh the list of notes after adding a note', async ({
   expect(notes.nth(1)).toHaveTextContent('B');
 });
 
-test('should correctly refresh the list of notes after editing a note', async ({
-  worker,
-}) => {
-  const note = createNoteForFindAll({ content: 'A', id: '123' });
-
-  (worker as SetupWorker).use(
-    postEditNoteHandler(),
-    getFindAllNotesHandler({ notes: [note] }),
-    getSessionHandler(),
-  );
+test('should correctly refresh the list of notes after editing a note', async () => {
+  // create mock server data
+  await createSessionMock();
+  await createNoteMock({ content: 'A' });
 
   const { getByRole, getByTestId } = await renderWithRouter();
 
@@ -107,13 +76,6 @@ test('should correctly refresh the list of notes after editing a note', async ({
   const modal = getByRole('dialog', { name: /Edit note/ });
   await modal.getByLabelText('Content').clear();
   await modal.getByLabelText('Content').fill('B');
-
-  (worker as SetupWorker).use(
-    getFindAllNotesHandler({
-      notes: [createNoteForFindAll({ ...note, content: 'B' })],
-    }),
-  );
-
   await modal.getByRole('button', { name: /Save/ }).click();
 
   // Wait for refreshed list

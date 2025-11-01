@@ -1,13 +1,12 @@
-import { type SetupWorker } from 'msw/browser';
 import { expect, vi } from 'vitest';
 
-import { postCreateNoteHandler } from '@/mocks/routes/notes';
-import { getSessionHandler } from '@/mocks/routes/session';
+import { createSessionMock } from '@/tests/factories/session';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
-test('should correctly create a note', async ({ worker }) => {
-  (worker as SetupWorker).use(postCreateNoteHandler(), getSessionHandler());
+test('should correctly create a note', async () => {
+  // create mock server data
+  await createSessionMock();
 
   const { getByRole } = await renderWithRouter();
 
@@ -25,10 +24,9 @@ test('should correctly create a note', async ({ worker }) => {
   );
 });
 
-test('should require at least 1 char for creating a note', async ({
-  worker,
-}) => {
-  (worker as SetupWorker).use(getSessionHandler());
+test('should require at least 1 char for creating a note', async () => {
+  // create mock server data
+  await createSessionMock();
 
   const { getByRole } = await renderWithRouter();
 

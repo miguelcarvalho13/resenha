@@ -1,14 +1,31 @@
-import { type Session, type User } from 'better-auth';
 import { http, HttpResponse } from 'msw';
 
-import { createSession } from '@/tests/factories/session';
-import { createUser } from '@/tests/factories/user';
+import { sessionMock } from '../models/sessions';
 
-export const getSessionHandler = ({
-  session = createSession(),
-  user = createUser(),
-}: {
-  session?: Session;
-  user?: User;
-} = {}) =>
-  http.get('/api/auth/get-session', () => HttpResponse.json({ session, user }));
+export const getSessionHandler = () =>
+  http.get('/api/auth/get-session', () => {
+    const session = sessionMock.findFirst();
+
+    if (!session) {
+      return new HttpResponse(null, { status: 404 });
+    }
+
+    return HttpResponse.json({ session, user: session.user });
+  });
+
+export const postSignUpWithEmail = () =>
+  http.post(
+    '/api/auth/sign-up/email',
+    () => new HttpResponse(null, { status: 201 }),
+  );
+
+export const postSignInWithEmail = () =>
+  http.post(
+    '/api/auth/sign-in/email',
+    () => new HttpResponse(null, { status: 200 }),
+  );
+export const postSignOut = () =>
+  http.post(
+    '/api/auth/sign-out',
+    () => new HttpResponse(null, { status: 200 }),
+  );
