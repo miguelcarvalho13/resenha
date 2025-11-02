@@ -1,9 +1,9 @@
-import { ActionIcon, Group, TextInput } from '@mantine/core';
+import { TextInput } from '@mantine/core';
 import { useState } from 'react';
-import { TbX } from 'react-icons/tb';
 
 import { type NoteTag as NoteTagModel } from '@/models/tags';
 import { NoteTagButton } from './NoteTagButton';
+import { NoteTagRemoveButton } from './NoteTagRemoveButton';
 import { NoteTagWrapper } from './NoteTagWrapper';
 
 interface NoteTagStringProps {
@@ -31,38 +31,31 @@ export const NoteTagString = ({
 
   return (
     <NoteTagWrapper color="orange" data-testid="tag">
-      <Group className="gap-0.5">
-        {!isEditing && (
-          <NoteTagButton
-            aria-label={`Edit ${noteTag.name}`}
-            disabled={disabled}
-            onClick={() => setIsEditing(true)}
-          >
-            {noteTag.name}
-          </NoteTagButton>
-        )}
-        {isEditing && (
-          <TextInput
-            aria-label={`Edit ${noteTag.name} value`}
-            // eslint-disable-next-line jsx-a11y/no-autofocus
-            autoFocus
-            defaultValue={noteTag.name}
-            onBlur={(e) => handleOnChange(e.target.value)}
-            placeholder={`Edit ${noteTag.name} value`}
-            variant="unstyled"
-          />
-        )}
-        <ActionIcon
-          aria-label={`Remove ${noteTag.name}`}
+      {!isEditing && (
+        <NoteTagButton
+          aria-label={`Edit ${noteTag.name}`}
           disabled={disabled}
-          onClick={() => onRemove(noteTag)}
-          radius="xl"
-          size="xs"
-          variant="white"
+          onClick={() => setIsEditing(true)}
         >
-          <TbX />
-        </ActionIcon>
-      </Group>
+          {noteTag.name}
+        </NoteTagButton>
+      )}
+      {isEditing && (
+        <TextInput
+          aria-label={`Edit ${noteTag.name} value`}
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus
+          defaultValue={noteTag.name}
+          onBlur={(e) => handleOnChange(e.target.value)}
+          placeholder={`Edit ${noteTag.name} value`}
+          variant="unstyled"
+        />
+      )}
+      <NoteTagRemoveButton
+        disabled={disabled}
+        onRemove={() => onRemove(noteTag)}
+        tagName={noteTag.name}
+      />
     </NoteTagWrapper>
   );
 };
