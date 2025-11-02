@@ -1,10 +1,7 @@
 import { test as testBase } from 'vitest';
 
 import { worker } from '@/mocks/browser.ts';
-import { noteMock } from '@/mocks/models/notes';
-import { sessionMock } from '@/mocks/models/sessions';
-import { noteTagMock, tagMock } from '@/mocks/models/tags';
-import { userMock } from '@/mocks/models/users';
+import { server } from '@/mocks/server';
 
 export const test = testBase.extend({
   worker: [
@@ -20,12 +17,8 @@ export const test = testBase.extend({
       // This prevents them from affecting unrelated tests.
       worker.resetHandlers();
 
-      // Remove data created between tests
-      noteTagMock.clear();
-      tagMock.clear();
-      noteMock.clear();
-      sessionMock.clear();
-      userMock.clear();
+      // Reset mock server
+      server.reset();
     },
     {
       auto: true,

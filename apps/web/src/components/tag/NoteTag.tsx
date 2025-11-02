@@ -2,6 +2,7 @@ import { type NoteTag as NoteTagModel } from '@/models/tags';
 import { trpc } from '@/utils/trpc';
 import { NoteTagString } from './NoteTagString';
 import { NoteTagWrapper } from './NoteTagWrapper';
+import { NoteTagNumber } from './NoteTagNumber';
 
 interface NoteTagProps {
   noteTag: NoteTagModel;
@@ -9,7 +10,8 @@ interface NoteTagProps {
 
 export const NoteTag = ({ noteTag }: NoteTagProps) => {
   const utils = trpc.useUtils();
-  const { mutate: editNoteTag } = trpc.tags.editNoteTag.useMutation({
+
+  const { mutate: editNoteTag, isPending } = trpc.tags.editNoteTag.useMutation({
     onSuccess: async () => {
       await utils.tags.findAllNoteTags.invalidate({ noteId: noteTag.noteId });
     },
@@ -25,12 +27,20 @@ export const NoteTag = ({ noteTag }: NoteTagProps) => {
 
   switch (noteTag.type) {
     case 'string':
-      return <NoteTagString noteTag={noteTag} onChange={handleTagEdit} />;
+      return (
+        <NoteTagString
+          disabled={isPending}
+          noteTag={noteTag}
+          onChange={handleTagEdit}
+        />
+      );
     case 'number':
       return (
-        <NoteTagWrapper color="blue" data-testid="tag">
-          {noteTag.name}: {noteTag.value}
-        </NoteTagWrapper>
+        <NoteTagNumber
+          disabled={isPending}
+          noteTag={noteTag}
+          onChange={handleTagEdit}
+        />
       );
     case 'boolean':
       return (

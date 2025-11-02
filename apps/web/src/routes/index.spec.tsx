@@ -5,7 +5,9 @@ import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
 test('should correctly render the side navbar', async () => {
-  await server.createSessionMock();
+  await server.createSessionMock({
+    user: await server.createUserMock({ name: 'Some Name' }),
+  });
 
   const { getByRole } = await renderWithRouter();
 
