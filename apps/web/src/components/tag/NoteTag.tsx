@@ -12,11 +12,19 @@ interface NoteTagProps {
 export const NoteTag = ({ noteTag }: NoteTagProps) => {
   const utils = trpc.useUtils();
 
-  const { mutate: editNoteTag, isPending } = trpc.tags.editNoteTag.useMutation({
-    onSuccess: async () => {
-      await utils.tags.findAllNoteTags.invalidate({ noteId: noteTag.noteId });
-    },
-  });
+  const onSuccess = async () => {
+    await utils.tags.findAllNoteTags.invalidate({ noteId: noteTag.noteId });
+  };
+
+  const { mutate: editNoteTag, isPending: isPendingEdition } =
+    trpc.tags.editNoteTag.useMutation({
+      onSuccess,
+    });
+
+  const { mutate: deleteNoteTag, isPending: isPendingDeletion } =
+    trpc.tags.deleteNoteTag.useMutation({
+      onSuccess,
+    });
 
   const handleTagEdit = (value: NoteTagModel['value']) => {
     editNoteTag({
@@ -26,6 +34,15 @@ export const NoteTag = ({ noteTag }: NoteTagProps) => {
     });
   };
 
+  const handleTagDelete = (noteTag: NoteTagModel) => {
+    deleteNoteTag({
+      noteId: noteTag.noteId,
+      tagId: noteTag.tagId,
+    });
+  };
+
+  const isPending = isPendingDeletion || isPendingEdition;
+
   switch (noteTag.type) {
     case 'string':
       return (
@@ -33,6 +50,7 @@ export const NoteTag = ({ noteTag }: NoteTagProps) => {
           disabled={isPending}
           noteTag={noteTag}
           onChange={handleTagEdit}
+          onRemove={handleTagDelete}
         />
       );
     case 'number':
@@ -41,6 +59,7 @@ export const NoteTag = ({ noteTag }: NoteTagProps) => {
           disabled={isPending}
           noteTag={noteTag}
           onChange={handleTagEdit}
+          onRemove={handleTagDelete}
         />
       );
     case 'boolean':
@@ -49,6 +68,7 @@ export const NoteTag = ({ noteTag }: NoteTagProps) => {
           disabled={isPending}
           noteTag={noteTag}
           onChange={handleTagEdit}
+          onRemove={handleTagDelete}
         />
       );
     case 'date':
@@ -57,6 +77,7 @@ export const NoteTag = ({ noteTag }: NoteTagProps) => {
           disabled={isPending}
           noteTag={noteTag}
           onChange={handleTagEdit}
+          onRemove={handleTagDelete}
         />
       );
   }

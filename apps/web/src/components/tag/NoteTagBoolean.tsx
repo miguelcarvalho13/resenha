@@ -1,5 +1,6 @@
-import { NativeSelect } from '@mantine/core';
+import { ActionIcon, Group, NativeSelect } from '@mantine/core';
 import { useState } from 'react';
+import { TbX } from 'react-icons/tb';
 
 import { type NoteTag as NoteTagModel } from '@/models/tags';
 import { NoteTagButton } from './NoteTagButton';
@@ -9,6 +10,7 @@ interface NoteTagBooleanProps {
   disabled: boolean;
   noteTag: NoteTagModel;
   onChange: (value: boolean) => void;
+  onRemove: (noteTag: NoteTagModel) => void;
 }
 
 const NO_OPTION = 'NO';
@@ -19,6 +21,7 @@ export const NoteTagBoolean = ({
   disabled,
   noteTag,
   onChange,
+  onRemove,
 }: NoteTagBooleanProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
@@ -38,31 +41,45 @@ export const NoteTagBoolean = ({
   };
 
   return (
-    <NoteTagWrapper color="green" data-testid="tag">
-      {noteTag.name}:{' '}
-      {!isEditing && (
-        <NoteTagButton
-          aria-label={`Edit ${noteTag.name}`}
-          disabled={disabled}
-          onClick={() => setIsEditing(true)}
-        >
-          {noteTag.value === true ? 'yes' : 'no'}
-        </NoteTagButton>
-      )}
-      {isEditing && (
-        <NativeSelect
-          aria-label={`Edit ${noteTag.name} value`}
-          // eslint-disable-next-line jsx-a11y/no-autofocus
-          autoFocus
-          className="inline-block"
-          data={SELECT_OPTIONS}
-          defaultValue={noteTag.value === true ? YES_OPTION : NO_OPTION}
-          onBlur={() => handleOnChange(null)}
-          onChange={(e) => handleOnChange(e.target.value)}
-          size="xs"
-          variant="unstyled"
-        />
-      )}
-    </NoteTagWrapper>
+    <Group>
+      <NoteTagWrapper color="green" data-testid="tag">
+        <Group className="gap-0.5">
+          {noteTag.name}:{' '}
+          {!isEditing && (
+            <NoteTagButton
+              aria-label={`Edit ${noteTag.name}`}
+              disabled={disabled}
+              onClick={() => setIsEditing(true)}
+            >
+              {noteTag.value === true ? 'yes' : 'no'}
+            </NoteTagButton>
+          )}
+          {isEditing && (
+            <NativeSelect
+              aria-label={`Edit ${noteTag.name} value`}
+              // eslint-disable-next-line jsx-a11y/no-autofocus
+              autoFocus
+              className="inline-block"
+              data={SELECT_OPTIONS}
+              defaultValue={noteTag.value === true ? YES_OPTION : NO_OPTION}
+              onBlur={() => handleOnChange(null)}
+              onChange={(e) => handleOnChange(e.target.value)}
+              size="xs"
+              variant="unstyled"
+            />
+          )}
+          <ActionIcon
+            aria-label={`Remove ${noteTag.name}`}
+            disabled={disabled}
+            onClick={() => onRemove(noteTag)}
+            radius="xl"
+            size="xs"
+            variant="white"
+          >
+            <TbX />
+          </ActionIcon>
+        </Group>
+      </NoteTagWrapper>
+    </Group>
   );
 };

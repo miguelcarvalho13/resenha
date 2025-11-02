@@ -577,3 +577,55 @@ test('should be able to edit tags in a note [boolean]', async () => {
   );
   await expect.element(tagEditButton).toBeEnabled();
 });
+
+test.each([
+  { name: 'abc', value: 'abc', type: 'string' },
+  { name: 'abc', value: 10, type: 'number' },
+  { name: 'abc', value: '2025-10-01', type: 'date' },
+  { name: 'abc', value: false, type: 'boolean' },
+] as const)(
+  'should be able to delete tags in a note [$type]',
+  async ({ name, value, type }) => {
+    // create mock server data
+    await server.createSessionMock();
+    const note = await server.createNoteMock({ content: 'A' });
+    await server.createNoteTagMock({ name, value, type, note });
+
+    const { getByRole, getByTestId } = await renderWithRouter();
+
+    await vi.waitFor(() =>
+      expect(getByTestId('note-card').elements()).toHaveLength(1),
+    );
+
+    // Open the modal for the first time and edit it
+    await getByTestId('note-card')
+      .nth(0)
+      .getByRole('button', { name: /Edit note/ })
+      .click();
+
+    const tagsContainer = getByRole('dialog', {
+      name: /Edit note/,
+    }).getByTestId('tags-container');
+    const tags = tagsContainer.getByTestId('tag');
+
+    await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
+
+    // clicks in the tag delete button
+    server.timing = 100;
+    const tag = tags.nth(0);
+    const tagDeleteButton = tag.getByRole('button', {
+      name: new RegExp(`Remove ${name}`),
+    });
+    const tagEditButton = tag.getByRole('button', {
+      name: new RegExp(`Edit ${name}`),
+    });
+    await tagDeleteButton.click();
+
+    // While deleting, both edit and delete buttons should be disabled
+    await expect.element(tagDeleteButton).toBeDisabled();
+    await expect.element(tagEditButton).toBeDisabled();
+
+    // after deletion, the tag should no longer exist
+    await expect.element(tag).not.toBeInTheDocument();
+  },
+);
