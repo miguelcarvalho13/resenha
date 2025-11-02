@@ -1,9 +1,9 @@
 import { type NoteTag as NoteTagModel } from '@/models/tags';
 import { trpc } from '@/utils/trpc';
-import { NoteTagString } from './NoteTagString';
-import { NoteTagWrapper } from './NoteTagWrapper';
-import { NoteTagNumber } from './NoteTagNumber';
+import { NoteTagBoolean } from './NoteTagBoolean';
 import { NoteTagDate } from './NoteTagDate';
+import { NoteTagNumber } from './NoteTagNumber';
+import { NoteTagString } from './NoteTagString';
 
 interface NoteTagProps {
   noteTag: NoteTagModel;
@@ -45,9 +45,11 @@ export const NoteTag = ({ noteTag }: NoteTagProps) => {
       );
     case 'boolean':
       return (
-        <NoteTagWrapper color="green" data-testid="tag">
-          {noteTag.name}: {noteTag.value === true ? 'yes' : 'no'}
-        </NoteTagWrapper>
+        <NoteTagBoolean
+          disabled={isPending}
+          noteTag={noteTag}
+          onChange={handleTagEdit}
+        />
       );
     case 'date':
       return (
