@@ -1,11 +1,11 @@
 import { delay, http, type PathParams } from 'msw';
 
-import { createNoteMock } from '@/tests/factories/notes';
+import { createNoteMock } from '@/mocks/factories/notes';
 import {
   createTrpcBatchJson,
   extractTrpcInput,
   type TrpcBatchInput,
-} from '@/tests/factories/trpc';
+} from '@/mocks/factories/trpc';
 import { type RouterInput, type RouterOutput } from '@/utils/trpc';
 import { noteMock } from '../models/notes';
 

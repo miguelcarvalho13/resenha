@@ -1,16 +1,15 @@
 import { expect, vi } from 'vitest';
 
-import { createNoteMock } from '@/tests/factories/notes';
-import { createSessionMock } from '@/tests/factories/session';
+import { server } from '@/mocks/server';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
 test('should correctly list the notes', async () => {
   // create mock server data
-  await createSessionMock();
-  await createNoteMock({ content: 'A' });
-  await createNoteMock({ content: 'B' });
-  await createNoteMock({ content: 'C' });
+  await server.createSessionMock();
+  await server.createNoteMock({ content: 'A' });
+  await server.createNoteMock({ content: 'B' });
+  await server.createNoteMock({ content: 'C' });
 
   const { getByTestId } = await renderWithRouter();
 
@@ -26,8 +25,8 @@ test('should correctly list the notes', async () => {
 
 test('should correctly refresh the list of notes after adding a note', async () => {
   // create mock server data
-  await createSessionMock();
-  await createNoteMock({ content: 'A' });
+  await server.createSessionMock();
+  await server.createNoteMock({ content: 'A' });
 
   const { getByRole, getByTestId } = await renderWithRouter();
 
@@ -55,8 +54,8 @@ test('should correctly refresh the list of notes after adding a note', async () 
 
 test('should correctly refresh the list of notes after editing a note', async () => {
   // create mock server data
-  await createSessionMock();
-  await createNoteMock({ content: 'A' });
+  await server.createSessionMock();
+  await server.createNoteMock({ content: 'A' });
 
   const { getByRole, getByTestId } = await renderWithRouter();
 

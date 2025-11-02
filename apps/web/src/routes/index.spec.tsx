@@ -1,12 +1,11 @@
 import { expect, vi } from 'vitest';
 
-import { createSessionMock } from '@/tests/factories/session';
-import { createUserMock } from '@/tests/factories/user';
+import { server } from '@/mocks/server';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
 test('should correctly render the side navbar', async () => {
-  await createSessionMock();
+  await server.createSessionMock();
 
   const { getByRole } = await renderWithRouter();
 
@@ -34,8 +33,8 @@ test('should correctly render the side navbar', async () => {
 });
 
 test('should correctly display user menu in the header', async () => {
-  await createSessionMock({
-    user: await createUserMock({ name: 'Some Name' }),
+  await server.createSessionMock({
+    user: await server.createUserMock({ name: 'Some Name' }),
   });
 
   const { getByRole } = await renderWithRouter();
@@ -52,8 +51,8 @@ test('should correctly display user menu in the header', async () => {
 });
 
 test('should be redirected to /sign-in upon clicking on "Logout"', async () => {
-  await createSessionMock({
-    user: await createUserMock({ name: 'Some Name' }),
+  await server.createSessionMock({
+    user: await server.createUserMock({ name: 'Some Name' }),
   });
 
   const { getByRole } = await renderWithRouter();

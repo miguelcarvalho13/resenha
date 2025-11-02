@@ -1,12 +1,12 @@
 import { expect, vi } from 'vitest';
 
-import { createSessionMock } from '@/tests/factories/session';
+import { server } from '@/mocks/server';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
 test('should correctly create a note', async () => {
   // create mock server data
-  await createSessionMock();
+  await server.createSessionMock();
 
   const { getByRole } = await renderWithRouter();
 
@@ -26,7 +26,7 @@ test('should correctly create a note', async () => {
 
 test('should require at least 1 char for creating a note', async () => {
   // create mock server data
-  await createSessionMock();
+  await server.createSessionMock();
 
   const { getByRole } = await renderWithRouter();
 

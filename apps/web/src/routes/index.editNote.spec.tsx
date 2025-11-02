@@ -1,15 +1,13 @@
 import { expect, vi } from 'vitest';
 
-import { createNoteMock } from '@/tests/factories/notes';
-import { createSessionMock } from '@/tests/factories/session';
-import { createNoteTagMock } from '@/tests/factories/tags';
+import { server } from '@/mocks/server';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
 test('should correctly edit a note', async () => {
   // create mock server data
-  await createSessionMock();
-  await createNoteMock({ content: 'A' });
+  await server.createSessionMock();
+  await server.createNoteMock({ content: 'A' });
 
   const { getByRole, getByTestId } = await renderWithRouter();
 
@@ -39,8 +37,8 @@ test('should correctly edit a note', async () => {
 
 test('should require at least 1 char for editing a note', async () => {
   // create mock server data
-  await createSessionMock();
-  await createNoteMock({ content: 'A' });
+  await server.createSessionMock();
+  await server.createNoteMock({ content: 'A' });
 
   const { getByRole, getByTestId } = await renderWithRouter();
 
@@ -65,8 +63,8 @@ test('should require at least 1 char for editing a note', async () => {
 
 test('should update modal content when reopening the modal after a save', async () => {
   // create mock server data
-  await createSessionMock();
-  await createNoteMock({ content: 'A' });
+  await server.createSessionMock();
+  await server.createNoteMock({ content: 'A' });
 
   const { getByRole, getByTestId } = await renderWithRouter();
 
@@ -104,17 +102,27 @@ test('should update modal content when reopening the modal after a save', async 
 
 test('should be able to list tags in a note', async () => {
   // create mock server data
-  await createSessionMock();
-  const note = await createNoteMock({ content: 'A' });
-  await createNoteTagMock({ name: 'abc', value: 'abc', type: 'string', note });
-  await createNoteTagMock({ name: 'score', value: 10.5, type: 'number', note });
-  await createNoteTagMock({
+  await server.createSessionMock();
+  const note = await server.createNoteMock({ content: 'A' });
+  await server.createNoteTagMock({
+    name: 'abc',
+    value: 'abc',
+    type: 'string',
+    note,
+  });
+  await server.createNoteTagMock({
+    name: 'score',
+    value: 10.5,
+    type: 'number',
+    note,
+  });
+  await server.createNoteTagMock({
     name: 'created',
     value: '2025-10-27',
     type: 'date',
     note,
   });
-  await createNoteTagMock({
+  await server.createNoteTagMock({
     name: 'active',
     value: true,
     type: 'boolean',
@@ -149,8 +157,8 @@ test('should be able to list tags in a note', async () => {
 
 test('should list all kinds of tags that are possible to add tags in a note', async () => {
   // create mock server data
-  await createSessionMock();
-  await createNoteMock({ content: 'A' });
+  await server.createSessionMock();
+  await server.createNoteMock({ content: 'A' });
 
   const { getByLabelText, getByRole, getByTestId } = await renderWithRouter();
 
@@ -189,8 +197,8 @@ test('should list all kinds of tags that are possible to add tags in a note', as
 
 test('should be able to add tags in a note [string]', async () => {
   // create mock server data
-  await createSessionMock();
-  await createNoteMock({ content: 'A' });
+  await server.createSessionMock();
+  await server.createNoteMock({ content: 'A' });
 
   const name = 'string-tag';
 
@@ -227,8 +235,8 @@ test('should be able to add tags in a note [string]', async () => {
 
 test('should be able to add tags in a note [number]', async () => {
   // create mock server data
-  await createSessionMock();
-  await createNoteMock({ content: 'A' });
+  await server.createSessionMock();
+  await server.createNoteMock({ content: 'A' });
 
   const name = 'number-tag';
 
@@ -267,8 +275,8 @@ test('should be able to add tags in a note [date]', async () => {
   vi.setSystemTime(new Date(2025, 9, 30));
 
   // create mock server data
-  await createSessionMock();
-  await createNoteMock({ content: 'A' });
+  await server.createSessionMock();
+  await server.createNoteMock({ content: 'A' });
 
   const name = 'date-tag';
 
@@ -306,8 +314,8 @@ test('should be able to add tags in a note [date]', async () => {
 
 test('should be able to add tags in a note [boolean]', async () => {
   // create mock server data
-  await createSessionMock();
-  await createNoteMock({ content: 'A' });
+  await server.createSessionMock();
+  await server.createNoteMock({ content: 'A' });
 
   const name = 'boolean-tag';
 

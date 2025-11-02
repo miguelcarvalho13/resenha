@@ -1,11 +1,11 @@
 import { delay, http, type PathParams } from 'msw';
 
-import { createNoteTagMock, createTagMock } from '@/tests/factories/tags';
+import { createNoteTagMock, createTagMock } from '@/mocks/factories/tags';
 import {
   createTrpcBatchJson,
   extractTrpcInput,
   type TrpcBatchInput,
-} from '@/tests/factories/trpc';
+} from '@/mocks/factories/trpc';
 import { type RouterInput, type RouterOutput } from '@/utils/trpc';
 import { noteMock } from '../models/notes';
 import { noteTagMock } from '../models/tags';

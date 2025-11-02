@@ -1,7 +1,7 @@
 import { act } from 'react';
 import { expect, vi } from 'vitest';
 
-import { createSessionMock } from '@/tests/factories/session';
+import { server } from '@/mocks/server';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
@@ -35,7 +35,7 @@ test('should be redirected to index upon clicking on "Sign in"', async () => {
   await getByLabelText('Password').fill('MyPassword123!@');
 
   // creates a session in the mock server
-  await createSessionMock();
+  await server.createSessionMock();
 
   await getByRole('button', { name: /Sign in/ }).click();
 
