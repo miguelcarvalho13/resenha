@@ -3,6 +3,7 @@ import { trpc } from '@/utils/trpc';
 import { NoteTagString } from './NoteTagString';
 import { NoteTagWrapper } from './NoteTagWrapper';
 import { NoteTagNumber } from './NoteTagNumber';
+import { NoteTagDate } from './NoteTagDate';
 
 interface NoteTagProps {
   noteTag: NoteTagModel;
@@ -50,9 +51,11 @@ export const NoteTag = ({ noteTag }: NoteTagProps) => {
       );
     case 'date':
       return (
-        <NoteTagWrapper color="red" data-testid="tag">
-          {noteTag.name}: {noteTag.value}
-        </NoteTagWrapper>
+        <NoteTagDate
+          disabled={isPending}
+          noteTag={noteTag}
+          onChange={handleTagEdit}
+        />
       );
   }
 };

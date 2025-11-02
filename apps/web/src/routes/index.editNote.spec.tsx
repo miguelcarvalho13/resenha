@@ -464,3 +464,60 @@ test('should be able to edit tags in a note [number]', async () => {
   );
   await expect.element(tagEditButton).toBeEnabled();
 });
+
+test('should be able to edit tags in a note [date]', async () => {
+  // create mock server data
+  await server.createSessionMock();
+  const note = await server.createNoteMock({ content: 'A' });
+  const currentTagName = 'date-tag';
+  await server.createNoteTagMock({
+    name: currentTagName,
+    value: '2025-10-31',
+    type: 'date',
+    note,
+  });
+
+  const { getByRole, getByTestId } = await renderWithRouter();
+
+  await vi.waitFor(() =>
+    expect(getByTestId('note-card').elements()).toHaveLength(1),
+  );
+
+  // Open the modal for the first time and edit it
+  await getByTestId('note-card')
+    .nth(0)
+    .getByRole('button', { name: /Edit note/ })
+    .click();
+
+  const tagsContainer = getByRole('dialog', { name: /Edit note/ }).getByTestId(
+    'tags-container',
+  );
+  const tags = tagsContainer.getByTestId('tag');
+
+  await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
+
+  // clicks in the tag to activate edit mode
+  const tag = tags.nth(0);
+  const tagEditButton = tag.getByRole('button', {
+    name: new RegExp(`Edit ${currentTagName}`),
+  });
+  await tagEditButton.click();
+
+  const tagInput = tagsContainer.getByLabelText(
+    new RegExp(`Edit ${currentTagName} value`),
+  );
+
+  expect(tagInput).toHaveValue('2025-10-31');
+  expect(tagInput.element()).toHaveFocus();
+  await tagInput.clear();
+  await tagInput.fill('2025-11-01');
+
+  // after focus out, the input should no longer be in the document and the tag name to be updated
+  await userEvent.tab();
+  await expect.element(tagInput).not.toBeInTheDocument();
+  await expect.element(tagEditButton).toBeDisabled();
+  await vi.waitFor(() =>
+    expect(tags.nth(0)).toHaveTextContent('date-tag: 2025-11-01'),
+  );
+  await expect.element(tagEditButton).toBeEnabled();
+});

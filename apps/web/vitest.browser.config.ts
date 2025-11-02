@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   optimizeDeps: {
-    include: ['react-dom/client'],
+    include: ['react-dom/client', '@mantine/dates'],
   },
   test: {
     browser: {

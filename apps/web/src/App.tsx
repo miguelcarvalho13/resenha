@@ -1,10 +1,15 @@
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 
 import { TrpcWrapper } from './components/TrpcWrapper';
 import './index.css';
 import { routeTree } from './routeTree.gen';
+
+dayjs.extend(customParseFormat);
 
 const router = createRouter({ routeTree });
 
