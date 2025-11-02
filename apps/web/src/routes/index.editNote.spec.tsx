@@ -1,3 +1,4 @@
+import { userEvent } from '@vitest/browser/context';
 import { expect, vi } from 'vitest';
 
 import { server } from '@/mocks/server';
@@ -348,4 +349,56 @@ test('should be able to add tags in a note [boolean]', async () => {
 
   await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
   expect(tags.nth(0)).toHaveTextContent(`${name}: yes`);
+});
+
+test('should be able to edit tags in a note [string]', async () => {
+  // create mock server data
+  await server.createSessionMock();
+  const note = await server.createNoteMock({ content: 'A' });
+  const currentTagName = 'string-tag';
+  await server.createNoteTagMock({
+    name: currentTagName,
+    value: currentTagName,
+    type: 'string',
+    note,
+  });
+
+  const { getByRole, getByTestId } = await renderWithRouter();
+
+  await vi.waitFor(() =>
+    expect(getByTestId('note-card').elements()).toHaveLength(1),
+  );
+
+  // Open the modal for the first time and edit it
+  await getByTestId('note-card')
+    .nth(0)
+    .getByRole('button', { name: /Edit note/ })
+    .click();
+
+  const tagsContainer = getByRole('dialog', { name: /Edit note/ }).getByTestId(
+    'tags-container',
+  );
+  const tags = tagsContainer.getByTestId('tag');
+
+  await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
+
+  // clicks in the tag to activate edit mode
+  await tags
+    .nth(0)
+    .getByRole('button', { name: new RegExp(`Edit ${currentTagName}`) })
+    .click();
+
+  const tagInput = tagsContainer.getByLabelText(
+    new RegExp(`Edit ${currentTagName} value`),
+  );
+
+  expect(tagInput).toHaveValue(currentTagName);
+  expect(tagInput.element()).toHaveFocus();
+  await tagInput.clear();
+  await tagInput.fill('new-tag-name');
+
+  // after focus out, the input should no longer be in the document and the tag name to be updated
+  await userEvent.tab();
+  await expect.element(tagInput).not.toBeInTheDocument();
+  await vi.waitFor(() => expect(tags.nth(0)).toHaveTextContent('new-tag-name'));
 });

@@ -118,6 +118,7 @@ export const postEditNoteTagHandler = ({ wait = 0 }: { wait?: number } = {}) =>
               noteTag.tag!.type === 'string' &&
               typeof input.value === 'string'
             ) {
+              noteTag.name = input.value;
               noteTag.tag!.name = input.value;
             }
           },
