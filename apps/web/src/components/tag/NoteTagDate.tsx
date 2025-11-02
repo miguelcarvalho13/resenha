@@ -30,7 +30,17 @@ export const NoteTagDate = ({
   };
 
   return (
-    <NoteTagWrapper color="red" data-testid="tag">
+    <NoteTagWrapper
+      color="red"
+      data-testid="tag"
+      rightSection={
+        <NoteTagRemoveButton
+          disabled={disabled}
+          onRemove={() => onRemove(noteTag)}
+          tagName={noteTag.name}
+        />
+      }
+    >
       {noteTag.name}:{' '}
       {!isEditing && (
         <NoteTagButton
@@ -56,11 +66,6 @@ export const NoteTagDate = ({
           variant="unstyled"
         />
       )}
-      <NoteTagRemoveButton
-        disabled={disabled}
-        onRemove={() => onRemove(noteTag)}
-        tagName={noteTag.name}
-      />
     </NoteTagWrapper>
   );
 };

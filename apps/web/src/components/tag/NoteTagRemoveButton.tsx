@@ -14,11 +14,13 @@ export const NoteTagRemoveButton = ({
 }: NoteTagRemoveButtonProps) => (
   <ActionIcon
     aria-label={`Remove ${tagName}`}
+    className="-mr-2"
+    color="white"
     disabled={disabled}
     onClick={onRemove}
     radius="xl"
     size="xs"
-    variant="white"
+    variant="transparent"
   >
     <TbX />
   </ActionIcon>

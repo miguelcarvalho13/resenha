@@ -30,7 +30,17 @@ export const NoteTagString = ({
   };
 
   return (
-    <NoteTagWrapper color="orange" data-testid="tag">
+    <NoteTagWrapper
+      color="orange"
+      data-testid="tag"
+      rightSection={
+        <NoteTagRemoveButton
+          disabled={disabled}
+          onRemove={() => onRemove(noteTag)}
+          tagName={noteTag.name}
+        />
+      }
+    >
       {!isEditing && (
         <NoteTagButton
           aria-label={`Edit ${noteTag.name}`}
@@ -51,11 +61,6 @@ export const NoteTagString = ({
           variant="unstyled"
         />
       )}
-      <NoteTagRemoveButton
-        disabled={disabled}
-        onRemove={() => onRemove(noteTag)}
-        tagName={noteTag.name}
-      />
     </NoteTagWrapper>
   );
 };
