@@ -2,6 +2,7 @@ import { Group, NativeSelect } from '@mantine/core';
 import { useState } from 'react';
 
 import { type NoteTag as NoteTagModel } from '@/models/tags';
+import { TAG_COLOR } from '@/utils/tags';
 import { NoteTagButton } from './NoteTagButton';
 import { NoteTagRemoveButton } from './NoteTagRemoveButton';
 import { NoteTagWrapper } from './NoteTagWrapper';
@@ -43,7 +44,7 @@ export const NoteTagBoolean = ({
   return (
     <Group>
       <NoteTagWrapper
-        color="green"
+        color={TAG_COLOR[noteTag.type]}
         data-testid="tag"
         rightSection={
           <NoteTagRemoveButton
