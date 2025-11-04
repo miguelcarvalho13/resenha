@@ -4,6 +4,7 @@ import { TbCirclePlus } from 'react-icons/tb';
 
 import { NoteTagWrapper } from '@/components/tag/NoteTagWrapper';
 import { type NoteTag } from '@/models/tags';
+import { TAG_COLOR } from '@/utils/tags';
 import { trpc } from '@/utils/trpc';
 
 const FIXED_OPTION_VALUES = {
@@ -26,9 +27,25 @@ const getNowDateValue = () => {
   return `${year}-${month}-${date}`;
 };
 
+const getTypeNameForType = (type: NoteTag['type']) => {
+  switch (type) {
+    case 'boolean':
+      return ': yes/no';
+    case 'date':
+    case 'number':
+      return `: ${type}`;
+    case 'string':
+      return '';
+  }
+};
+
 export const AddTagButton = ({ noteId }: AddTagButtonProps) => {
   const [search, setSearch] = useState('');
   const utils = trpc.useUtils();
+
+  const { data: tagsData } = trpc.tags.findAllTags.useQuery();
+  const { data: noteTagsData } = trpc.tags.findAllNoteTags.useQuery({ noteId });
+
   const { mutate: createNoteTag, isPending } =
     trpc.tags.createNoteTag.useMutation({
       onSuccess: async () => {
@@ -48,6 +65,25 @@ export const AddTagButton = ({ noteId }: AddTagButtonProps) => {
     },
   });
 
+  const createNoteTagFromExistingTag = (optionValue: string) => {
+    const [type, name] = optionValue.split('|') as [NoteTag['type'], string];
+
+    switch (type) {
+      case 'boolean':
+        createNoteTag({ name, type, noteId, value: true });
+        break;
+      case 'date':
+        createNoteTag({ name, type, noteId, value: getNowDateValue() });
+        break;
+      case 'number':
+        createNoteTag({ name, type, noteId, value: 10 });
+        break;
+      case 'string':
+        createNoteTag({ name, type, noteId });
+        break;
+    }
+  };
+
   const onOptionSubmit = (value: string) => {
     const name = search;
 
@@ -64,13 +100,28 @@ export const AddTagButton = ({ noteId }: AddTagButtonProps) => {
       case FIXED_OPTION_VALUES.string:
         createNoteTag({ name, type: 'string', noteId });
         break;
+      default:
+        createNoteTagFromExistingTag(value);
+        break;
     }
 
     combobox.closeDropdown();
   };
 
-  const newTagLabel = search.trim();
-  const isNewTagAllowed = search.trim().length >= 1;
+  const sanitizedSearch = search.trim();
+
+  const filteredTags = tagsData?.tags
+    .filter(
+      (tag) => !noteTagsData?.noteTags.some(({ name }) => name === tag.name),
+    )
+    .filter((tag) =>
+      tag.name
+        .toLocaleLowerCase()
+        .includes(sanitizedSearch.toLocaleLowerCase()),
+    )
+    .sort((tagA, tagB) => tagA.name.localeCompare(tagB.name));
+
+  const isNewTagAllowed = !filteredTags?.length && sanitizedSearch.length >= 1;
 
   return (
     <Combobox
@@ -102,26 +153,38 @@ export const AddTagButton = ({ noteId }: AddTagButtonProps) => {
           value={search}
         />
         <Combobox.Options aria-label="List of tags">
+          {filteredTags?.map((tag) => (
+            <Combobox.Option key={tag.name} value={`${tag.type}|${tag.name}`}>
+              <NoteTagWrapper color={TAG_COLOR[tag.type]} data-testid="tag-new">
+                {tag.name}
+                {getTypeNameForType(tag.type)}
+              </NoteTagWrapper>
+            </Combobox.Option>
+          ))}
           {isNewTagAllowed && (
             <>
               <Combobox.Option value={FIXED_OPTION_VALUES.string}>
                 <NoteTagWrapper color="gray" data-testid="tag-new">
-                  {newTagLabel}
+                  {sanitizedSearch}
+                  {getTypeNameForType('string')}
                 </NoteTagWrapper>
               </Combobox.Option>
               <Combobox.Option value={FIXED_OPTION_VALUES.number}>
                 <NoteTagWrapper color="gray" data-testid="tag-new">
-                  {newTagLabel}: number
+                  {sanitizedSearch}
+                  {getTypeNameForType('number')}
                 </NoteTagWrapper>
               </Combobox.Option>
               <Combobox.Option value={FIXED_OPTION_VALUES.date}>
                 <NoteTagWrapper color="gray" data-testid="tag-new">
-                  {newTagLabel}: date
+                  {sanitizedSearch}
+                  {getTypeNameForType('date')}
                 </NoteTagWrapper>
               </Combobox.Option>
               <Combobox.Option value={FIXED_OPTION_VALUES.boolean}>
                 <NoteTagWrapper color="gray" data-testid="tag-new">
-                  {newTagLabel}: yes/no
+                  {sanitizedSearch}
+                  {getTypeNameForType('boolean')}
                 </NoteTagWrapper>
               </Combobox.Option>
             </>

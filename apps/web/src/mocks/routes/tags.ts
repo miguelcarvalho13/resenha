@@ -8,8 +8,22 @@ import {
 } from '@/mocks/factories/trpc';
 import { type RouterInput, type RouterOutput } from '@/utils/trpc';
 import { noteMock } from '../models/notes';
-import { noteTagMock } from '../models/tags';
+import { noteTagMock, tagMock } from '../models/tags';
 import { server } from '../server';
+
+export const getFindAllTagsHandler = ({
+  wait = 0,
+}: {
+  wait?: number;
+} = {}) =>
+  http.get('/api/trpc/tags.findAllTags', async () => {
+    await delay(wait || server.timing);
+
+    return createTrpcJson({
+      success: true,
+      tags: tagMock.all(),
+    } satisfies RouterOutput['tags']['findAllTags']);
+  });
 
 export const getFindAllNoteTagsHandler = ({
   wait = 0,

@@ -11,6 +11,7 @@ import {
 } from './routes/session';
 import {
   getFindAllNoteTagsHandler,
+  getFindAllTagsHandler,
   postCreateNoteTagHandler,
   postDeleteNoteTagHandler,
   postEditNoteTagHandler,
@@ -29,6 +30,7 @@ export const handlers = [
   postEditNoteHandler(),
 
   // tags
+  getFindAllTagsHandler(),
   getFindAllNoteTagsHandler(),
   postCreateNoteTagHandler(),
   postDeleteNoteTagHandler(),

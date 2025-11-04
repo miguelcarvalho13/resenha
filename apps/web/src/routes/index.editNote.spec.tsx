@@ -196,6 +196,103 @@ test('should list all kinds of tags that are possible to add tags in a note', as
   expect(addTagMenuItems.nth(3)).toHaveTextContent('abc: yes/no');
 });
 
+test(`should only list new tags if there's no tag with the same name already in the system`, async () => {
+  // create mock server data
+  await server.createSessionMock();
+  const note = await server.createNoteMock({ content: 'A' });
+  await server.createTagMock({ name: 'string tag', type: 'string' });
+  await server.createTagMock({ name: 'number tag', type: 'number' });
+  await server.createTagMock({ name: 'date tag', type: 'date' });
+  await server.createTagMock({ name: 'boolean tag', type: 'boolean' });
+
+  // setup used tags, to assert those won't be shown in the combobox
+  const tag1 = await server.createTagMock({
+    name: 'string tag 2',
+    type: 'string',
+  });
+  const tag2 = await server.createTagMock({
+    name: 'number tag 2',
+    type: 'number',
+  });
+  const tag3 = await server.createTagMock({ name: 'date tag 2', type: 'date' });
+  const tag4 = await server.createTagMock({
+    name: 'boolean tag 2',
+    type: 'boolean',
+  });
+  await server.createNoteTagMock({
+    note,
+    tag: tag1,
+    type: tag1.type,
+    name: tag1.name,
+    value: '123',
+  });
+  await server.createNoteTagMock({
+    note,
+    tag: tag2,
+    type: tag2.type,
+    name: tag2.name,
+    value: 10,
+  });
+  await server.createNoteTagMock({
+    note,
+    tag: tag3,
+    type: tag3.type,
+    name: tag3.name,
+    value: '2025-11-04',
+  });
+  await server.createNoteTagMock({
+    note,
+    tag: tag4,
+    type: tag4.type,
+    name: tag4.name,
+    value: false,
+  });
+
+  const { getByLabelText, getByRole, getByTestId } = await renderWithRouter();
+
+  await vi.waitFor(() =>
+    expect(getByTestId('note-card').elements()).toHaveLength(1),
+  );
+
+  // Open the modal for the first time and edit it
+  await getByTestId('note-card')
+    .nth(0)
+    .getByRole('button', { name: /Edit note/ })
+    .click();
+
+  const tagsContainer = getByRole('dialog', { name: /Edit note/ }).getByTestId(
+    'tags-container',
+  );
+
+  const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
+
+  await addTagButton.click();
+
+  // Initially all tags in the system should be shown
+  const addTagMenu = getByRole('listbox', { name: 'List of tags' });
+  const addTagMenuItems = addTagMenu.getByRole('option');
+  await vi.waitFor(() => expect(addTagMenuItems.elements()).toHaveLength(4));
+  expect(addTagMenuItems.nth(0)).toHaveTextContent('boolean tag: yes/no');
+  expect(addTagMenuItems.nth(1)).toHaveTextContent('date tag: date');
+  expect(addTagMenuItems.nth(2)).toHaveTextContent('number tag: number');
+  expect(addTagMenuItems.nth(3)).toHaveTextContent('string tag');
+
+  await getByLabelText('Search tags').fill('string');
+
+  // After typing something, only filtered tags should be shown
+  expect(addTagMenuItems.elements()).toHaveLength(1);
+  expect(addTagMenuItems.nth(0)).toHaveTextContent('string tag');
+
+  await getByLabelText('Search tags').fill('strings');
+
+  // After searching for something not in the list, only new tags suggestion should be shown
+  expect(addTagMenuItems.elements()).toHaveLength(4);
+  expect(addTagMenuItems.nth(0)).toHaveTextContent('strings');
+  expect(addTagMenuItems.nth(1)).toHaveTextContent('strings: number');
+  expect(addTagMenuItems.nth(2)).toHaveTextContent('strings: date');
+  expect(addTagMenuItems.nth(3)).toHaveTextContent('strings: yes/no');
+});
+
 test('should be able to add tags in a note [string]', async () => {
   // create mock server data
   await server.createSessionMock();
@@ -350,6 +447,58 @@ test('should be able to add tags in a note [boolean]', async () => {
   await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
   expect(tags.nth(0)).toHaveTextContent(`${name}: yes`);
 });
+
+test.each([
+  { name: 'abc', value: '', type: 'string' },
+  { name: 'abc', value: ': 10', type: 'number' },
+  { name: 'abc', value: ': 2025-10-01', type: 'date' },
+  { name: 'abc', value: ': yes', type: 'boolean' },
+] as const)(
+  'should be able to add existing tags in a note [$type]',
+  async ({ name, value, type }) => {
+    vi.setSystemTime(new Date(2025, 9, 1));
+
+    // create mock server data
+    await server.createSessionMock();
+    await server.createNoteMock({ content: 'A' });
+    await server.createTagMock({ name, type });
+
+    const { getByLabelText, getByRole, getByTestId } = await renderWithRouter();
+
+    await vi.waitFor(() =>
+      expect(getByTestId('note-card').elements()).toHaveLength(1),
+    );
+
+    // Open the modal for the first time and edit it
+    await getByTestId('note-card')
+      .nth(0)
+      .getByRole('button', { name: /Edit note/ })
+      .click();
+
+    const tagsContainer = getByRole('dialog', {
+      name: /Edit note/,
+    }).getByTestId('tags-container');
+
+    const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
+
+    await addTagButton.click();
+
+    // Initially all tags in the system should be shown
+    const addTagMenu = getByRole('listbox', { name: 'List of tags' });
+    const addTagMenuItems = addTagMenu.getByRole('option');
+    await getByLabelText('Search tags').fill(name);
+    await vi.waitFor(() => expect(addTagMenuItems.elements()).toHaveLength(1));
+    await addTagMenuItems.nth(0).click();
+
+    // After selecting the existing tag, a note tag should be visible in the note, with default values
+    expect(addTagButton).toBeDisabled();
+    const tags = tagsContainer.getByTestId('tag');
+    await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
+    expect(tags.nth(0)).toHaveTextContent(`${name}${value}`);
+
+    vi.useRealTimers();
+  },
+);
 
 test('should be able to edit tags in a note [string]', async () => {
   // create mock server data

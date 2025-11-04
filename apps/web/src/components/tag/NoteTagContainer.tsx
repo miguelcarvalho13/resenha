@@ -10,11 +10,13 @@ interface NoteTagContainerProps {
 }
 
 export const NoteTagContainer = ({ note }: NoteTagContainerProps) => {
-  const { data, isLoading } = trpc.tags.findAllNoteTags.useQuery({
-    noteId: note.id,
-  });
+  const { isLoading: isLoadingTags } = trpc.tags.findAllTags.useQuery();
+  const { data, isLoading: isLoadingNoteTags } =
+    trpc.tags.findAllNoteTags.useQuery({
+      noteId: note.id,
+    });
 
-  if (isLoading) {
+  if (isLoadingTags || isLoadingNoteTags) {
     return <Skeleton />;
   }
 
