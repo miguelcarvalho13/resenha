@@ -2,22 +2,22 @@ import { delay, http, type PathParams } from 'msw';
 
 import { createNoteMock } from '@/mocks/factories/notes';
 import {
-  createTrpcBatchJson,
+  createTrpcJson,
   extractTrpcInput,
-  type TrpcBatchInput,
+  type TrpcInput,
 } from '@/mocks/factories/trpc';
 import { type RouterInput, type RouterOutput } from '@/utils/trpc';
 import { noteMock } from '../models/notes';
 
 export const postCreateNoteHandler = ({ wait = 0 }: { wait?: number } = {}) =>
-  http.post<PathParams, TrpcBatchInput<RouterInput['notes']['createNote']>>(
+  http.post<PathParams, TrpcInput<RouterInput['notes']['createNote']>>(
     '/api/trpc/notes.createNote',
     async ({ request }) => {
       await delay(wait);
 
       const input = extractTrpcInput(await request.clone().json());
 
-      return createTrpcBatchJson({
+      return createTrpcJson({
         success: true,
         note: await createNoteMock({
           content: input.content,
@@ -27,7 +27,7 @@ export const postCreateNoteHandler = ({ wait = 0 }: { wait?: number } = {}) =>
   );
 
 export const postEditNoteHandler = ({ wait = 0 }: { wait?: number } = {}) =>
-  http.post<PathParams, TrpcBatchInput<RouterInput['notes']['editNote']>>(
+  http.post<PathParams, TrpcInput<RouterInput['notes']['editNote']>>(
     '/api/trpc/notes.editNote',
     async ({ request }) => {
       await delay(wait);
@@ -44,7 +44,7 @@ export const postEditNoteHandler = ({ wait = 0 }: { wait?: number } = {}) =>
           },
         );
 
-        return createTrpcBatchJson({
+        return createTrpcJson({
           success: true,
           note: updatedNote!,
         } satisfies RouterOutput['notes']['editNote']);
@@ -56,7 +56,7 @@ export const postEditNoteHandler = ({ wait = 0 }: { wait?: number } = {}) =>
 
 export const getFindAllNotesHandler = () =>
   http.get('/api/trpc/notes.findAll', () =>
-    createTrpcBatchJson({
+    createTrpcJson({
       success: true,
       notes: noteMock.all(),
     } satisfies RouterOutput['notes']['findAll']),

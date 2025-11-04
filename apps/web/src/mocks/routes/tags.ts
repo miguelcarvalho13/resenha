@@ -2,9 +2,9 @@ import { delay, http, type PathParams } from 'msw';
 
 import { createNoteTagMock, createTagMock } from '@/mocks/factories/tags';
 import {
-  createTrpcBatchJson,
+  createTrpcJson,
   extractTrpcInput,
-  type TrpcBatchInput,
+  type TrpcInput,
 } from '@/mocks/factories/trpc';
 import { type RouterInput, type RouterOutput } from '@/utils/trpc';
 import { noteMock } from '../models/notes';
@@ -19,7 +19,7 @@ export const getFindAllNoteTagsHandler = ({
   http.get('/api/trpc/tags.findAllNoteTags', async () => {
     await delay(wait || server.timing);
 
-    return createTrpcBatchJson({
+    return createTrpcJson({
       success: true,
       noteTags: noteTagMock.all(),
     } satisfies RouterOutput['tags']['findAllNoteTags']);
@@ -28,7 +28,7 @@ export const getFindAllNoteTagsHandler = ({
 export const postCreateNoteTagHandler = ({
   wait = 0,
 }: { wait?: number } = {}) =>
-  http.post<PathParams, TrpcBatchInput<RouterInput['tags']['createNoteTag']>>(
+  http.post<PathParams, TrpcInput<RouterInput['tags']['createNoteTag']>>(
     '/api/trpc/tags.createNoteTag',
     async ({ request }) => {
       await delay(wait || server.timing);
@@ -48,7 +48,7 @@ export const postCreateNoteTagHandler = ({
         value: 'value' in input ? input.value : input.name,
       });
 
-      return createTrpcBatchJson({
+      return createTrpcJson({
         success: true,
         noteTag: {
           ...noteTag,
@@ -66,7 +66,7 @@ export const postCreateNoteTagHandler = ({
 export const postDeleteNoteTagHandler = ({
   wait = 0,
 }: { wait?: number } = {}) =>
-  http.post<PathParams, TrpcBatchInput<RouterInput['tags']['deleteNoteTag']>>(
+  http.post<PathParams, TrpcInput<RouterInput['tags']['deleteNoteTag']>>(
     '/api/trpc/tags.deleteNoteTag',
     async ({ request }) => {
       await delay(wait || server.timing);
@@ -78,7 +78,7 @@ export const postDeleteNoteTagHandler = ({
 
       noteTagMock.delete((q) => q.where({ ...input }));
 
-      return createTrpcBatchJson({
+      return createTrpcJson({
         success: true,
         noteTag: {
           ...noteTag,
@@ -102,7 +102,7 @@ export const postDeleteNoteTagHandler = ({
   );
 
 export const postEditNoteTagHandler = ({ wait = 0 }: { wait?: number } = {}) =>
-  http.post<PathParams, TrpcBatchInput<RouterInput['tags']['editNoteTag']>>(
+  http.post<PathParams, TrpcInput<RouterInput['tags']['editNoteTag']>>(
     '/api/trpc/tags.editNoteTag',
     async ({ request }) => {
       await delay(wait || server.timing);
@@ -128,7 +128,7 @@ export const postEditNoteTagHandler = ({ wait = 0 }: { wait?: number } = {}) =>
 
       const tag = updatedNoteTag.tag!;
 
-      return createTrpcBatchJson({
+      return createTrpcJson({
         success: true,
         noteTag: {
           ...updatedNoteTag,

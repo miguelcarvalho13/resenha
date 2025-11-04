@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { httpBatchLink } from '@trpc/client';
+import { httpBatchLink, httpLink } from '@trpc/client';
 import { useState } from 'react';
 import superjson from 'superjson';
 
@@ -11,12 +11,14 @@ const baseUrl =
       'http://localhost:63315'
     : import.meta.env.VITE_API_URL;
 
+const trpcLink = import.meta.env.MODE === 'test' ? httpLink : httpBatchLink;
+
 export function TrpcWrapper({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
-        httpBatchLink({
+        trpcLink({
           fetch: (url, options) =>
             fetch(url, {
               ...options,
