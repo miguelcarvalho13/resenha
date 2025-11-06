@@ -1,5 +1,6 @@
 import { DateInput } from '@mantine/dates';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type NoteTag as NoteTagModel } from '@/models/tags';
 import { TAG_COLOR } from '@/utils/tags';
@@ -20,6 +21,7 @@ export const NoteTagDate = ({
   onChange,
   onRemove,
 }: NoteTagDateProps) => {
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
 
   const handleOnChange = (value: string | null) => {
@@ -45,7 +47,7 @@ export const NoteTagDate = ({
       {noteTag.name}:{' '}
       {!isEditing && (
         <NoteTagButton
-          aria-label={`Edit ${noteTag.name}`}
+          aria-label={t(($) => $.tags.editTag, { name: noteTag.name })}
           disabled={disabled}
           onClick={() => setIsEditing(true)}
         >
@@ -54,14 +56,14 @@ export const NoteTagDate = ({
       )}
       {isEditing && (
         <DateInput
-          aria-label={`Edit ${noteTag.name} value`}
+          aria-label={t(($) => $.tags.editTagValue, { name: noteTag.name })}
           // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus
           className="inline-block"
           defaultValue={noteTag.value as string}
           onBlur={() => handleOnChange(null)}
           onChange={(value) => handleOnChange(value)}
-          placeholder={`Edit ${noteTag.name} value`}
+          placeholder={t(($) => $.tags.editTagValue, { name: noteTag.name })}
           size="xs"
           valueFormat="YYYY-MM-DD"
           variant="unstyled"

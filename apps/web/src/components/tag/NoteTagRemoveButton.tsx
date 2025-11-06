@@ -1,4 +1,5 @@
 import { ActionIcon } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import { TbX } from 'react-icons/tb';
 
 interface NoteTagRemoveButtonProps {
@@ -11,17 +12,21 @@ export const NoteTagRemoveButton = ({
   disabled,
   onRemove,
   tagName,
-}: NoteTagRemoveButtonProps) => (
-  <ActionIcon
-    aria-label={`Remove ${tagName}`}
-    className="-mr-2"
-    color="white"
-    disabled={disabled}
-    onClick={onRemove}
-    radius="xl"
-    size="xs"
-    variant="transparent"
-  >
-    <TbX />
-  </ActionIcon>
-);
+}: NoteTagRemoveButtonProps) => {
+  const { t } = useTranslation();
+
+  return (
+    <ActionIcon
+      aria-label={t(($) => $.tags.removeTag, { name: tagName })}
+      className="-mr-2"
+      color="white"
+      disabled={disabled}
+      onClick={onRemove}
+      radius="xl"
+      size="xs"
+      variant="transparent"
+    >
+      <TbX />
+    </ActionIcon>
+  );
+};

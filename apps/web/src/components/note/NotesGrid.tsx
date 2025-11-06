@@ -1,15 +1,18 @@
 import { SimpleGrid } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 
-import { type NoteForFindAll } from '@/models/notes';
 import { NoteCard } from '@/components/note/NoteCard';
+import { type NoteForFindAll } from '@/models/notes';
 
 interface NotesGridProps {
   notes: NoteForFindAll[] | undefined;
 }
 
 export const NotesGrid = ({ notes }: NotesGridProps) => {
+  const { t } = useTranslation();
+
   if (!notes) {
-    return 'No notes found';
+    return t(($) => $.notes.noNotesFound);
   }
 
   return (

@@ -1,5 +1,6 @@
 import { Stack, Text } from '@mantine/core';
 import { createFileRoute, redirect } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 
 import CreateNoteButton from '@/components/note/CreateNoteButton';
 import { RecentNotesGrid } from '@/components/note/RecentNotesGrid';
@@ -19,10 +20,11 @@ export const Route = createFileRoute('/')({
 });
 
 function Index() {
+  const { t } = useTranslation();
   const { data: session, isPending } = authClient.useSession();
 
   if (isPending) {
-    return <div>Loading...</div>;
+    return <div>{t(($) => $.common.loading)}</div>;
   }
 
   return (

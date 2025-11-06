@@ -1,6 +1,7 @@
 import { AppShell, Burger, Group, Stack, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { createRootRoute, Outlet } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 
 import { NavLinkStyled } from '@/components/link/NavLinkStyled';
 import UserMenu from '@/components/user/UserMenu';
@@ -10,6 +11,7 @@ export const Route = createRootRoute({
 });
 
 function RootRoute() {
+  const { t } = useTranslation();
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
 
@@ -48,12 +50,15 @@ function RootRoute() {
       <AppShell.Navbar py="md">
         <Stack justify="space-between" h="100%">
           <Stack gap={0}>
-            <NavLinkStyled to="/" label="Recent" />
-            <NavLinkStyled to="/searches" label="My Searches" />
+            <NavLinkStyled to="/" label={t(($) => $.menu.recent)} />
+            <NavLinkStyled to="/searches" label={t(($) => $.menu.mySearches)} />
           </Stack>
           <Stack gap={0}>
-            <NavLinkStyled to="/trash" label="Trash" />
-            <NavLinkStyled to="/config" label="Configurations" />
+            <NavLinkStyled to="/trash" label={t(($) => $.menu.trash)} />
+            <NavLinkStyled
+              to="/config"
+              label={t(($) => $.menu.configurations)}
+            />
           </Stack>
         </Stack>
       </AppShell.Navbar>

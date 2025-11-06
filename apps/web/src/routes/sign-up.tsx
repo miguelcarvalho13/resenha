@@ -1,5 +1,6 @@
 import { Text } from '@mantine/core';
 import { createFileRoute } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 
 import { LoginAndSignUpForm } from '@/components/auth/LoginAndSignUpForm';
 import { LoginAndSignUpFormLayout } from '@/components/auth/LoginAndSignUpFormLayout';
@@ -10,17 +11,22 @@ export const Route = createFileRoute('/sign-up')({
 });
 
 function SignUp() {
+  const { t } = useTranslation();
+
   return (
     <LoginAndSignUpFormLayout
       form={<LoginAndSignUpForm mode="sign-up" />}
       extra={
         <Text>
-          Already registered? <LinkStyled to="/sign-in">Sign in</LinkStyled>
+          {t(($) => $.signInSignUp.alreadyRegistered)}{' '}
+          <LinkStyled to="/sign-in">
+            {t(($) => $.signInSignUp.signIn)}
+          </LinkStyled>
         </Text>
       }
       title={
         <Text size="lg" fw="bold">
-          Sign-up
+          {t(($) => $.signInSignUp.signUp)}
         </Text>
       }
     />

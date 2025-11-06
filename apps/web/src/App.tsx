@@ -8,6 +8,7 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { TrpcWrapper } from './components/TrpcWrapper';
 import './index.css';
 import { routeTree } from './routeTree.gen';
+import './i18n';
 
 dayjs.extend(customParseFormat);
 

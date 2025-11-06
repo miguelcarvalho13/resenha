@@ -1,9 +1,11 @@
 import { Avatar, Menu, UnstyledButton } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 
 import { useLogout } from '@/hooks/auth/useLogout';
 import { authClient } from '@/utils/authClient';
 
 const UserMenu = () => {
+  const { t } = useTranslation();
   const handleLogout = useLogout();
   const { data: session, isPending } = authClient.useSession();
 
@@ -24,7 +26,9 @@ const UserMenu = () => {
       </Menu.Target>
 
       <Menu.Dropdown>
-        <Menu.Item onClick={handleLogout}>Logout</Menu.Item>
+        <Menu.Item onClick={handleLogout}>
+          {t(($) => $.signInSignUp.logout)}
+        </Menu.Item>
       </Menu.Dropdown>
     </Menu>
   );

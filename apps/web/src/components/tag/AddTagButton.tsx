@@ -1,5 +1,6 @@
 import { Button, Combobox, useCombobox } from '@mantine/core';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TbCirclePlus } from 'react-icons/tb';
 
 import { NoteTagWrapper } from '@/components/tag/NoteTagWrapper';
@@ -12,7 +13,14 @@ const FIXED_OPTION_VALUES = {
   date: 'new:date',
   number: 'new:number',
   string: 'new:string',
-} satisfies { [key in NoteTag['type']]: string };
+} as const satisfies { [key in NoteTag['type']]: string };
+
+const FIXED_OPTIONS_ORDER = [
+  'string',
+  'number',
+  'date',
+  'boolean',
+] satisfies NoteTag['type'][];
 
 interface AddTagButtonProps {
   noteId: string;
@@ -27,19 +35,8 @@ const getNowDateValue = () => {
   return `${year}-${month}-${date}`;
 };
 
-const getTypeNameForType = (type: NoteTag['type']) => {
-  switch (type) {
-    case 'boolean':
-      return ': yes/no';
-    case 'date':
-    case 'number':
-      return `: ${type}`;
-    case 'string':
-      return '';
-  }
-};
-
 export const AddTagButton = ({ noteId }: AddTagButtonProps) => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const utils = trpc.useUtils();
 
@@ -141,55 +138,47 @@ export const AddTagButton = ({ noteId }: AddTagButtonProps) => {
           size="compact-xs"
           variant="outline"
         >
-          Add tag
+          {t(($) => $.tags.addTag)}
         </Button>
       </Combobox.Target>
 
       <Combobox.Dropdown>
         <Combobox.Search
-          aria-label="Search tags"
+          aria-label={t(($) => $.tags.searchTags)}
           onChange={(event) => setSearch(event.currentTarget.value)}
-          placeholder="Search tags"
+          placeholder={t(($) => $.tags.searchTags)}
           value={search}
         />
-        <Combobox.Options aria-label="List of tags">
+        <Combobox.Options aria-label={t(($) => $.tags.listOfTags)}>
           {filteredTags?.map((tag) => (
             <Combobox.Option key={tag.name} value={`${tag.type}|${tag.name}`}>
               <NoteTagWrapper color={TAG_COLOR[tag.type]} data-testid="tag-new">
                 {tag.name}
-                {getTypeNameForType(tag.type)}
+                {t(($) => $.tags.newTagSuffix, { context: tag.type })}
               </NoteTagWrapper>
             </Combobox.Option>
           ))}
           {isNewTagAllowed && (
             <>
-              <Combobox.Option value={FIXED_OPTION_VALUES.string}>
-                <NoteTagWrapper color="gray" data-testid="tag-new">
-                  {sanitizedSearch}
-                  {getTypeNameForType('string')}
-                </NoteTagWrapper>
-              </Combobox.Option>
-              <Combobox.Option value={FIXED_OPTION_VALUES.number}>
-                <NoteTagWrapper color="gray" data-testid="tag-new">
-                  {sanitizedSearch}
-                  {getTypeNameForType('number')}
-                </NoteTagWrapper>
-              </Combobox.Option>
-              <Combobox.Option value={FIXED_OPTION_VALUES.date}>
-                <NoteTagWrapper color="gray" data-testid="tag-new">
-                  {sanitizedSearch}
-                  {getTypeNameForType('date')}
-                </NoteTagWrapper>
-              </Combobox.Option>
-              <Combobox.Option value={FIXED_OPTION_VALUES.boolean}>
-                <NoteTagWrapper color="gray" data-testid="tag-new">
-                  {sanitizedSearch}
-                  {getTypeNameForType('boolean')}
-                </NoteTagWrapper>
-              </Combobox.Option>
+              {Object.entries(FIXED_OPTION_VALUES)
+                .sort(
+                  ([a], [b]) =>
+                    FIXED_OPTIONS_ORDER.indexOf(a as NoteTag['type']) -
+                    FIXED_OPTIONS_ORDER.indexOf(b as NoteTag['type']),
+                )
+                .map(([type, value]) => (
+                  <Combobox.Option key={value} value={value}>
+                    <NoteTagWrapper color="gray" data-testid="tag-new">
+                      {sanitizedSearch}
+                      {t(($) => $.tags.newTagSuffix, { context: type })}
+                    </NoteTagWrapper>
+                  </Combobox.Option>
+                ))}
             </>
           )}
-          {!isNewTagAllowed && <Combobox.Empty>No tags found</Combobox.Empty>}
+          {!isNewTagAllowed && (
+            <Combobox.Empty>{t(($) => $.tags.noTagsFound)}</Combobox.Empty>
+          )}
         </Combobox.Options>
       </Combobox.Dropdown>
     </Combobox>

@@ -2,6 +2,7 @@ import { Button, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useNavigate } from '@tanstack/react-router';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { authClient } from '@/utils/authClient';
@@ -26,6 +27,7 @@ export const signInSchema = z.object({
 });
 
 export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate({
     from: '/',
   });
@@ -88,33 +90,33 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
       <Stack>
         {isSignUp && (
           <TextInput
-            label="Name"
-            placeholder="Name"
+            label={t(($) => $.signInSignUp.fields.name)}
+            placeholder={t(($) => $.signInSignUp.fields.name)}
             key={form.key('name')}
             {...form.getInputProps('name')}
           />
         )}
 
         <TextInput
-          label="Email"
-          placeholder="Email"
+          label={t(($) => $.signInSignUp.fields.email)}
+          placeholder={t(($) => $.signInSignUp.fields.email)}
           key={form.key('email')}
           type="email"
           {...form.getInputProps('email')}
         />
 
         <TextInput
-          label="Password"
-          placeholder="Password"
+          label={t(($) => $.signInSignUp.fields.password)}
+          placeholder={t(($) => $.signInSignUp.fields.password)}
           key={form.key('password')}
           type="password"
           {...form.getInputProps('password')}
         />
 
         {isSignUp ? (
-          <Button type="submit">Sign up</Button>
+          <Button type="submit">{t(($) => $.signInSignUp.signUp)}</Button>
         ) : (
-          <Button type="submit">Sign in</Button>
+          <Button type="submit">{t(($) => $.signInSignUp.signIn)}</Button>
         )}
       </Stack>
     </form>

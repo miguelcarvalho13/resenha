@@ -18,11 +18,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@api/*": ["../api/src/*"]
+      "@api/*": ["../api/src/*"],
+      "locales": ["./public/locales"]
     },
 
     "types": ["@vitest/browser/providers/playwright"]
   },
-  "include": ["src"],
+  "include": ["src", "public/locales"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

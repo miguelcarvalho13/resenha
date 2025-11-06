@@ -1,5 +1,6 @@
 import { ActionIcon, Paper, Stack, Text, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useTranslation } from 'react-i18next';
 import { TbPencil } from 'react-icons/tb';
 
 import { type NoteForFindAll } from '@/models/notes';
@@ -10,6 +11,7 @@ interface NoteCardProps {
 }
 
 export const NoteCard = ({ note }: NoteCardProps) => {
+  const { t } = useTranslation();
   const [opened, { open, close }] = useDisclosure(false);
 
   return (
@@ -17,9 +19,9 @@ export const NoteCard = ({ note }: NoteCardProps) => {
       <Stack h="100%" justify="space-between">
         <Text className="line-clamp-2">{note.content}</Text>
 
-        <Tooltip label="Edit note" withArrow>
+        <Tooltip label={t(($) => $.notes.editNote)} withArrow>
           <ActionIcon
-            aria-label="Edit note"
+            aria-label={t(($) => $.notes.editNote)}
             className="self-end"
             onClick={open}
             radius="xl"

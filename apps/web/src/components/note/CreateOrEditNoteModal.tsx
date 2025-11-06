@@ -1,6 +1,7 @@
 import { Button, Modal, Stack, Textarea } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { NoteTagContainer } from '@/components/tag/NoteTagContainer';
@@ -36,6 +37,7 @@ const CreateOrEditNoteModal = ({
   note,
   opened,
 }: CreateOrEditNoteModalProps) => {
+  const { t } = useTranslation();
   const utils = trpc.useUtils();
 
   const form = useForm({
@@ -80,7 +82,11 @@ const CreateOrEditNoteModal = ({
         form.reset();
       }}
       opened={opened}
-      title={mode === 'create' ? 'Create note' : 'Edit note'}
+      title={
+        mode === 'create'
+          ? t(($) => $.notes.createNote)
+          : t(($) => $.notes.editNote)
+      }
     >
       <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
         <Stack>

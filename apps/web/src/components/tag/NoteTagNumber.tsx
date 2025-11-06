@@ -1,5 +1,6 @@
 import { NumberInput } from '@mantine/core';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type NoteTag as NoteTagModel } from '@/models/tags';
 import { TAG_COLOR } from '@/utils/tags';
@@ -20,6 +21,7 @@ export const NoteTagNumber = ({
   onChange,
   onRemove,
 }: NoteTagStringProps) => {
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
 
   const handleOnChange = (value: string) => {
@@ -45,7 +47,7 @@ export const NoteTagNumber = ({
       {noteTag.name}:{' '}
       {!isEditing && (
         <NoteTagButton
-          aria-label={`Edit ${noteTag.name}`}
+          aria-label={t(($) => $.tags.editTag, { name: noteTag.name })}
           disabled={disabled}
           onClick={() => setIsEditing(true)}
         >
@@ -54,13 +56,13 @@ export const NoteTagNumber = ({
       )}
       {isEditing && (
         <NumberInput
-          aria-label={`Edit ${noteTag.name} value`}
+          aria-label={t(($) => $.tags.editTagValue, { name: noteTag.name })}
           // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus
           className="inline-block"
           defaultValue={noteTag.value as number}
           onBlur={(e) => handleOnChange(e.target.value)}
-          placeholder={`Edit ${noteTag.name} value`}
+          placeholder={t(($) => $.tags.editTagValue, { name: noteTag.name })}
           size="xs"
           variant="unstyled"
         />

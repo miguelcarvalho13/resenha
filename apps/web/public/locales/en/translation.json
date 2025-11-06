@@ -1,0 +1,45 @@
+{
+  "common": {
+    "loading": "Loading..."
+  },
+  "menu": {
+    "configurations": "Configurations",
+    "mySearches": "My Searches",
+    "recent": "Recent",
+    "trash": "Trash"
+  },
+  "notes": {
+    "createNote": "Create note",
+    "editNote": "Edit note",
+    "noNotesFound": "No notes found"
+  },
+  "signInSignUp": {
+    "alreadyRegistered": "Already registered?",
+    "fields": {
+      "email": "Email",
+      "name": "Name",
+      "password": "Password"
+    },
+    "logout": "Logout",
+    "notRegisteredYet": "Not registered yet?",
+    "signIn": "Sign in",
+    "signUp": "Sign up"
+  },
+  "tags": {
+    "addTag": "Add tag",
+    "editTag": "Edit {{name}}",
+    "editTagValue": "Edit {{name}} value",
+    "listOfTags": "List of tags",
+    "newTagSuffix": "",
+    "newTagSuffix_boolean": ": yes/no",
+    "newTagSuffix_date": ": date",
+    "newTagSuffix_number": ": number",
+    "newTagSuffix_string": "",
+    "noTagsFound": "No tags found",
+    "removeTag": "Remove {{name}}",
+    "searchTags": "Search tags",
+    "tagBoolean": "-",
+    "tagBoolean_NO": "NO",
+    "tagBoolean_YES": "YES"
+  }
+}

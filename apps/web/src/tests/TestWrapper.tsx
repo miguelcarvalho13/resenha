@@ -8,6 +8,7 @@ import { type ReactNode } from 'react';
 
 import { TrpcWrapper } from '@/components/TrpcWrapper';
 import '@/index.css';
+import '@/i18n';
 
 dayjs.extend(customParseFormat);
 
