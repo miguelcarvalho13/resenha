@@ -10,7 +10,7 @@ export const createTagSchema = () =>
 
 export const editTagSchema = () =>
   z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
   });
 
@@ -18,32 +18,32 @@ export const createNoteTagSchema = () =>
   z.intersection(
     z.object({
       name: z.string(),
-      noteId: z.string().uuid(),
+      noteId: z.uuid(),
     }),
     z.discriminatedUnion('type', [
       z.object({ type: z.literal('string') }),
       z.object({ type: z.literal('number'), value: z.number() }),
-      z.object({ type: z.literal('date'), value: z.string().date() }),
+      z.object({ type: z.literal('date'), value: z.iso.date() }),
       z.object({ type: z.literal('boolean'), value: z.boolean() }),
     ]),
   );
 
 export const deleteNoteTagSchema = () =>
   z.object({
-    noteId: z.string().uuid(),
-    tagId: z.string().uuid(),
+    noteId: z.uuid(),
+    tagId: z.uuid(),
   });
 
 export const editNoteTagSchema = () =>
   z.object({
-    noteId: z.string().uuid(),
-    tagId: z.string().uuid(),
-    value: z.union([z.string(), z.number(), z.string().date(), z.boolean()]),
+    noteId: z.uuid(),
+    tagId: z.uuid(),
+    value: z.union([z.string(), z.number(), z.iso.date(), z.boolean()]),
   });
 
 export const findAllNoteTagsSchema = () =>
   z.object({
-    noteId: z.string().uuid(),
+    noteId: z.uuid(),
   });
 
 export type CreateTagSchemaType = z.infer<ReturnType<typeof createTagSchema>>;

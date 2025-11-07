@@ -7,7 +7,7 @@ import {
 import { fromNodeHeaders } from 'better-auth/node';
 import { type IncomingHttpHeaders } from 'http';
 import superjson from 'superjson';
-import { ZodError } from 'zod';
+import { z, ZodError } from 'zod';
 
 import { auth } from '@api/auth';
 import { db } from '@api/db';
@@ -39,7 +39,8 @@ const t = initTRPC.context<Context>().create({
     ...shape,
     data: {
       ...shape.data,
-      zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
+      zodError:
+        error.cause instanceof ZodError ? z.treeifyError(error.cause) : null,
     },
   }),
 });
