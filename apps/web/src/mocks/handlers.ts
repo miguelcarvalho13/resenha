@@ -3,6 +3,7 @@ import {
   postCreateNoteHandler,
   postEditNoteHandler,
 } from './routes/notes';
+import { getSearchNotesHandler } from './routes/searches';
 import {
   getSessionHandler,
   postSignInWithEmail,
@@ -28,6 +29,9 @@ export const handlers = [
   getFindAllNotesHandler(),
   postCreateNoteHandler(),
   postEditNoteHandler(),
+
+  // searches
+  getSearchNotesHandler(),
 
   // tags
   getFindAllTagsHandler(),
