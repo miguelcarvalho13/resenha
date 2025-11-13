@@ -10,7 +10,7 @@ import { noteMock } from '../models/notes';
 import { noteTagMock } from '../models/tags';
 import { server } from '../server';
 
-export const getSearchNotesHandler = ({ wait = 0 }: { wait?: number } = {}) => {
+export const getSearchNotesHandler = ({ wait = 0 }: { wait?: number } = {}) =>
   http.get<PathParams, TrpcInput<RouterInput['searches']['searchNotes']>>(
     '/api/trpc/searches.searchNotes',
     async ({ request }) => {
@@ -46,11 +46,9 @@ export const getSearchNotesHandler = ({ wait = 0 }: { wait?: number } = {}) => {
         }),
       );
 
-      console.log();
       return createTrpcJson({
         success: true,
         notes,
       } satisfies RouterOutput['searches']['searchNotes']);
     },
   );
-};
