@@ -6,7 +6,7 @@ import { type NoteTag as NoteTagModel } from '@/models/tags';
 import { TAG_COLOR } from '@/utils/tags';
 import { NoteTagButton } from './NoteTagButton';
 import { NoteTagRemoveButton } from './NoteTagRemoveButton';
-import { NoteTagWrapper } from './NoteTagWrapper';
+import { TagWrapper } from './TagWrapper';
 
 interface NoteTagStringProps {
   disabled: boolean;
@@ -33,7 +33,7 @@ export const NoteTagNumber = ({
   };
 
   return (
-    <NoteTagWrapper
+    <TagWrapper
       color={TAG_COLOR[noteTag.type]}
       data-testid="tag"
       rightSection={
@@ -67,6 +67,6 @@ export const NoteTagNumber = ({
           variant="unstyled"
         />
       )}
-    </NoteTagWrapper>
+    </TagWrapper>
   );
 };

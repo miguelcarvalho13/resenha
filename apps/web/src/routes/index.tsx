@@ -1,10 +1,18 @@
 import { Stack, Text } from '@mantine/core';
 import { createFileRoute, redirect } from '@tanstack/react-router';
+import { zodValidator } from '@tanstack/zod-adapter';
 import { useTranslation } from 'react-i18next';
+import z from 'zod';
 
 import CreateNoteButton from '@/components/note/CreateNoteButton';
 import { RecentNotesGrid } from '@/components/note/RecentNotesGrid';
+import { SearchedNotesGrid } from '@/components/note/SearchedNotesGrid';
 import { authClient } from '@/utils/authClient';
+import { searchNotesSchema } from '@repo/api';
+
+const searchSchema = z.object({
+  query: z.array(searchNotesSchema().shape.query.unwrap()).nullish(),
+});
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -17,11 +25,13 @@ export const Route = createFileRoute('/')({
       });
     }
   },
+  validateSearch: zodValidator(searchSchema),
 });
 
 function Index() {
   const { t } = useTranslation();
   const { data: session, isPending } = authClient.useSession();
+  const { query } = Route.useSearch();
 
   if (isPending) {
     return <div>{t(($) => $.common.loading)}</div>;
@@ -32,7 +42,7 @@ function Index() {
       <Stack p="xl">
         <Text>User: {session?.user?.email}</Text>
         <CreateNoteButton />
-        <RecentNotesGrid />
+        {query?.length ? <SearchedNotesGrid /> : <RecentNotesGrid />}
       </Stack>
     </div>
   );

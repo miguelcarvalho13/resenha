@@ -6,3 +6,10 @@ export type NoteTag = ArrayElement<
 >;
 
 export type Tag = ArrayElement<RouterOutput['tags']['findAllTags']['tags']>;
+
+export const NO_OPTION_VALUE = 'NO';
+export const YES_OPTION_VALUE = 'YES';
+export const SELECT_OPTION_VALUES = [
+  YES_OPTION_VALUE,
+  NO_OPTION_VALUE,
+] as const;

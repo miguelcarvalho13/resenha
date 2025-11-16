@@ -2,7 +2,7 @@ import { delay, http, type PathParams } from 'msw';
 
 import {
   createTrpcJson,
-  extractTrpcInput,
+  extractTrpcInputQuery,
   type TrpcInput,
 } from '@/mocks/factories/trpc';
 import { type RouterInput, type RouterOutput } from '@/utils/trpc';
@@ -15,11 +15,14 @@ export const getSearchNotesHandler = ({ wait = 0 }: { wait?: number } = {}) =>
     '/api/trpc/searches.searchNotes',
     async ({ request }) => {
       await delay(wait || server.timing);
-      const input = extractTrpcInput(await request.clone().json());
+
+      const input = extractTrpcInputQuery<
+        RouterInput['searches']['searchNotes']
+      >(request.url);
 
       const notes = noteMock.all().filter((note) =>
         input.query.every((condition) => {
-          !!noteTagMock.findFirst((q) =>
+          const matchedNoteTag = noteTagMock.findFirst((q) =>
             q.and(
               q.where({ noteId: note.id }),
               q.where({ tagId: condition.tagId }),
@@ -43,6 +46,8 @@ export const getSearchNotesHandler = ({ wait = 0 }: { wait?: number } = {}) =>
               }),
             ),
           );
+
+          return !!matchedNoteTag;
         }),
       );
 

@@ -33,3 +33,7 @@ export async function renderWithRouter() {
     ...renderResult,
   };
 }
+
+export type RenderWithRouterContext = Awaited<
+  ReturnType<typeof renderWithRouter>
+>;

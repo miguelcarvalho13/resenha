@@ -4,6 +4,7 @@ import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { NavLinkStyled } from '@/components/link/NavLinkStyled';
+import { SearchNotesButton } from '@/components/search/SearchNotesButton';
 import UserMenu from '@/components/user/UserMenu';
 
 export const Route = createRootRoute({
@@ -42,6 +43,7 @@ function RootRoute() {
 
             <Title order={1}>Resenhaí</Title>
           </Group>
+          <SearchNotesButton />
 
           <UserMenu />
         </Group>

@@ -2,11 +2,16 @@ import { Group, NativeSelect } from '@mantine/core';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type NoteTag as NoteTagModel } from '@/models/tags';
+import {
+  NO_OPTION_VALUE,
+  SELECT_OPTION_VALUES,
+  YES_OPTION_VALUE,
+  type NoteTag as NoteTagModel,
+} from '@/models/tags';
 import { TAG_COLOR } from '@/utils/tags';
 import { NoteTagButton } from './NoteTagButton';
 import { NoteTagRemoveButton } from './NoteTagRemoveButton';
-import { NoteTagWrapper } from './NoteTagWrapper';
+import { TagWrapper } from './TagWrapper';
 
 interface NoteTagBooleanProps {
   disabled: boolean;
@@ -14,10 +19,6 @@ interface NoteTagBooleanProps {
   onChange: (value: boolean) => void;
   onRemove: (noteTag: NoteTagModel) => void;
 }
-
-const NO_OPTION_VALUE = 'NO';
-const YES_OPTION_VALUE = 'YES';
-const SELECT_OPTION_VALUES = [YES_OPTION_VALUE, NO_OPTION_VALUE] as const;
 
 export const NoteTagBoolean = ({
   disabled,
@@ -50,7 +51,7 @@ export const NoteTagBoolean = ({
 
   return (
     <Group>
-      <NoteTagWrapper
+      <TagWrapper
         color={TAG_COLOR[noteTag.type]}
         data-testid="tag"
         rightSection={
@@ -89,7 +90,7 @@ export const NoteTagBoolean = ({
             variant="unstyled"
           />
         )}
-      </NoteTagWrapper>
+      </TagWrapper>
     </Group>
   );
 };

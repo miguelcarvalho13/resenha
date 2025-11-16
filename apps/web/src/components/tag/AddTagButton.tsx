@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TbCirclePlus } from 'react-icons/tb';
 
-import { NoteTagWrapper } from '@/components/tag/NoteTagWrapper';
+import { TagWrapper } from '@/components/tag/TagWrapper';
 import { type NoteTag } from '@/models/tags';
-import { TAG_COLOR } from '@/utils/tags';
 import { trpc } from '@/utils/trpc';
+import { Tag } from './Tag';
 
 const FIXED_OPTION_VALUES = {
   boolean: 'new:boolean',
@@ -152,10 +152,7 @@ export const AddTagButton = ({ noteId }: AddTagButtonProps) => {
         <Combobox.Options aria-label={t(($) => $.tags.listOfTags)}>
           {filteredTags?.map((tag) => (
             <Combobox.Option key={tag.name} value={`${tag.type}|${tag.name}`}>
-              <NoteTagWrapper color={TAG_COLOR[tag.type]} data-testid="tag-new">
-                {tag.name}
-                {t(($) => $.tags.newTagSuffix, { context: tag.type })}
-              </NoteTagWrapper>
+              <Tag data-testid="tag-new" name={tag.name} type={tag.type} />
             </Combobox.Option>
           ))}
           {isNewTagAllowed && (
@@ -168,10 +165,10 @@ export const AddTagButton = ({ noteId }: AddTagButtonProps) => {
                 )
                 .map(([type, value]) => (
                   <Combobox.Option key={value} value={value}>
-                    <NoteTagWrapper color="gray" data-testid="tag-new">
+                    <TagWrapper color="gray" data-testid="tag-new">
                       {sanitizedSearch}
                       {t(($) => $.tags.newTagSuffix, { context: type })}
-                    </NoteTagWrapper>
+                    </TagWrapper>
                   </Combobox.Option>
                 ))}
             </>

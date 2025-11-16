@@ -34,23 +34,19 @@ export const postEditNoteHandler = ({ wait = 0 }: { wait?: number } = {}) =>
 
       const input = extractTrpcInput(await request.clone().json());
 
-      try {
-        const updatedNote = await noteMock.update(
-          (q) => q.where({ id: input.id }),
-          {
-            data(note) {
-              note.content = input.content;
-            },
+      const updatedNote = await noteMock.update(
+        (q) => q.where({ id: input.id }),
+        {
+          data(note) {
+            note.content = input.content;
           },
-        );
+        },
+      );
 
-        return createTrpcJson({
-          success: true,
-          note: updatedNote!,
-        } satisfies RouterOutput['notes']['editNote']);
-      } catch (error) {
-        console.log(error);
-      }
+      return createTrpcJson({
+        success: true,
+        note: updatedNote!,
+      } satisfies RouterOutput['notes']['editNote']);
     },
   );
 

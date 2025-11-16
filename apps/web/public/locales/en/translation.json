@@ -1,6 +1,7 @@
 {
   "common": {
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "search": "Search"
   },
   "menu": {
     "configurations": "Configurations",
@@ -12,6 +13,22 @@
     "createNote": "Create note",
     "editNote": "Edit note",
     "noNotesFound": "No notes found"
+  },
+  "search": {
+    "modal": {
+      "addTag": "Add tag",
+      "description": "Find notes with:",
+      "operator": "Operator",
+      "tag": "Tag",
+      "value": "Value"
+    },
+    "operator": "-",
+    "operator_<": "less than",
+    "operator_<=": "less than or equals to",
+    "operator_=": "equals to",
+    "operator_>": "greater than",
+    "operator_>=": "greater than or equals to",
+    "searchNotes": "Search notes"
   },
   "signInSignUp": {
     "alreadyRegistered": "Already registered?",
