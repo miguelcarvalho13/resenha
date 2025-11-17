@@ -26,8 +26,8 @@ function RootRoute() {
       }}
     >
       <AppShell.Header>
-        <Group h="100%" px="md" justify="space-between">
-          <Group h="100%">
+        <Group h="100%">
+          <Group h="100%" px="md" w={{ sm: 300 }}>
             <Burger
               opened={mobileOpened}
               onClick={toggleMobile}
@@ -43,9 +43,10 @@ function RootRoute() {
 
             <Title order={1}>Resenhaí</Title>
           </Group>
-          <SearchNotesButton />
-
-          <UserMenu />
+          <Group flex="1" justify="space-between" pr="md">
+            <SearchNotesButton />
+            <UserMenu />
+          </Group>
         </Group>
       </AppShell.Header>
 
