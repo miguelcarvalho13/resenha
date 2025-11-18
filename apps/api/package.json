@@ -14,7 +14,7 @@
     "type-check": "tsc",
     "build": "rimraf dist && tsc --noEmit false && tsc-alias",
     "start": "node dist/server.js",
-    "test": "vitest",
+    "test": "vitest --silent='passed-only'",
     "ts:check": "tsc --noEmit"
   },
   "dependencies": {
