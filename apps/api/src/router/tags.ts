@@ -28,7 +28,13 @@ const findOrCreateTag = async ({
   const [tag] = await tx
     .select()
     .from(tags)
-    .where(and(eq(tags.name, name), eq(tags.type, type)));
+    .where(
+      and(
+        eq(tags.name, name),
+        eq(tags.type, type),
+        eq(tags.createdBy, createdBy),
+      ),
+    );
 
   if (tag) {
     return tag;

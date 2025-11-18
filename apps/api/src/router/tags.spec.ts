@@ -512,6 +512,37 @@ describe('tags.createNoteTag', () => {
     expect((await db.select().from(schema.notes)).length).toBe(1);
   });
 
+  test('should create new tag even if the tag exists for another user', async () => {
+    const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
+      app!,
+      { name: 'Another User', email: 'another@example.com' },
+    );
+
+    await createTagThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+      tag: { name: 'my tag', type: 'string' },
+    });
+
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const note = await createNoteThroughApi({ app: app!, authCookie });
+
+    const res = await supertest(app!)
+      .post('/api/trpc/tags.createNoteTag')
+      .send({
+        json: {
+          name: 'my tag',
+          noteId: note.id,
+          type: 'string',
+        } satisfies CreateNoteTagSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+    expect((await db.select().from(schema.tags)).length).toBe(2);
+  });
+
   test('should be a protected route', async () => {
     const res = await supertest(app!)
       .post('/api/trpc/tags.createNoteTag')
