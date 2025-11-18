@@ -191,7 +191,7 @@ test('should correctly search for notes', async () => {
 
   // Add tag filters
   const tagsContainer = searchModal.getByTestId('tags-filter-container');
-  const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
+  const addTagButton = searchModal.getByRole('button', { name: /Add tag/ });
   await addTagButton.click();
 
   // string-tag search

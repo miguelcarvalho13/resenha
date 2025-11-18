@@ -93,20 +93,26 @@ export const SearchNotesModal = ({ close, opened }: SearchNotesModalProps) => {
 
   return (
     <Modal
-      opened={opened}
       onClose={() => {
         form.reset();
         close();
       }}
+      opened={opened}
+      size="lg"
       title={t(($) => $.search.searchNotes)}
     >
       <SearchModalFormProvider form={form}>
         <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
-          <Text size="sm">{t(($) => $.search.modal.description)}</Text>
-          <Stack data-testid="tags-filter-container">
-            {rows?.map((_, index) => (
-              <SearchNotesModalRow key={index} index={index} />
-            ))}
+          <Stack align="center" c="dimmed" gap="lg">
+            <Text size="xs" ta="left" w="100%">
+              {t(($) => $.search.modal.description)}
+            </Text>
+
+            <Stack data-testid="tags-filter-container" gap={0} w="100%">
+              {rows?.map((_, index) => (
+                <SearchNotesModalRow key={index} index={index} />
+              ))}
+            </Stack>
 
             <Button
               leftSection={<TbPlus />}

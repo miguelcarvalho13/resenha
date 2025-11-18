@@ -1,16 +1,25 @@
-import { Combobox, Input, Loader, useCombobox } from '@mantine/core';
+import {
+  Combobox,
+  Input,
+  Loader,
+  type MantineStyleProps,
+  useCombobox,
+} from '@mantine/core';
+import { type GetInputPropsReturnType } from '@mantine/form';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type GetInputPropsReturnType } from '@mantine/form';
 
 import { Tag } from '@/components/tag/Tag';
 import { TagWrapper } from '@/components/tag/TagWrapper';
 import { TAG_COLOR } from '@/utils/tags';
 import { trpc } from '@/utils/trpc';
 
-interface SearchNotesModalRowTagInputProps extends GetInputPropsReturnType {}
+interface SearchNotesModalRowTagInputProps extends GetInputPropsReturnType {
+  flex?: MantineStyleProps['flex'];
+}
 
 export const SearchNotesModalRowTagInput = ({
+  flex,
   value,
   defaultValue,
   onChange,
@@ -51,7 +60,7 @@ export const SearchNotesModalRowTagInput = ({
       store={combobox}
     >
       <Combobox.Target>
-        <Input.Wrapper error={error}>
+        <Input.Wrapper flex={flex} error={error}>
           {currentTag && <Tag name={currentTag.name} type={currentTag.type} />}
           <Input
             aria-label={t(($) => $.search.modal.tag)}
