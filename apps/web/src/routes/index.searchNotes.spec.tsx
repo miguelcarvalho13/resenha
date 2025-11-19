@@ -8,6 +8,7 @@ import {
   type RenderWithRouterContext,
 } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
+import { searchNotesSchema, type SearchNotesSchemaType } from '@repo/api';
 
 const createFilterRowPO = ({
   getByRole,
@@ -96,6 +97,16 @@ const assertRowOperatorOptions = async ({
   }
 };
 
+const getCurrentQueryFromUrl = () => {
+  const queryString = new URLSearchParams(window.location.search).get('query');
+
+  if (!queryString) throw new Error('`query` not found in query params');
+
+  return searchNotesSchema().shape.query.parse(
+    JSON.parse(decodeURIComponent(queryString)),
+  );
+};
+
 test('should correctly search for notes', async () => {
   // create mock server data
   await server.createSessionMock();
@@ -103,11 +114,16 @@ test('should correctly search for notes', async () => {
   const noteB = await server.createNoteMock({ content: 'B' });
 
   // Apply string tag
-  await server.createNoteTagMock({
+  const stringTag = await server.createTagMock({
     name: 'string-tag',
-    note: noteA,
     type: 'string',
-    value: 'string-tag',
+  });
+
+  await server.createNoteTagMock({
+    name: stringTag.name,
+    note: noteA,
+    tag: stringTag,
+    type: stringTag.type,
   });
 
   // Apply number tag
@@ -262,4 +278,22 @@ test('should correctly search for notes', async () => {
   await expect.element(searchModal).not.toBeInTheDocument();
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
   expect(notes.nth(0)).toHaveTextContent('A');
+  expect(getCurrentQueryFromUrl()).to.deep.eq([
+    { tagId: stringTag.id, type: 'string', operator: { type: '=' } },
+    {
+      tagId: numberTag.id,
+      type: 'number',
+      operator: { type: '<=', value: 10 },
+    },
+    {
+      tagId: booleanTag.id,
+      type: 'boolean',
+      operator: { type: '=', value: false },
+    },
+    {
+      tagId: dateTag.id,
+      type: 'date',
+      operator: { type: '>=', value: '2025-10-10' },
+    },
+  ] satisfies SearchNotesSchemaType['query']);
 });
