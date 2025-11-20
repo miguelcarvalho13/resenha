@@ -9,7 +9,7 @@ export const useLogout = () => {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          navigate({ to: '/sign-in' });
+          void navigate({ to: '/sign-in' });
         },
       },
     });

@@ -2,7 +2,7 @@ import { type Locator } from '@vitest/browser/context';
 import { expect, vi } from 'vitest';
 
 import { server } from '@/mocks/server';
-import { type Tag } from '@/models/tags';
+import { NO_OPTION_VALUE, type Tag } from '@/models/tags';
 import {
   renderWithRouter,
   type RenderWithRouterContext,
@@ -107,8 +107,7 @@ const getCurrentQueryFromUrl = () => {
   );
 };
 
-test('should correctly search for notes', async () => {
-  // create mock server data
+const setupCommonData = async () => {
   await server.createSessionMock();
   const noteA = await server.createNoteMock({ content: 'A' });
   const noteB = await server.createNoteMock({ content: 'B' });
@@ -191,6 +190,13 @@ test('should correctly search for notes', async () => {
     type: dateTag.type,
     value: '2025-10-09',
   });
+
+  return { noteA, noteB, stringTag, dateTag, booleanTag, numberTag };
+};
+
+test('should correctly search for notes', async () => {
+  // create mock server data
+  const { stringTag, numberTag, booleanTag, dateTag } = await setupCommonData();
 
   const { getByTestId, getByRole } = await renderWithRouter();
 
@@ -296,4 +302,69 @@ test('should correctly search for notes', async () => {
       operator: { type: '>=', value: '2025-10-10' },
     },
   ] satisfies SearchNotesSchemaType['query']);
+});
+
+test('should correctly restore search based on query params', async () => {
+  // create mock server data
+  const { stringTag, numberTag, booleanTag, dateTag } = await setupCommonData();
+
+  const query = [
+    { tagId: stringTag.id, type: 'string', operator: { type: '=' } },
+    {
+      tagId: numberTag.id,
+      type: 'number',
+      operator: { type: '<=', value: 10 },
+    },
+    {
+      tagId: booleanTag.id,
+      type: 'boolean',
+      operator: { type: '=', value: false },
+    },
+    {
+      tagId: dateTag.id,
+      type: 'date',
+      operator: { type: '>=', value: '2025-10-10' },
+    },
+  ] satisfies SearchNotesSchemaType['query'];
+
+  const { getByRole } = await renderWithRouter({ search: { query } });
+
+  // Open search modal
+  await getByRole('button', { name: /Search notes/ }).click();
+  const searchModal = getByRole('dialog', { name: /Search notes/ });
+  await expect.element(searchModal).toBeVisible();
+  const tagsContainer = searchModal.getByTestId('tags-filter-container');
+  const filterRows = tagsContainer.getByTestId('tags-filter');
+
+  // Assert filter rows
+  await vi.waitFor(() => expect(filterRows.elements()).toHaveLength(4));
+  const firstRow = createFilterRowPO({ getByRole, row: filterRows.nth(0) });
+  const secondRow = createFilterRowPO({ getByRole, row: filterRows.nth(1) });
+  const thirdRow = createFilterRowPO({ getByRole, row: filterRows.nth(2) });
+  const fourthRow = createFilterRowPO({ getByRole, row: filterRows.nth(3) });
+
+  // first row
+  await expect.element(filterRows.nth(0)).toHaveTextContent(stringTag.name);
+  await expect.element(firstRow.operatorInput).not.toBeInTheDocument();
+  await expect.element(firstRow.valueInput).not.toBeInTheDocument();
+
+  // second row
+  await expect.element(filterRows.nth(1)).toHaveTextContent(numberTag.name);
+  await expect
+    .element(secondRow.operatorInput)
+    .toHaveValue('less than or equals to');
+  console.log(secondRow.valueInput.selector);
+  await expect.element(secondRow.valueInput).toHaveValue('10');
+
+  // third row
+  await expect.element(filterRows.nth(2)).toHaveTextContent(booleanTag.name);
+  await expect.element(thirdRow.operatorInput).toHaveValue('equals to');
+  await expect.element(thirdRow.valueInput).toHaveValue(NO_OPTION_VALUE);
+
+  // fourth row
+  await expect.element(filterRows.nth(3)).toHaveTextContent(dateTag.name);
+  await expect
+    .element(fourthRow.operatorInput)
+    .toHaveValue('greater than or equals to');
+  await expect.element(fourthRow.valueInput).toHaveValue('2025-10-10');
 });

@@ -1,4 +1,5 @@
 import { MantineProvider } from '@mantine/core';
+import { ModalsProvider } from '@mantine/modals';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import dayjs from 'dayjs';
@@ -24,7 +25,9 @@ export function App() {
   return (
     <TrpcWrapper>
       <MantineProvider>
-        <RouterProvider router={router} />
+        <ModalsProvider>
+          <RouterProvider router={router} />
+        </ModalsProvider>
       </MantineProvider>
     </TrpcWrapper>
   );

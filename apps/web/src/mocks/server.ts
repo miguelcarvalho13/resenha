@@ -8,6 +8,7 @@ import { noteTagMock, tagMock } from './models/tags';
 import { userMock } from './models/users';
 
 export const server = {
+  id: crypto.randomUUID(),
   timing: 0,
 
   // mocks
@@ -17,6 +18,8 @@ export const server = {
   createTagMock,
   createUserMock,
   reset() {
+    console.log('resetting mock server...');
+    this.id = crypto.randomUUID();
     this.timing = 0;
     noteMock.clear();
     noteTagMock.clear();

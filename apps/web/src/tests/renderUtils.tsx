@@ -2,8 +2,9 @@ import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { act } from 'react';
 import { render } from 'vitest-browser-react';
 
-import { TestWrapper } from './TestWrapper';
 import { routeTree } from '@/routeTree.gen';
+import { type IndexSearchParams } from '@/routes/index';
+import { TestWrapper } from './TestWrapper';
 
 const getTestRouter = () => {
   const router = createRouter({
@@ -17,7 +18,9 @@ const getTestRouter = () => {
 /**
  * Renders the index route for testing purposes.
  */
-export async function renderWithRouter() {
+export async function renderWithRouter({
+  search,
+}: { search?: IndexSearchParams } = {}) {
   const router = getTestRouter();
 
   const renderResult = render(
@@ -26,7 +29,7 @@ export async function renderWithRouter() {
     </TestWrapper>,
   );
 
-  await act(() => router.navigate({ to: '/' }));
+  await act(() => router.navigate({ to: '/', search }));
 
   return {
     router,

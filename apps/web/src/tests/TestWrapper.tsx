@@ -1,4 +1,5 @@
 import { MantineProvider } from '@mantine/core';
+import { ModalsProvider } from '@mantine/modals';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import dayjs from 'dayjs';
@@ -18,6 +19,8 @@ interface TestWrapperProps {
 
 export const TestWrapper = ({ children }: TestWrapperProps) => (
   <TrpcWrapper>
-    <MantineProvider>{children}</MantineProvider>
+    <MantineProvider>
+      <ModalsProvider>{children}</ModalsProvider>
+    </MantineProvider>
   </TrpcWrapper>
 );

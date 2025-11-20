@@ -10,9 +10,11 @@ import { SearchedNotesGrid } from '@/components/note/SearchedNotesGrid';
 import { authClient } from '@/utils/authClient';
 import { searchNotesSchema } from '@repo/api';
 
-const searchSchema = z.object({
+const indexSearchSchema = z.object({
   query: z.array(searchNotesSchema().shape.query.unwrap()).nullish(),
 });
+
+export type IndexSearchParams = z.infer<typeof indexSearchSchema>;
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -25,7 +27,7 @@ export const Route = createFileRoute('/')({
       });
     }
   },
-  validateSearch: zodValidator(searchSchema),
+  validateSearch: zodValidator(indexSearchSchema),
 });
 
 function Index() {

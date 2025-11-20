@@ -59,7 +59,7 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
         {
           onSuccess: () => {
             console.log('Sign up successful');
-            navigate({ to: '/' });
+            void navigate({ to: '/' });
           },
           onError: (ctx) => {
             console.log(ctx.error.message);
@@ -75,7 +75,7 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
         {
           onSuccess: () => {
             console.log('Sign in successful');
-            navigate({ to: '/' });
+            void navigate({ to: '/' });
           },
           onError: (ctx) => {
             console.log(ctx.error.message);

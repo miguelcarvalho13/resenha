@@ -1,13 +1,25 @@
 import { Button, Text } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { TbZoom } from 'react-icons/tb';
 
+import { Route as RouteIndex } from '@/routes/index';
+import { modals } from '@mantine/modals';
 import { SearchNotesModal } from './searchNotesModal/SearchNotesModal';
+import {
+  fromSearchNotesSchemaToSearchParams,
+  fromSearchParamsToSearchNotesSchema,
+} from './searchNotesModal/SearchNotesModal.utils';
+import { trpc } from '@/utils/trpc';
 
 export const SearchNotesButton = () => {
   const { t } = useTranslation();
-  const [opened, { close, open }] = useDisclosure(false);
+  const searchParams = useSearch({
+    from: RouteIndex.fullPath,
+    shouldThrow: false,
+  });
+  const navigate = useNavigate({ from: RouteIndex.fullPath });
+  const { data: tagsData } = trpc.tags.findAllTags.useQuery();
 
   return (
     <>
@@ -18,14 +30,33 @@ export const SearchNotesButton = () => {
         justify="start"
         leftSection={<TbZoom />}
         maw={{ xs: 250 }}
-        onClick={open}
+        onClick={() =>
+          modals.open({
+            title: t(($) => $.search.searchNotes),
+            size: 'lg',
+            children: (
+              <SearchNotesModal
+                initialValues={fromSearchParamsToSearchNotesSchema({
+                  values: { query: searchParams?.query ?? [] },
+                })}
+                onSubmit={(values) => {
+                  void navigate({
+                    search: fromSearchNotesSchemaToSearchParams({
+                      values,
+                      tags: tagsData?.tags ?? [],
+                    }),
+                  });
+                }}
+              />
+            ),
+          })
+        }
         variant="transparent"
       >
         <Text c="dimmed" visibleFrom="xs">
           {t(($) => $.search.searchNotes)}
         </Text>
       </Button>
-      <SearchNotesModal close={close} opened={opened} />
     </>
   );
 };

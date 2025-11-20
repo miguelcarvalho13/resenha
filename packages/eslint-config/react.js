@@ -6,12 +6,14 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
   ],
+  parserOptions: { project: './tsconfig.json' },
   plugins: ['jsx-a11y'],
   globals: {
     React: true,
     JSX: true,
   },
   rules: {
+    '@typescript-eslint/no-floating-promises': ['error'],
     'react/react-in-jsx-scope': 'off',
     'prefer-template': 'off',
     'react/prop-types': 'off',
@@ -25,4 +27,5 @@ module.exports = {
     // Force ESLint to detect .tsx files
     { files: ['*.js?(x)', '*.ts?(x)'] },
   ],
+  ignorePatterns: ['tailwind.*.ts', 'vite*.ts'],
 };
