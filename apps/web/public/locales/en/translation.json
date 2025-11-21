@@ -18,6 +18,7 @@
   },
   "search": {
     "clearSearch": "Clear search",
+    "currentlySearchingFor": "Currently searching for...",
     "modal": {
       "addTag": "Add tag",
       "description": "Find notes with:",

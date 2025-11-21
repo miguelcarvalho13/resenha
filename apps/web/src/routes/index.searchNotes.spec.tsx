@@ -333,7 +333,11 @@ test('should correctly restore search based on query params', async () => {
   expect(getCurrentQueryFromUrl()).to.deep.eq(query);
 
   // Open search modal
-  await getByRole('button', { name: /Search notes/ }).click();
+  const searchButton = getByRole('button', { name: /Search notes/ });
+  await expect
+    .element(searchButton)
+    .toHaveTextContent('Currently searching for...');
+  await searchButton.click();
   const searchModal = getByRole('dialog', { name: /Search notes/ });
   await expect.element(searchModal).toBeVisible();
   const tagsContainer = searchModal.getByTestId('tags-filter-container');

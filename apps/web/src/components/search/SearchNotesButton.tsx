@@ -54,9 +54,15 @@ export const SearchNotesButton = () => {
         }
         variant="transparent"
       >
-        <Text c="dimmed" visibleFrom="xs">
-          {t(($) => $.search.searchNotes)}
-        </Text>
+        {searchParams?.query ? (
+          <Text c="dark" visibleFrom="xs">
+            {t(($) => $.search.currentlySearchingFor)}
+          </Text>
+        ) : (
+          <Text c="dimmed" visibleFrom="xs">
+            {t(($) => $.search.searchNotes)}
+          </Text>
+        )}
       </Button>
     </>
   );
