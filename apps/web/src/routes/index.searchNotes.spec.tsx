@@ -329,6 +329,9 @@ test('should correctly restore search based on query params', async () => {
 
   const { getByRole } = await renderWithRouter({ search: { query } });
 
+  // URL should be restored
+  expect(getCurrentQueryFromUrl()).to.deep.eq(query);
+
   // Open search modal
   await getByRole('button', { name: /Search notes/ }).click();
   const searchModal = getByRole('dialog', { name: /Search notes/ });
