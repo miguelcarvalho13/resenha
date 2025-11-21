@@ -100,7 +100,7 @@ const assertRowOperatorOptions = async ({
 const getCurrentQueryFromUrl = () => {
   const queryString = new URLSearchParams(window.location.search).get('query');
 
-  if (!queryString) throw new Error('`query` not found in query params');
+  if (!queryString) return [];
 
   return searchNotesSchema().shape.query.parse(
     JSON.parse(decodeURIComponent(queryString)),
@@ -393,4 +393,40 @@ test('should be possible to remove rows from search modal', async () => {
     .getByRole('button', { name: /Remove/ })
     .click();
   await vi.waitFor(() => expect(filterRows.elements()).toHaveLength(0));
+});
+
+test('should be possible to clear search through the search modal', async () => {
+  // create mock server data
+  const { stringTag, numberTag, booleanTag, dateTag } = await setupCommonData();
+
+  const query = [
+    { tagId: stringTag.id, type: 'string', operator: { type: '=' } },
+    {
+      tagId: numberTag.id,
+      type: 'number',
+      operator: { type: '<=', value: 10 },
+    },
+    {
+      tagId: booleanTag.id,
+      type: 'boolean',
+      operator: { type: '=', value: false },
+    },
+    {
+      tagId: dateTag.id,
+      type: 'date',
+      operator: { type: '>=', value: '2025-10-10' },
+    },
+  ] satisfies SearchNotesSchemaType['query'];
+
+  const { getByRole } = await renderWithRouter({ search: { query } });
+
+  // Open search modal
+  await getByRole('button', { name: /Search notes/ }).click();
+  const searchModal = getByRole('dialog', { name: /Search notes/ });
+  await expect.element(searchModal).toBeVisible();
+
+  // Clear search
+  await searchModal.getByRole('button', { name: /Clear search/ }).click();
+  await expect.element(searchModal).not.toBeInTheDocument();
+  expect(getCurrentQueryFromUrl()).to.deep.eq([]);
 });

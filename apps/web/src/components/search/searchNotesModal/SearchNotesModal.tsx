@@ -14,11 +14,13 @@ import { SearchNotesModalRow } from './SearchNotesModalRow';
 
 interface SearchNotesModalProps {
   initialValues: SearchModalSchemaType;
+  onClearSearch: () => void;
   onSubmit: (values: SearchModalSchemaType) => void;
 }
 
 export const SearchNotesModal = ({
   initialValues,
+  onClearSearch,
   onSubmit,
 }: SearchNotesModalProps) => {
   const { t } = useTranslation();
@@ -34,6 +36,11 @@ export const SearchNotesModal = ({
 
   const handleSubmit = (values: SearchModalSchemaType) => {
     onSubmit(values);
+    modals.closeAll();
+  };
+
+  const handleClearSearch = () => {
+    onClearSearch();
     modals.closeAll();
   };
 
@@ -64,7 +71,10 @@ export const SearchNotesModal = ({
           </Button>
         </Stack>
 
-        <Group mt="xl" justify="right">
+        <Group mt="xl" justify="space-between">
+          <Button color="red" onClick={handleClearSearch}>
+            {t(($) => $.search.clearSearch)}
+          </Button>
           <Button type="submit">{t(($) => $.common.search)}</Button>
         </Group>
       </form>

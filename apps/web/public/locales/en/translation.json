@@ -17,6 +17,7 @@
     "noNotesFound": "No notes found"
   },
   "search": {
+    "clearSearch": "Clear search",
     "modal": {
       "addTag": "Add tag",
       "description": "Find notes with:",

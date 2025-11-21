@@ -39,6 +39,7 @@ export const SearchNotesButton = () => {
                 initialValues={fromSearchParamsToSearchNotesSchema({
                   values: { query: searchParams?.query ?? [] },
                 })}
+                onClearSearch={() => navigate({})}
                 onSubmit={(values) => {
                   void navigate({
                     search: fromSearchNotesSchemaToSearchParams({
