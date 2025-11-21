@@ -1,7 +1,8 @@
 import { trpc } from '@/utils/trpc';
-import { Flex, Text } from '@mantine/core';
+import { ActionIcon, Flex, Group, Text } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 
+import { TbMinus } from 'react-icons/tb';
 import { useSearchModalFormContext } from './SearchNotesModal.form';
 import { SearchNotesModalRowOperatorInput } from './SearchNotesModalRowOperatorInput';
 import { SearchNotesModalRowTagInput } from './SearchNotesModalRowTagInput';
@@ -26,30 +27,42 @@ export const SearchNotesModalRow = ({ index }: SearchNotesModalRowProps) => {
           {t(($) => $.common.and)}
         </Text>
       )}
-      <Flex
-        align={{ base: 'stretch', xs: 'center' }}
-        data-testid="tags-filter"
-        direction={{ base: 'column', xs: 'row' }}
-        gap={{ base: 'xs', xs: 'sm' }}
-      >
-        <SearchNotesModalRowTagInput
-          {...form.getInputProps(`query.${index}.tagId`)}
-        />
 
-        {currentTag && (
-          <>
-            <SearchNotesModalRowOperatorInput
-              flex={1}
-              type={currentTag.type}
-              {...form.getInputProps(`query.${index}.operator`)}
-            />
-            <SearchNotesModalRowValueInput
-              type={currentTag.type}
-              {...form.getInputProps(`query.${index}.value`)}
-            />
-          </>
-        )}
-      </Flex>
+      <Group data-testid="tags-filter">
+        <Flex
+          align={{ base: 'stretch', xs: 'center' }}
+          direction={{ base: 'column', xs: 'row' }}
+          flex={1}
+          gap={{ base: 'xs', xs: 'sm' }}
+        >
+          <SearchNotesModalRowTagInput
+            {...form.getInputProps(`query.${index}.tagId`)}
+          />
+
+          {currentTag && (
+            <>
+              <SearchNotesModalRowOperatorInput
+                flex={1}
+                type={currentTag.type}
+                {...form.getInputProps(`query.${index}.operator`)}
+              />
+              <SearchNotesModalRowValueInput
+                type={currentTag.type}
+                {...form.getInputProps(`query.${index}.value`)}
+              />
+            </>
+          )}
+        </Flex>
+
+        <ActionIcon
+          aria-label={t(($) => $.common.remove)}
+          onClick={() => form.removeListItem('query', index)}
+          radius="xl"
+          variant="subtle"
+        >
+          <TbMinus aria-label={t(($) => $.common.remove)} />
+        </ActionIcon>
+      </Group>
     </>
   );
 };

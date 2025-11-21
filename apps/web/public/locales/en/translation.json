@@ -2,6 +2,7 @@
   "common": {
     "and": "and",
     "loading": "Loading...",
+    "remove": "Remove",
     "search": "Search"
   },
   "menu": {

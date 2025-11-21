@@ -368,3 +368,26 @@ test('should correctly restore search based on query params', async () => {
     .toHaveValue('greater than or equals to');
   await expect.element(fourthRow.valueInput).toHaveValue('2025-10-10');
 });
+
+test('should be possible to remove rows from search modal', async () => {
+  const { getByRole } = await renderWithRouter();
+
+  // Open search modal
+  await getByRole('button', { name: /Search notes/ }).click();
+  const searchModal = getByRole('dialog', { name: /Search notes/ });
+  await expect.element(searchModal).toBeVisible();
+  const tagsContainer = searchModal.getByTestId('tags-filter-container');
+  const filterRows = tagsContainer.getByTestId('tags-filter');
+  const addTagButton = searchModal.getByRole('button', { name: /Add tag/ });
+
+  // Add tag filter row
+  await addTagButton.click();
+  await vi.waitFor(() => expect(filterRows.elements()).toHaveLength(1));
+
+  // Remove tag filter row
+  await filterRows
+    .nth(0)
+    .getByRole('button', { name: /Remove/ })
+    .click();
+  await vi.waitFor(() => expect(filterRows.elements()).toHaveLength(0));
+});
