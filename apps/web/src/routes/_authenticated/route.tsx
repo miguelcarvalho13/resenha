@@ -41,7 +41,7 @@ function Index() {
               size="sm"
             />
 
-            <Title order={1}>Resenhaí</Title>
+            <Title order={1}>{t(($) => $.common.appTitle)}</Title>
           </Group>
           <Group flex="1" justify="space-between" pr="md">
             <SearchNotesButton />
