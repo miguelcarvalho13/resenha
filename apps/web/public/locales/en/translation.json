@@ -51,6 +51,10 @@
     "addTag": "Add tag",
     "editTag": "Edit {{name}}",
     "editTagValue": "Edit {{name}} value",
+    "fixed": {
+      "created": "created",
+      "updated": "updated"
+    },
     "listOfTags": "List of tags",
     "newTagSuffix": "",
     "newTagSuffix_boolean": ": yes/no",

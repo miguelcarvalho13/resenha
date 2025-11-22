@@ -778,3 +778,36 @@ test.each([
     await expect.element(tag).not.toBeInTheDocument();
   },
 );
+
+test('should render "created" and "updated" fixed/default tags', async () => {
+  // create mock server data
+  await server.createSessionMock();
+  await server.createNoteMock({
+    content: 'A',
+    createdAt: new Date(2025, 10, 20),
+    updatedAt: new Date(2025, 10, 22),
+  });
+
+  const { getByRole, getByTestId } = await renderWithRouter();
+  const noteCard = getByTestId('note-card');
+
+  await vi.waitFor(() => expect(noteCard.elements()).toHaveLength(1));
+
+  // Open the modal for the first time and edit it
+  await noteCard
+    .nth(0)
+    .getByRole('button', { name: /Edit note/ })
+    .click();
+
+  const fixedTagsContainer = getByRole('dialog', {
+    name: /Edit note/,
+  }).getByTestId('fixed-tags-container');
+
+  const tags = fixedTagsContainer.getByTestId('tag');
+
+  await vi.waitFor(() => expect(tags.elements()).toHaveLength(2));
+
+  // clicks in the tag to activate edit mode
+  await expect.element(tags.nth(0)).toHaveTextContent('created: 2025-11-20');
+  await expect.element(tags.nth(1)).toHaveTextContent('updated: 2025-11-22');
+});

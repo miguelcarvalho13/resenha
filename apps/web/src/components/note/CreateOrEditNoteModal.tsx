@@ -1,9 +1,10 @@
-import { Button, Modal, Stack, Textarea } from '@mantine/core';
+import { Box, Button, Modal, Stack, Textarea } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
+import { FixedNoteTagContainer } from '@/components/tag/FixedNoteTagContainer';
 import { NoteTagContainer } from '@/components/tag/NoteTagContainer';
 import { type NoteForFindAll } from '@/models/notes';
 import { trpc } from '@/utils/trpc';
@@ -98,6 +99,10 @@ const CreateOrEditNoteModal = ({
           />
 
           {note && <NoteTagContainer note={note} />}
+
+          <Box bd="1px dashed gray.2" />
+
+          {note && <FixedNoteTagContainer note={note} />}
 
           <Button type="submit">Save</Button>
         </Stack>
