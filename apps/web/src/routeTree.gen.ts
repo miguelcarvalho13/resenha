@@ -9,36 +9,22 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TrashRouteImport } from './routes/trash'
-import { Route as SignUpRouteImport } from './routes/sign-up'
-import { Route as SignInRouteImport } from './routes/sign-in'
-import { Route as SearchesRouteImport } from './routes/searches'
-import { Route as ConfigRouteImport } from './routes/config'
+import { Route as PublicRouteRouteImport } from './routes/_public/route'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PublicSignUpRouteImport } from './routes/_public/sign-up'
+import { Route as PublicSignInRouteImport } from './routes/_public/sign-in'
+import { Route as AuthenticatedTrashRouteImport } from './routes/_authenticated/trash'
+import { Route as AuthenticatedSearchesRouteImport } from './routes/_authenticated/searches'
+import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedConfigRouteImport } from './routes/_authenticated/config'
 
-const TrashRoute = TrashRouteImport.update({
-  id: '/trash',
-  path: '/trash',
+const PublicRouteRoute = PublicRouteRouteImport.update({
+  id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SignUpRoute = SignUpRouteImport.update({
-  id: '/sign-up',
-  path: '/sign-up',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignInRoute = SignInRouteImport.update({
-  id: '/sign-in',
-  path: '/sign-in',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SearchesRoute = SearchesRouteImport.update({
-  id: '/searches',
-  path: '/searches',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConfigRoute = ConfigRouteImport.update({
-  id: '/config',
-  path: '/config',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -46,91 +32,119 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PublicSignUpRoute = PublicSignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicSignInRoute = PublicSignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const AuthenticatedTrashRoute = AuthenticatedTrashRouteImport.update({
+  id: '/trash',
+  path: '/trash',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSearchesRoute = AuthenticatedSearchesRouteImport.update({
+  id: '/searches',
+  path: '/searches',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedConfigRoute = AuthenticatedConfigRouteImport.update({
+  id: '/config',
+  path: '/config',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/config': typeof ConfigRoute
-  '/searches': typeof SearchesRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
-  '/trash': typeof TrashRoute
+  '/config': typeof AuthenticatedConfigRoute
+  '/home': typeof AuthenticatedHomeRoute
+  '/searches': typeof AuthenticatedSearchesRoute
+  '/trash': typeof AuthenticatedTrashRoute
+  '/sign-in': typeof PublicSignInRoute
+  '/sign-up': typeof PublicSignUpRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/config': typeof ConfigRoute
-  '/searches': typeof SearchesRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
-  '/trash': typeof TrashRoute
+  '/config': typeof AuthenticatedConfigRoute
+  '/home': typeof AuthenticatedHomeRoute
+  '/searches': typeof AuthenticatedSearchesRoute
+  '/trash': typeof AuthenticatedTrashRoute
+  '/sign-in': typeof PublicSignInRoute
+  '/sign-up': typeof PublicSignUpRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/config': typeof ConfigRoute
-  '/searches': typeof SearchesRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
-  '/trash': typeof TrashRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_public': typeof PublicRouteRouteWithChildren
+  '/_authenticated/config': typeof AuthenticatedConfigRoute
+  '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/searches': typeof AuthenticatedSearchesRoute
+  '/_authenticated/trash': typeof AuthenticatedTrashRoute
+  '/_public/sign-in': typeof PublicSignInRoute
+  '/_public/sign-up': typeof PublicSignUpRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/config' | '/searches' | '/sign-in' | '/sign-up' | '/trash'
+  fullPaths:
+    | '/'
+    | '/config'
+    | '/home'
+    | '/searches'
+    | '/trash'
+    | '/sign-in'
+    | '/sign-up'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/config' | '/searches' | '/sign-in' | '/sign-up' | '/trash'
+  to:
+    | '/'
+    | '/config'
+    | '/home'
+    | '/searches'
+    | '/trash'
+    | '/sign-in'
+    | '/sign-up'
   id:
     | '__root__'
     | '/'
-    | '/config'
-    | '/searches'
-    | '/sign-in'
-    | '/sign-up'
-    | '/trash'
+    | '/_authenticated'
+    | '/_public'
+    | '/_authenticated/config'
+    | '/_authenticated/home'
+    | '/_authenticated/searches'
+    | '/_authenticated/trash'
+    | '/_public/sign-in'
+    | '/_public/sign-up'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ConfigRoute: typeof ConfigRoute
-  SearchesRoute: typeof SearchesRoute
-  SignInRoute: typeof SignInRoute
-  SignUpRoute: typeof SignUpRoute
-  TrashRoute: typeof TrashRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  PublicRouteRoute: typeof PublicRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/trash': {
-      id: '/trash'
-      path: '/trash'
-      fullPath: '/trash'
-      preLoaderRoute: typeof TrashRouteImport
+    '/_public': {
+      id: '/_public'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof PublicRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sign-up': {
-      id: '/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof SignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sign-in': {
-      id: '/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof SignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/searches': {
-      id: '/searches'
-      path: '/searches'
-      fullPath: '/searches'
-      preLoaderRoute: typeof SearchesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/config': {
-      id: '/config'
-      path: '/config'
-      fullPath: '/config'
-      preLoaderRoute: typeof ConfigRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -140,16 +154,86 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_public/sign-up': {
+      id: '/_public/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof PublicSignUpRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/sign-in': {
+      id: '/_public/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof PublicSignInRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_authenticated/trash': {
+      id: '/_authenticated/trash'
+      path: '/trash'
+      fullPath: '/trash'
+      preLoaderRoute: typeof AuthenticatedTrashRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/searches': {
+      id: '/_authenticated/searches'
+      path: '/searches'
+      fullPath: '/searches'
+      preLoaderRoute: typeof AuthenticatedSearchesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/home': {
+      id: '/_authenticated/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthenticatedHomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/config': {
+      id: '/_authenticated/config'
+      path: '/config'
+      fullPath: '/config'
+      preLoaderRoute: typeof AuthenticatedConfigRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedConfigRoute: typeof AuthenticatedConfigRoute
+  AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedSearchesRoute: typeof AuthenticatedSearchesRoute
+  AuthenticatedTrashRoute: typeof AuthenticatedTrashRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedConfigRoute: AuthenticatedConfigRoute,
+  AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedSearchesRoute: AuthenticatedSearchesRoute,
+  AuthenticatedTrashRoute: AuthenticatedTrashRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
+interface PublicRouteRouteChildren {
+  PublicSignInRoute: typeof PublicSignInRoute
+  PublicSignUpRoute: typeof PublicSignUpRoute
+}
+
+const PublicRouteRouteChildren: PublicRouteRouteChildren = {
+  PublicSignInRoute: PublicSignInRoute,
+  PublicSignUpRoute: PublicSignUpRoute,
+}
+
+const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
+  PublicRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ConfigRoute: ConfigRoute,
-  SearchesRoute: SearchesRoute,
-  SignInRoute: SignInRoute,
-  SignUpRoute: SignUpRoute,
-  TrashRoute: TrashRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  PublicRouteRoute: PublicRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

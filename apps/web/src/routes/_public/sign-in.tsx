@@ -6,27 +6,28 @@ import { LoginAndSignUpForm } from '@/components/auth/LoginAndSignUpForm';
 import { LoginAndSignUpFormLayout } from '@/components/auth/LoginAndSignUpFormLayout';
 import { LinkStyled } from '@/components/link/LinkStyled';
 
-export const Route = createFileRoute('/sign-up')({
-  component: SignUp,
+export const Route = createFileRoute('/_public/sign-in')({
+  component: SignIn,
 });
 
-function SignUp() {
+function SignIn() {
   const { t } = useTranslation();
 
   return (
     <LoginAndSignUpFormLayout
-      form={<LoginAndSignUpForm mode="sign-up" />}
+      form={<LoginAndSignUpForm mode="sign-in" />}
       extra={
         <Text>
-          {t(($) => $.signInSignUp.alreadyRegistered)}{' '}
-          <LinkStyled to="/sign-in">
-            {t(($) => $.signInSignUp.signIn)}
+          {t(($) => $.signInSignUp.notRegisteredYet)}{' '}
+          <LinkStyled to="/sign-up">
+            {' '}
+            {t(($) => $.signInSignUp.signUp)}
           </LinkStyled>
         </Text>
       }
       title={
         <Text size="lg" fw="bold">
-          {t(($) => $.signInSignUp.signUp)}
+          {t(($) => $.signInSignUp.signIn)}
         </Text>
       }
     />

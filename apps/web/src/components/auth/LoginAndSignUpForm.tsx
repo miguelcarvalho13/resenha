@@ -28,9 +28,7 @@ export const signInSchema = z.object({
 
 export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
   const { t } = useTranslation();
-  const navigate = useNavigate({
-    from: '/',
-  });
+  const navigate = useNavigate();
 
   const isSignUp = mode === 'sign-up';
   const schema = isSignUp ? signUpSchema : signInSchema;
@@ -59,7 +57,7 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
         {
           onSuccess: () => {
             console.log('Sign up successful');
-            void navigate({ to: '/' });
+            void navigate({ to: '/home' });
           },
           onError: (ctx) => {
             console.log(ctx.error.message);
@@ -75,7 +73,7 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
         {
           onSuccess: () => {
             console.log('Sign in successful');
-            void navigate({ to: '/' });
+            void navigate({ to: '/home' });
           },
           onError: (ctx) => {
             console.log(ctx.error.message);

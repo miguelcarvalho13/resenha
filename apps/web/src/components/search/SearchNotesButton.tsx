@@ -3,7 +3,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { TbZoom } from 'react-icons/tb';
 
-import { Route as RouteIndex } from '@/routes/index';
+import { Route as HomeRoute } from '@/routes/_authenticated/home';
 import { modals } from '@mantine/modals';
 import { SearchNotesModal } from './searchNotesModal/SearchNotesModal';
 import {
@@ -15,10 +15,10 @@ import { trpc } from '@/utils/trpc';
 export const SearchNotesButton = () => {
   const { t } = useTranslation();
   const searchParams = useSearch({
-    from: RouteIndex.fullPath,
+    from: HomeRoute.id,
     shouldThrow: false,
   });
-  const navigate = useNavigate({ from: RouteIndex.fullPath });
+  const navigate = useNavigate({ from: HomeRoute.fullPath });
   const { data: tagsData } = trpc.tags.findAllTags.useQuery();
 
   return (

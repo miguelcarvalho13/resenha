@@ -26,7 +26,7 @@ test('should render sign in form fields', async () => {
     .toHaveAttribute('href', '/sign-up');
 });
 
-test('should be redirected to index upon clicking on "Sign in"', async () => {
+test('should be redirected to /home upon clicking on "Sign in"', async () => {
   const { router, getByLabelText, getByRole } = await renderWithRouter();
 
   await act(() => router.navigate({ to: '/sign-in' }));
@@ -39,5 +39,15 @@ test('should be redirected to index upon clicking on "Sign in"', async () => {
 
   await getByRole('button', { name: /Sign in/ }).click();
 
-  await vi.waitFor(() => expect(window.location.pathname).toBe('/'));
+  await vi.waitFor(() => expect(window.location.pathname).toBe('/home'));
+});
+
+test('should not render components not meant for logged out users', async () => {
+  const { router, getByRole } = await renderWithRouter();
+  await act(() => router.navigate({ to: '/sign-in' }));
+
+  await expect.element(getByRole('navigation')).not.toBeInTheDocument();
+  await expect
+    .element(getByRole('button', { name: /Search notes/ }))
+    .not.toBeInTheDocument();
 });

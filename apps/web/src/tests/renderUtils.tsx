@@ -3,7 +3,7 @@ import { act } from 'react';
 import { render } from 'vitest-browser-react';
 
 import { routeTree } from '@/routeTree.gen';
-import { type IndexSearchParams } from '@/routes/index';
+import { type HomeSearchParams } from '@/routes/_authenticated/home';
 import { TestWrapper } from './TestWrapper';
 
 const getTestRouter = () => {
@@ -20,7 +20,7 @@ const getTestRouter = () => {
  */
 export async function renderWithRouter({
   search,
-}: { search?: IndexSearchParams } = {}) {
+}: { search?: HomeSearchParams } = {}) {
   const router = getTestRouter();
 
   const renderResult = render(
@@ -29,7 +29,7 @@ export async function renderWithRouter({
     </TestWrapper>,
   );
 
-  await act(() => router.navigate({ to: '/', search }));
+  await act(() => router.navigate({ to: '/home', search }));
 
   return {
     router,

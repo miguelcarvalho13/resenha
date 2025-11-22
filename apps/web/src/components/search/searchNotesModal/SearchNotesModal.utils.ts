@@ -1,5 +1,5 @@
 import { NO_OPTION_VALUE, YES_OPTION_VALUE, type Tag } from '@/models/tags';
-import { type IndexSearchParams } from '@/routes';
+import { type HomeSearchParams } from '@/routes/_authenticated/home';
 import { type SearchModalSchemaType } from './SearchNotesModal.form';
 
 /**
@@ -12,8 +12,8 @@ export const fromSearchNotesSchemaToSearchParams = ({
 }: {
   values: SearchModalSchemaType;
   tags: Tag[];
-}): IndexSearchParams => {
-  const query: IndexSearchParams['query'] = values.query.map(
+}): HomeSearchParams => {
+  const query: HomeSearchParams['query'] = values.query.map(
     ({ tagId, operator, value }) => {
       const tag = tags.find(({ id }) => id === tagId);
 
@@ -69,7 +69,7 @@ export const fromSearchNotesSchemaToSearchParams = ({
 export const fromSearchParamsToSearchNotesSchema = ({
   values,
 }: {
-  values: IndexSearchParams;
+  values: HomeSearchParams;
 }): SearchModalSchemaType => {
   const query: SearchModalSchemaType['query'] = (values.query ?? []).map(
     (q) => {

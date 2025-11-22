@@ -1,9 +1,9 @@
-import { Route as RouteIndex } from '@/routes/index';
+import { Route as HomeRoute } from '@/routes/_authenticated/home';
 import { trpc } from '@/utils/trpc';
 import { NotesGrid } from './NotesGrid';
 
 export const SearchedNotesGrid = () => {
-  const { query } = RouteIndex.useSearch();
+  const { query } = HomeRoute.useSearch();
   const { data: findAllResponse, isLoading } =
     trpc.searches.searchNotes.useQuery({
       query: query ?? [],

@@ -19,7 +19,7 @@ test('should correctly render the side navbar', async () => {
 
   // Recent
   expect(links.nth(0)).toHaveTextContent('Recent');
-  expect(links.nth(0)).toHaveAttribute('href', '/');
+  expect(links.nth(0)).toHaveAttribute('href', '/home');
 
   // // My searches
   expect(links.nth(1)).toHaveTextContent('My Searches');

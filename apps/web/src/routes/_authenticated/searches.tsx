@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/trash')({
+export const Route = createFileRoute('/_authenticated/searches')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  return <div>Hello /trash</div>;
+  return <div>Hello /searches</div>;
 }
