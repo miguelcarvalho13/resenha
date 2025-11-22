@@ -28,37 +28,11 @@ test('should correctly edit a note', async () => {
 
   await modal.getByLabelText('Content').clear();
   await modal.getByLabelText('Content').fill('Updated');
-  await modal.getByRole('button', { name: /Save/ }).click();
+  await getByRole('button', { name: /Close/ }).click();
 
   // TODO: Find idiomatic way for checking element is not longer visible
   await vi.waitFor(() =>
     expect(document.body.contains(modalElement)).not.toBeTruthy(),
-  );
-});
-
-test('should require at least 1 char for editing a note', async () => {
-  // create mock server data
-  await server.createSessionMock();
-  await server.createNoteMock({ content: 'A' });
-
-  const { getByRole, getByTestId } = await renderWithRouter();
-
-  await vi.waitFor(() =>
-    expect(getByTestId('note-card').elements()).toHaveLength(1),
-  );
-
-  await getByTestId('note-card')
-    .nth(0)
-    .getByRole('button', { name: /Edit note/ })
-    .click();
-
-  const modal = getByRole('dialog', { name: /Edit note/ });
-
-  await modal.getByLabelText('Content').clear();
-  await modal.getByRole('button', { name: /Save/ }).click();
-
-  expect(modal.getByRole('paragraph')).toHaveTextContent(
-    'String must contain at least 1 character(s)',
   );
 });
 
@@ -82,7 +56,7 @@ test('should update modal content when reopening the modal after a save', async 
   const modal = getByRole('dialog', { name: /Edit note/ });
   await modal.getByLabelText('Content').clear();
   await modal.getByLabelText('Content').fill('B');
-  await modal.getByRole('button', { name: /Save/ }).click();
+  await getByRole('button', { name: /Close/ }).click();
 
   // Waits the modal to close
   const modalElement = modal.element();

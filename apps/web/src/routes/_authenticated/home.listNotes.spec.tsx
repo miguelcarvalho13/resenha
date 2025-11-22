@@ -41,7 +41,7 @@ test('should correctly refresh the list of notes after adding a note', async () 
   await getByRole('button', { name: /Create note/ }).click();
   const modal = getByRole('dialog', { name: /Create note/ });
   await modal.getByLabelText('Content').fill('B');
-  await modal.getByRole('button', { name: /Save/ }).click();
+  await getByRole('button', { name: /Close/ }).click();
 
   // Wait for refreshed list
   await vi.waitFor(() =>
@@ -75,7 +75,7 @@ test('should correctly refresh the list of notes after editing a note', async ()
   const modal = getByRole('dialog', { name: /Edit note/ });
   await modal.getByLabelText('Content').clear();
   await modal.getByLabelText('Content').fill('B');
-  await modal.getByRole('button', { name: /Save/ }).click();
+  await getByRole('button', { name: /Close/ }).click();
 
   // Wait for refreshed list
   await vi.waitFor(() => expect(notes.nth(0)).toHaveTextContent('B'));

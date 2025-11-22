@@ -1,18 +1,16 @@
 import { Button } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 
-import CreateOrEditNoteModal from '@/components/note/CreateOrEditNoteModal';
+import { useOpenCreateOrEditNoteModal } from '@/components/note/createOrEditModal/useOpenCreateOrEditNoteModal';
 
 const CreateNoteButton = () => {
   const { t } = useTranslation();
-  const [opened, { open, close }] = useDisclosure(false);
+  const { openNoteModal } = useOpenCreateOrEditNoteModal();
 
   return (
-    <>
-      <CreateOrEditNoteModal mode="create" opened={opened} close={close} />
-      <Button onClick={open}>{t(($) => $.notes.createNote)}</Button>
-    </>
+    <Button onClick={() => openNoteModal()}>
+      {t(($) => $.notes.createNote)}
+    </Button>
   );
 };
 
