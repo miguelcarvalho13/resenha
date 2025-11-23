@@ -80,10 +80,17 @@ export const notes = pgTable('notes', {
   createdBy: text('created_by')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
+  deletedAt: timestamp('deleted_at'),
+  deletedBy: text('deleted_by').references(() => users.id, {
+    onDelete: 'cascade',
+  }),
   updatedAt: timestamp('updated_at')
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  updatedBy: text('updated_by')
+    // .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
 });
 
 export const tagTypeEnum = pgEnum('tag_type', [
@@ -154,6 +161,14 @@ export const notesRelations = relations(notes, ({ one }) => ({
   // Notes -> User
   creator: one(users, {
     fields: [notes.createdBy],
+    references: [users.id],
+  }),
+  deleter: one(users, {
+    fields: [notes.deletedBy],
+    references: [users.id],
+  }),
+  updater: one(users, {
+    fields: [notes.updatedBy],
     references: [users.id],
   }),
 }));

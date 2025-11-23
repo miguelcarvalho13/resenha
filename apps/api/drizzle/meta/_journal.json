@@ -36,6 +36,13 @@
       "when": 1760909795892,
       "tag": "0004_violet_firelord",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1763922938953,
+      "tag": "0005_hot_randall_flagg",
+      "breakpoints": true
     }
   ]
 }
