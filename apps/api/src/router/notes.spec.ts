@@ -9,6 +9,7 @@ import * as schema from '@api/db/schema';
 import {
   type CreateNoteSchemaType,
   type EditNoteSchemaType,
+  type SoftDeleteNotesSchemaType,
 } from '@api/schemas/notes';
 import { startApp } from '@api/server';
 import { createNoteThroughApi } from '@api/tests/noteUtils';
@@ -63,6 +64,108 @@ describe('notes.createNote', () => {
     expect(res.status).toBe(401);
 
     expect((await db.select().from(schema.notes)).length).toBe(0);
+  });
+});
+
+describe('notes.softDeleteNotes', () => {
+  test('should be correctly handled', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+
+    const createdNote = await createNoteThroughApi({ app: app!, authCookie });
+
+    const res = await supertest(app!)
+      .post('/api/trpc/notes.softDeleteNotes')
+      .send({
+        json: {
+          noteIds: [createdNote.id],
+        } satisfies SoftDeleteNotesSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const updatedNote = (await db.select().from(schema.notes).limit(1))[0];
+
+    expect(updatedNote.content).toBe(createdNote.content);
+    expect(updatedNote.createdAt).not.toBeNull();
+    expect(updatedNote.updatedAt).not.toBeNull();
+    expect(updatedNote.deletedAt).not.toBeNull();
+
+    // the created user should be the same
+    expect(updatedNote.createdBy).toBe(user.id);
+    expect(createdNote.createdBy).toBe(updatedNote.createdBy);
+
+    // the created date should also remain the same
+    expect(updatedNote.createdAt).not.toBeNull();
+    expect(createdNote.createdAt).toEqual(updatedNote.createdAt);
+
+    // the deleted user should be present
+    expect(updatedNote.deletedBy).not.toBeNull();
+    expect(updatedNote.deletedBy).toBe(user.id);
+
+    // the updated date should be more recent than the created date
+    expect(updatedNote.updatedAt.getTime()).toBeGreaterThan(
+      createdNote.updatedAt.getTime(),
+    );
+
+    // the deleted date should be more recent than the created date
+    expect(updatedNote.deletedAt?.getTime()).toBeGreaterThan(
+      createdNote.updatedAt.getTime(),
+    );
+  });
+
+  test('should not allow soft deletion for a note created by a different user', async () => {
+    const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
+      app!,
+      {
+        name: 'Another User',
+        email: 'another@example.com',
+      },
+    );
+
+    const noteCreatedByAnotherUser = await createNoteThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+    });
+
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const noteCreatedByCurrentUser = await createNoteThroughApi({
+      app: app!,
+      authCookie,
+    });
+
+    const res = await supertest(app!)
+      .post('/api/trpc/notes.softDeleteNotes')
+      .send({
+        json: {
+          noteIds: [noteCreatedByCurrentUser.id, noteCreatedByAnotherUser.id],
+        } satisfies SoftDeleteNotesSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(401);
+
+    // note should remain the same
+    const updatedNotes = await db.select().from(schema.notes).limit(2);
+
+    expect(updatedNotes).to.deep.equal([
+      noteCreatedByAnotherUser,
+      noteCreatedByCurrentUser,
+    ]);
+
+    expect(updatedNotes[0].deletedAt).toBeNull();
+    expect(updatedNotes[0].deletedBy).toBeNull();
+    expect(updatedNotes[1].deletedAt).toBeNull();
+    expect(updatedNotes[1].deletedBy).toBeNull();
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!)
+      .post('/api/trpc/notes.softDeleteNotes')
+      .send();
+
+    expect(res.status).toBe(401);
   });
 });
 

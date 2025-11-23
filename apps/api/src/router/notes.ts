@@ -1,8 +1,12 @@
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 
 import { db } from '@api/db';
 import { notes } from '@api/db/schema';
-import { createNoteSchema, editNoteSchema } from '@api/schemas/notes';
+import {
+  createNoteSchema,
+  editNoteSchema,
+  softDeleteNotesSchema,
+} from '@api/schemas/notes';
 import { protectedProcedure, router } from '@api/trpc';
 import { TRPCError } from '@trpc/server';
 
@@ -67,4 +71,39 @@ export const notesRouter = router({
       notes: allNotes,
     };
   }),
+
+  softDeleteNotes: protectedProcedure
+    .input(softDeleteNotesSchema())
+    .mutation(async ({ input, ctx }) => {
+      const { noteIds } = input;
+
+      const requestedNotes = await db
+        .select()
+        .from(notes)
+        .where(inArray(notes.id, noteIds));
+
+      if (requestedNotes.some(({ createdBy }) => createdBy !== ctx.user.id)) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        });
+      }
+
+      const softDeleteNotes = await db
+        .update(notes)
+        .set({
+          deletedAt: new Date(),
+          deletedBy: ctx.user.id,
+          updatedBy: ctx.user.id,
+        })
+        .where(
+          and(inArray(notes.id, noteIds), eq(notes.createdBy, ctx.user.id)),
+        )
+        .returning();
+
+      return {
+        success: true,
+        notes: softDeleteNotes,
+      };
+    }),
 });
