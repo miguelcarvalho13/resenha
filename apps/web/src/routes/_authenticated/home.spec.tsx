@@ -15,7 +15,7 @@ test('should correctly render the side navbar', async () => {
 
   const links = navbar.getByRole('link');
 
-  expect(links.elements()).toHaveLength(4);
+  await vi.waitFor(() => expect(links.elements()).toHaveLength(4));
 
   // Recent
   expect(links.nth(0)).toHaveTextContent('Recent');
