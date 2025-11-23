@@ -89,7 +89,7 @@ export const notes = pgTable('notes', {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
   updatedBy: text('updated_by')
-    // .notNull()
+    .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
 });
 

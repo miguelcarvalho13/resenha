@@ -17,6 +17,7 @@ export const notesRouter = router({
         .values({
           content,
           createdBy: ctx.user.id,
+          updatedBy: ctx.user.id,
         })
         .returning();
 
@@ -44,7 +45,7 @@ export const notesRouter = router({
 
       const [updatedNote] = await db
         .update(notes)
-        .set({ content })
+        .set({ content, updatedBy: ctx.user.id })
         .where(eq(notes.id, id))
         .returning();
 

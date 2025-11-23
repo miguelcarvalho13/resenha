@@ -192,6 +192,7 @@ describe('notes.findAll', () => {
     await db.insert(schema.notes).values({
       content: 'Some content',
       createdBy: anotherUser.id,
+      updatedBy: anotherUser.id,
     });
 
     // First creates a note for the user

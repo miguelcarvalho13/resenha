@@ -1,0 +1,1 @@
+ALTER TABLE "notes" ALTER COLUMN "updated_by" SET NOT NULL;

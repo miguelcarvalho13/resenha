@@ -10,20 +10,27 @@ export const createNoteForFindAll = (
   content: faker.lorem.paragraph(),
   createdAt: faker.date.past(),
   createdBy: faker.string.uuid(),
+  deletedAt: null,
+  deletedBy: null,
   id: faker.string.uuid(),
   updatedAt: faker.date.recent(),
+  updatedBy: faker.string.uuid(),
   ...data,
 });
 
 export const createNoteMock = async ({
   createdByUser,
+  updatedByUser,
   ...data
 }: Partial<NoteMockSchemaType> = {}) => {
   const createdByUserRelation = createdByUser ?? (await createUserMock());
+  const updatedByUserRelation = updatedByUser ?? (await createUserMock());
 
   return noteMock.create({
     ...createNoteForFindAll(data),
     createdByUser: createdByUserRelation,
     createdBy: createdByUserRelation.id,
+    updatedByUser: updatedByUserRelation,
+    updatedBy: updatedByUserRelation.id,
   });
 };

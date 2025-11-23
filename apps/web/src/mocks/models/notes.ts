@@ -11,14 +11,25 @@ export const noteMockSchema = z.object({
   get createdByUser() {
     return userMockSchema.optional();
   },
+  deletedAt: z.date().nullable(),
+  deletedBy: z.uuid().nullable(),
+  get deletedByUser() {
+    return userMockSchema.optional();
+  },
   id: z.uuid(),
   updatedAt: z.date(),
+  updatedBy: z.uuid(),
+  get updatedByUser() {
+    return userMockSchema.optional();
+  },
 }) satisfies z.ZodType<NoteForFindAll>;
 
 export const noteMock = new Collection({ schema: noteMockSchema });
 
 noteMock.defineRelations(({ one }) => ({
   createdByUser: one(userMock),
+  deletedByUser: one(userMock),
+  updatedByUser: one(userMock),
 }));
 
 export type NoteMockSchemaType = z.infer<typeof noteMockSchema>;

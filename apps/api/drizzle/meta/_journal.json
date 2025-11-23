@@ -50,6 +50,13 @@
       "when": 1763923143926,
       "tag": "0006_pink_the_executioner",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1763923727770,
+      "tag": "0007_ancient_vertigo",
+      "breakpoints": true
     }
   ]
 }
