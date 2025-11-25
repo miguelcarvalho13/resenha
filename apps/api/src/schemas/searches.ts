@@ -54,38 +54,47 @@ const stringOperators = z.object({
     { tagId: '001', type: 'string', operator: { type: '!=' } },
     { field: 'created', type: 'date', operator: { type: '<=', value: '2025-11-07' } },
     { field: 'updated', type: 'date', operator: { type: '<=', value: '2025-11-07' } },
+    { field: 'deleted', type: 'date', operator: { type: '<=', value: '2025-11-07' } },
   ]
  */
 export const searchNotesSchema = () =>
   z.object({
     query: z.array(
-      z.discriminatedUnion('type', [
-        z.object({
-          tagId: z.uuid(),
-          type: z.literal('string'),
-          operator: stringOperators,
-        }),
-        z.object({
-          tagId: z.uuid(),
-          type: z.literal('number'),
-          operator: numberOperators,
-        }),
-        z.object({
-          tagId: z.uuid(),
-          type: z.literal('date'),
-          operator: dateOperators,
-        }),
-        z.object({
-          tagId: z.uuid(),
-          type: z.literal('boolean'),
-          operator: booleanOperators,
-        }),
-        // TODO: implement date operators for 'created' and 'updated'
-        // z.object({
-        //   field: z.union([z.literal('created'), z.literal('updated')]),
-        //   type: z.literal('date'),
-        //   operator: dateOperators,
-        // }),
+      z.union([
+        z.discriminatedUnion('type', [
+          z.object({
+            tagId: z.uuid(),
+            type: z.literal('string'),
+            operator: stringOperators,
+          }),
+          z.object({
+            tagId: z.uuid(),
+            type: z.literal('number'),
+            operator: numberOperators,
+          }),
+          z.object({
+            tagId: z.uuid(),
+            type: z.literal('date'),
+            operator: dateOperators,
+          }),
+          z.object({
+            tagId: z.uuid(),
+            type: z.literal('boolean'),
+            operator: booleanOperators,
+          }),
+          // TODO: implement date operators for 'created' and 'updated'
+          // z.object({
+          //   field: z.union([z.literal('created'), z.literal('updated')]),
+          //   type: z.literal('date'),
+          //   operator: dateOperators,
+          // }),
+        ]),
+        z.discriminatedUnion('field', [
+          z.object({
+            field: z.literal('deleted'),
+            operator: dateOperators,
+          }),
+        ]),
       ]),
     ),
   });

@@ -71,8 +71,12 @@ export const fromSearchParamsToSearchNotesSchema = ({
 }: {
   values: HomeSearchParams;
 }): SearchModalSchemaType => {
-  const query: SearchModalSchemaType['query'] = (values.query ?? []).map(
-    (q) => {
+  const query: SearchModalSchemaType['query'] = (values.query ?? [])
+    .map((q) => {
+      if ('field' in q) {
+        return null;
+      }
+
       switch (q.type) {
         case 'string':
           return {
@@ -96,8 +100,8 @@ export const fromSearchParamsToSearchNotesSchema = ({
         default:
           throw new Error('Unknown tag type');
       }
-    },
-  );
+    })
+    .filter((q) => !!q);
 
   return { query };
 };

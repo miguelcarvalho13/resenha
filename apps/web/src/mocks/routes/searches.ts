@@ -6,6 +6,7 @@ import {
   type TrpcInput,
 } from '@/mocks/factories/trpc';
 import { type RouterInput, type RouterOutput } from '@/utils/trpc';
+import { utils as apiUtils } from '@repo/api';
 import { noteMock } from '../models/notes';
 import { noteTagMock } from '../models/tags';
 import { server } from '../server';
@@ -20,8 +21,13 @@ export const getSearchNotesHandler = ({ wait = 0 }: { wait?: number } = {}) =>
         RouterInput['searches']['searchNotes']
       >(request.url);
 
+      const [, tagFilters] = apiUtils.partition(
+        input.query,
+        (filter) => 'field' in filter,
+      );
+
       const notes = noteMock.all().filter((note) =>
-        input.query.every((condition) => {
+        tagFilters.every((condition) => {
           const matchedNoteTag = noteTagMock.findFirst((q) =>
             q.and(
               q.where({ noteId: note.id }),

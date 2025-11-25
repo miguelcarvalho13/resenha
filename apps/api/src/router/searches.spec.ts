@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm';
 import { reset } from 'drizzle-seed';
 import { type Server } from 'http';
 import supertest from 'supertest';
@@ -12,7 +13,10 @@ import {
   type SearchNotesSchemaType,
 } from '@api/schemas/searches';
 import { startApp } from '@api/server';
-import { createNoteThroughApi } from '@api/tests/noteUtils';
+import {
+  createNoteThroughApi,
+  softDeleteNotesThroughApi,
+} from '@api/tests/noteUtils';
 import { createAndSignInUser } from '@api/tests/sessionUtils';
 import { createNoteTagThroughApi } from '@api/tests/tagUtils';
 
@@ -282,6 +286,91 @@ describe('tags.searchNotes', () => {
     },
   );
 
+  test('should not return deleted notes by default', async () => {
+    if (!app) throw new Error('app not started');
+
+    const { authCookie } = await createAndSignInUser(app);
+
+    const noteA = await createNoteThroughApi({ app, authCookie });
+    const noteB = await createNoteThroughApi({ app, authCookie });
+
+    await softDeleteNotesThroughApi({ app, authCookie, noteIds: [noteA.id] });
+
+    const res = await supertest(app!)
+      .get('/api/trpc/searches.searchNotes')
+      .query({
+        input: JSON.stringify({
+          json: {
+            query: [],
+          } satisfies SearchNotesSchemaType,
+        }),
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    expect(res.body.result.data.json.notes).to.deep.equal([
+      {
+        ...noteB,
+        createdAt: noteB.createdAt.toISOString(),
+        updatedAt: noteB.createdAt.toISOString(),
+      },
+    ]);
+  });
+
+  test('should return deleted notes if requested in the query', async () => {
+    if (!app) throw new Error('app not started');
+
+    const { authCookie } = await createAndSignInUser(app);
+
+    const noteA = await createNoteThroughApi({ app, authCookie });
+    const noteB = await createNoteThroughApi({ app, authCookie });
+
+    await softDeleteNotesThroughApi({
+      app,
+      authCookie,
+      noteIds: [noteA.id, noteB.id],
+    });
+
+    await db
+      .update(schema.notes)
+      .set({ deletedAt: new Date(2025, 0, 1) })
+      .where(eq(schema.notes.id, noteA.id));
+    const [updatedNoteB] = await db
+      .update(schema.notes)
+      .set({ deletedAt: new Date(2024, 0, 1) })
+      .where(eq(schema.notes.id, noteB.id))
+      .returning();
+
+    const res = await supertest(app!)
+      .get('/api/trpc/searches.searchNotes')
+      .query({
+        input: JSON.stringify({
+          json: {
+            query: [
+              {
+                field: 'deleted',
+                type: 'date',
+                operator: { type: '<', value: '2025-01-01' },
+              },
+            ],
+          } satisfies SearchNotesSchemaType,
+        }),
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    expect(res.body.result.data.json.notes).to.deep.equal([
+      {
+        ...updatedNoteB,
+        createdAt: updatedNoteB.createdAt.toISOString(),
+        deletedAt: updatedNoteB.deletedAt?.toISOString(),
+        updatedAt: updatedNoteB.updatedAt.toISOString(),
+      },
+    ]);
+  });
+
   test('should correctly handle search considering multiple operators', async () => {
     if (!app) throw new Error('app not started');
 
@@ -289,6 +378,14 @@ describe('tags.searchNotes', () => {
 
     const noteA = await createNoteThroughApi({ app, authCookie });
     const noteB = await createNoteThroughApi({ app, authCookie });
+
+    const {
+      notes: [updatedNoteA],
+    } = await softDeleteNotesThroughApi({
+      app,
+      authCookie,
+      noteIds: [noteA.id, noteB.id],
+    });
 
     // Apply string tag
     const { tag: tagA } = await createNoteTagThroughApi({
@@ -392,6 +489,11 @@ describe('tags.searchNotes', () => {
                 type: 'date',
                 operator: { type: '>=', value: '2025-10-10' },
               },
+              {
+                field: 'deleted',
+                type: 'date',
+                operator: { type: '>=', value: '2020-01-01' },
+              },
             ],
           } satisfies SearchNotesSchemaType,
         }),
@@ -402,9 +504,10 @@ describe('tags.searchNotes', () => {
 
     expect(res.body.result.data.json.notes).to.deep.equal([
       {
-        ...noteA,
-        createdAt: noteA.createdAt.toISOString(),
-        updatedAt: noteA.createdAt.toISOString(),
+        ...updatedNoteA,
+        createdAt: updatedNoteA.createdAt.toISOString(),
+        deletedAt: updatedNoteA.deletedAt?.toISOString(),
+        updatedAt: updatedNoteA.updatedAt.toISOString(),
       },
     ]);
   });

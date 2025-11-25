@@ -1,11 +1,31 @@
-import { and, desc, eq, gt, gte, lt, lte } from 'drizzle-orm';
+import dayjs from 'dayjs';
+import { and, desc, eq, gt, gte, isNull, lt, lte } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 
 import { db } from '@api/db';
 import { notes, noteTags } from '@api/db/schema';
-import { searchNotesSchema } from '@api/schemas/searches';
+import {
+  type DateOperatorsType,
+  searchNotesSchema,
+} from '@api/schemas/searches';
 import { protectedProcedure, router } from '@api/trpc';
+import { partition } from '@api/utils/array';
 import { TRPCError } from '@trpc/server';
-import { alias } from 'drizzle-orm/pg-core';
+
+const whereFactory = (type: DateOperatorsType['type']) => {
+  switch (type) {
+    case '=':
+      return eq;
+    case '<':
+      return lt;
+    case '<=':
+      return lte;
+    case '>':
+      return gt;
+    case '>=':
+      return gte;
+  }
+};
 
 export const searchesRouter = router({
   searchNotes: protectedProcedure
@@ -16,25 +36,16 @@ export const searchesRouter = router({
           note: notes,
         })
         .from(notes)
-        .where(eq(notes.createdBy, ctx.user.id))
         .orderBy(desc(notes.updatedAt))
         .$dynamic();
 
-      const filteredQuery = input.query.reduce((builder, q, index) => {
-        const where = (() => {
-          switch (q.operator.type) {
-            case '=':
-              return eq;
-            case '<':
-              return lt;
-            case '<=':
-              return lte;
-            case '>':
-              return gt;
-            case '>=':
-              return gte;
-          }
-        })();
+      const [fieldFilters, tagFilters] = partition(
+        input.query,
+        (q) => 'field' in q,
+      );
+
+      const queryFilteredByTag = tagFilters.reduce((builder, q, index) => {
+        const where = whereFactory(q.operator.type);
 
         const noteTagAlias = alias(noteTags, `noteTags${index}`);
 
@@ -82,7 +93,31 @@ export const searchesRouter = router({
         }
       }, query);
 
-      const allNotes = await filteredQuery;
+      const hasDeletedFilter = fieldFilters.some((f) => f.field === 'deleted');
+
+      const allNotes = await queryFilteredByTag.where(
+        and(
+          ...[
+            eq(notes.createdBy, ctx.user.id),
+            ...(hasDeletedFilter ? [] : [isNull(notes.deletedAt)]),
+            ...fieldFilters.map((filter) => {
+              const where = whereFactory(filter.operator.type);
+              const value = dayjs(filter.operator.value).toDate();
+
+              switch (filter.field) {
+                case 'deleted':
+                  return where(notes.deletedAt, value);
+
+                default:
+                  throw new TRPCError({
+                    code: 'BAD_REQUEST',
+                    message: 'Wrong filter provided',
+                  });
+              }
+            }),
+          ],
+        ),
+      );
 
       return {
         success: true,
