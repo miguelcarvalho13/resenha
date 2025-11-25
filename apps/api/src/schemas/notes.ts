@@ -21,6 +21,11 @@ export const editNoteSchema = () =>
     content: z.string(),
   });
 
+export const undoSoftDeletedNotesSchema = () =>
+  z.object({
+    noteIds: z.array(z.uuid()),
+  });
+
 export type CreateNoteSchemaType = z.infer<ReturnType<typeof createNoteSchema>>;
 
 export type HardDeleteNotesSchemaType = z.infer<
@@ -32,3 +37,7 @@ export type SoftDeleteNotesSchemaType = z.infer<
 >;
 
 export type EditNoteSchemaType = z.infer<ReturnType<typeof editNoteSchema>>;
+
+export type UndoSoftDeletedNotesSchemaType = z.infer<
+  ReturnType<typeof undoSoftDeletedNotesSchema>
+>;

@@ -11,9 +11,13 @@ import {
   type EditNoteSchemaType,
   type HardDeleteNotesSchemaType,
   type SoftDeleteNotesSchemaType,
+  type UndoSoftDeletedNotesSchemaType,
 } from '@api/schemas/notes';
 import { startApp } from '@api/server';
-import { createNoteThroughApi } from '@api/tests/noteUtils';
+import {
+  createNoteThroughApi,
+  softDeleteNotesThroughApi,
+} from '@api/tests/noteUtils';
 import { createAndSignInUser, createUser } from '@api/tests/sessionUtils';
 
 let app: Server | null = null;
@@ -228,6 +232,131 @@ describe('notes.softDeleteNotes', () => {
   test('should be a protected route', async () => {
     const res = await supertest(app!)
       .post('/api/trpc/notes.softDeleteNotes')
+      .send();
+
+    expect(res.status).toBe(401);
+  });
+});
+
+describe('notes.undoDeleteNotes', () => {
+  test('should be correctly handled', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+
+    const createdNote = await createNoteThroughApi({ app: app!, authCookie });
+
+    // soft deletes note
+    await softDeleteNotesThroughApi({
+      app: app!,
+      authCookie,
+      noteIds: [createdNote.id],
+    });
+
+    const res = await supertest(app!)
+      .post('/api/trpc/notes.undoSoftDeletedNotes')
+      .send({
+        json: {
+          noteIds: [createdNote.id],
+        } satisfies UndoSoftDeletedNotesSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const [updatedNote] = await db.select().from(schema.notes).limit(1);
+
+    expect(updatedNote.content).toBe(createdNote.content);
+    expect(updatedNote.createdAt).not.toBeNull();
+    expect(updatedNote.updatedAt).not.toBeNull();
+    expect(updatedNote.deletedAt).toBeNull();
+
+    // the created user should be the same
+    expect(updatedNote.createdBy).toBe(user.id);
+    expect(createdNote.createdBy).toBe(updatedNote.createdBy);
+
+    // the created date should also remain the same
+    expect(updatedNote.createdAt).not.toBeNull();
+    expect(createdNote.createdAt).toEqual(updatedNote.createdAt);
+
+    // the deleted user should be present
+    expect(updatedNote.deletedBy).toBeNull();
+
+    // the updated date should be more recent than the created date
+    expect(updatedNote.updatedAt.getTime()).toBeGreaterThan(
+      createdNote.updatedAt.getTime(),
+    );
+  });
+
+  test('should not allow undo soft deletion for a note created by a different user', async () => {
+    const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
+      app!,
+      {
+        name: 'Another User',
+        email: 'another@example.com',
+      },
+    );
+
+    const noteCreatedByAnotherUser = await createNoteThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+    });
+
+    await softDeleteNotesThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+      noteIds: [noteCreatedByAnotherUser.id],
+    });
+
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const noteCreatedByCurrentUser = await createNoteThroughApi({
+      app: app!,
+      authCookie,
+    });
+
+    await softDeleteNotesThroughApi({
+      app: app!,
+      authCookie,
+      noteIds: [noteCreatedByCurrentUser.id],
+    });
+
+    const res = await supertest(app!)
+      .post('/api/trpc/notes.undoSoftDeletedNotes')
+      .send({
+        json: {
+          noteIds: [noteCreatedByCurrentUser.id, noteCreatedByAnotherUser.id],
+        } satisfies UndoSoftDeletedNotesSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(401);
+
+    // note should remain the same
+    const updatedNotes = await db.select().from(schema.notes).limit(2);
+
+    expect(updatedNotes).to.deep.equal([
+      {
+        ...noteCreatedByAnotherUser,
+        deletedAt: updatedNotes[0].deletedAt,
+        deletedBy: updatedNotes[0].deletedBy,
+        updatedAt: updatedNotes[0].updatedAt,
+      },
+      {
+        ...noteCreatedByCurrentUser,
+        deletedAt: updatedNotes[1].deletedAt,
+        deletedBy: updatedNotes[1].deletedBy,
+        updatedAt: updatedNotes[1].updatedAt,
+      },
+    ]);
+
+    expect(updatedNotes[0].deletedAt).not.toBeNull();
+    expect(updatedNotes[0].deletedBy).not.toBeNull();
+    expect(updatedNotes[1].deletedAt).not.toBeNull();
+    expect(updatedNotes[1].deletedBy).not.toBeNull();
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!)
+      .post('/api/trpc/notes.undoSoftDeletedNotes')
       .send();
 
     expect(res.status).toBe(401);

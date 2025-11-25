@@ -7,6 +7,7 @@ import {
   editNoteSchema,
   hardDeleteNotesSchema,
   softDeleteNotesSchema,
+  undoSoftDeletedNotesSchema,
 } from '@api/schemas/notes';
 import { protectedProcedure, router } from '@api/trpc';
 import { TRPCError } from '@trpc/server';
@@ -135,6 +136,41 @@ export const notesRouter = router({
       return {
         success: true,
         notes: softDeleteNotes,
+      };
+    }),
+
+  undoSoftDeletedNotes: protectedProcedure
+    .input(undoSoftDeletedNotesSchema())
+    .mutation(async ({ input, ctx }) => {
+      const { noteIds } = input;
+
+      const requestedNotes = await db
+        .select()
+        .from(notes)
+        .where(inArray(notes.id, noteIds));
+
+      if (requestedNotes.some(({ createdBy }) => createdBy !== ctx.user.id)) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        });
+      }
+
+      const restoredSoftDeleteNotes = await db
+        .update(notes)
+        .set({
+          deletedAt: null,
+          deletedBy: null,
+          updatedBy: ctx.user.id,
+        })
+        .where(
+          and(inArray(notes.id, noteIds), eq(notes.createdBy, ctx.user.id)),
+        )
+        .returning();
+
+      return {
+        success: true,
+        notes: restoredSoftDeleteNotes,
       };
     }),
 });
