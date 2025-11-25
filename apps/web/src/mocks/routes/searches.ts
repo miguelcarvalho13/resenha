@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { delay, http, type PathParams } from 'msw';
 
 import {
@@ -21,41 +22,75 @@ export const getSearchNotesHandler = ({ wait = 0 }: { wait?: number } = {}) =>
         RouterInput['searches']['searchNotes']
       >(request.url);
 
-      const [, tagFilters] = apiUtils.partition(
+      const [fieldFilters, tagFilters] = apiUtils.partition(
         input.query,
         (filter) => 'field' in filter,
       );
 
-      const notes = noteMock.all().filter((note) =>
-        tagFilters.every((condition) => {
-          const matchedNoteTag = noteTagMock.findFirst((q) =>
-            q.and(
-              q.where({ noteId: note.id }),
-              q.where({ tagId: condition.tagId }),
-              q.where({
-                value: (value) => {
-                  switch (condition.operator.type) {
-                    case '=':
-                      return 'value' in condition.operator
-                        ? value === condition.operator.value
-                        : true;
-                    case '<':
-                      return value < condition.operator.value;
-                    case '<=':
-                      return value <= condition.operator.value;
-                    case '>':
-                      return value > condition.operator.value;
-                    case '>=':
-                      return value >= condition.operator.value;
-                  }
-                },
-              }),
-            ),
-          );
+      const hasDeletedFilter = fieldFilters.some((f) => f.field === 'deleted');
 
-          return !!matchedNoteTag;
-        }),
-      );
+      const notes = noteMock
+        .all()
+        .filter((note) => {
+          if (!hasDeletedFilter) {
+            return !note.deletedAt;
+          }
+
+          return fieldFilters.every((filter) => {
+            const value = dayjs(filter.operator.value).toDate();
+            const noteValue = {
+              deleted: note.deletedAt,
+            }[filter.field];
+
+            if (!noteValue) return false;
+
+            switch (filter.operator.type) {
+              case '=':
+                return noteValue.getTime() === value.getTime();
+              case '<':
+                return noteValue < value;
+              case '<=':
+                return noteValue <= value;
+              case '>':
+                return noteValue > value;
+              case '>=':
+                return noteValue >= value;
+
+              default:
+                return false;
+            }
+          });
+        })
+        .filter((note) =>
+          tagFilters.every((condition) => {
+            const matchedNoteTag = noteTagMock.findFirst((q) =>
+              q.and(
+                q.where({ noteId: note.id }),
+                q.where({ tagId: condition.tagId }),
+                q.where({
+                  value: (value) => {
+                    switch (condition.operator.type) {
+                      case '=':
+                        return 'value' in condition.operator
+                          ? value === condition.operator.value
+                          : true;
+                      case '<':
+                        return value < condition.operator.value;
+                      case '<=':
+                        return value <= condition.operator.value;
+                      case '>':
+                        return value > condition.operator.value;
+                      case '>=':
+                        return value >= condition.operator.value;
+                    }
+                  },
+                }),
+              ),
+            );
+
+            return !!matchedNoteTag;
+          }),
+        );
 
       return createTrpcJson({
         success: true,

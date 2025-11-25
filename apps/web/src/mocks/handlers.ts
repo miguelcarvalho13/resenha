@@ -2,6 +2,9 @@ import {
   getFindAllNotesHandler,
   postCreateNoteHandler,
   postEditNoteHandler,
+  postHardDeleteNotesHandler,
+  postSoftDeleteNotesHandler,
+  postUndoSoftDeletedNotesHandler,
 } from './routes/notes';
 import { getSearchNotesHandler } from './routes/searches';
 import {
@@ -29,6 +32,9 @@ export const handlers = [
   getFindAllNotesHandler(),
   postCreateNoteHandler(),
   postEditNoteHandler(),
+  postHardDeleteNotesHandler(),
+  postSoftDeleteNotesHandler(),
+  postUndoSoftDeletedNotesHandler(),
 
   // searches
   getSearchNotesHandler(),

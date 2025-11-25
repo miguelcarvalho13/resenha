@@ -50,6 +50,86 @@ export const postEditNoteHandler = ({ wait = 0 }: { wait?: number } = {}) =>
     },
   );
 
+export const postHardDeleteNotesHandler = ({
+  wait = 0,
+}: { wait?: number } = {}) =>
+  http.post<PathParams, TrpcInput<RouterInput['notes']['hardDeleteNotes']>>(
+    '/api/trpc/notes.softDeleteNotes',
+    async ({ request }) => {
+      await delay(wait);
+
+      const input = extractTrpcInput(await request.clone().json());
+
+      const hardDeletedNotes = noteMock.deleteMany((q) =>
+        q.where({ id: (id) => input.noteIds.includes(id) }),
+      );
+
+      return createTrpcJson({
+        success: true,
+        notes: hardDeletedNotes,
+      } satisfies RouterOutput['notes']['hardDeleteNotes']);
+    },
+  );
+
+export const postSoftDeleteNotesHandler = ({
+  wait = 0,
+}: { wait?: number } = {}) =>
+  http.post<PathParams, TrpcInput<RouterInput['notes']['softDeleteNotes']>>(
+    '/api/trpc/notes.softDeleteNotes',
+    async ({ request }) => {
+      await delay(wait);
+
+      const input = extractTrpcInput(await request.clone().json());
+
+      const softDeletedNotes = await noteMock.updateMany(
+        (q) => q.where({ id: (id) => input.noteIds.includes(id) }),
+        {
+          data(note) {
+            const now = new Date();
+            note.deletedAt = now;
+            note.deletedBy = note.createdBy;
+            note.deletedByUser = note.createdByUser;
+            note.updatedAt = now;
+          },
+        },
+      );
+
+      return createTrpcJson({
+        success: true,
+        notes: softDeletedNotes,
+      } satisfies RouterOutput['notes']['softDeleteNotes']);
+    },
+  );
+
+export const postUndoSoftDeletedNotesHandler = ({
+  wait = 0,
+}: { wait?: number } = {}) =>
+  http.post<
+    PathParams,
+    TrpcInput<RouterInput['notes']['undoSoftDeletedNotes']>
+  >('/api/trpc/notes.undoSoftDeletedNotes', async ({ request }) => {
+    await delay(wait);
+
+    const input = extractTrpcInput(await request.clone().json());
+
+    const restoredSoftDeleteNotes = await noteMock.updateMany(
+      (q) => q.where({ id: (id) => input.noteIds.includes(id) }),
+      {
+        data(note) {
+          note.deletedAt = null;
+          note.deletedBy = null;
+          note.deletedByUser = undefined;
+          note.updatedAt = new Date();
+        },
+      },
+    );
+
+    return createTrpcJson({
+      success: true,
+      notes: restoredSoftDeleteNotes,
+    } satisfies RouterOutput['notes']['undoSoftDeletedNotes']);
+  });
+
 export const getFindAllNotesHandler = () =>
   http.get('/api/trpc/notes.findAll', () =>
     createTrpcJson({
