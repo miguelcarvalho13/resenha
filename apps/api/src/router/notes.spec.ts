@@ -9,6 +9,7 @@ import * as schema from '@api/db/schema';
 import {
   type CreateNoteSchemaType,
   type EditNoteSchemaType,
+  type HardDeleteNotesSchemaType,
   type SoftDeleteNotesSchemaType,
 } from '@api/schemas/notes';
 import { startApp } from '@api/server';
@@ -64,6 +65,70 @@ describe('notes.createNote', () => {
     expect(res.status).toBe(401);
 
     expect((await db.select().from(schema.notes)).length).toBe(0);
+  });
+});
+
+describe('notes.hardDeleteNotes', () => {
+  test('should be correctly handled', async () => {
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const createdNote = await createNoteThroughApi({ app: app!, authCookie });
+
+    const res = await supertest(app!)
+      .post('/api/trpc/notes.hardDeleteNotes')
+      .send({
+        json: {
+          noteIds: [createdNote.id],
+        } satisfies HardDeleteNotesSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+    expect(await db.select().from(schema.notes)).toHaveLength(0);
+  });
+
+  test('should not allow hard deletion for a note created by a different user', async () => {
+    const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
+      app!,
+      {
+        name: 'Another User',
+        email: 'another@example.com',
+      },
+    );
+
+    const noteCreatedByAnotherUser = await createNoteThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+    });
+
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const noteCreatedByCurrentUser = await createNoteThroughApi({
+      app: app!,
+      authCookie,
+    });
+
+    const res = await supertest(app!)
+      .post('/api/trpc/notes.hardDeleteNotes')
+      .send({
+        json: {
+          noteIds: [noteCreatedByCurrentUser.id, noteCreatedByAnotherUser.id],
+        } satisfies HardDeleteNotesSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(401);
+
+    // notes should have been deleted
+    expect(await db.select().from(schema.notes)).toHaveLength(2);
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!)
+      .post('/api/trpc/notes.hardDeleteNotes')
+      .send();
+
+    expect(res.status).toBe(401);
   });
 });
 

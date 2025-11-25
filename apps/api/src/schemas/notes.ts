@@ -5,6 +5,11 @@ export const createNoteSchema = () =>
     content: z.string(),
   });
 
+export const hardDeleteNotesSchema = () =>
+  z.object({
+    noteIds: z.array(z.uuid()),
+  });
+
 export const softDeleteNotesSchema = () =>
   z.object({
     noteIds: z.array(z.uuid()),
@@ -17,6 +22,10 @@ export const editNoteSchema = () =>
   });
 
 export type CreateNoteSchemaType = z.infer<ReturnType<typeof createNoteSchema>>;
+
+export type HardDeleteNotesSchemaType = z.infer<
+  ReturnType<typeof hardDeleteNotesSchema>
+>;
 
 export type SoftDeleteNotesSchemaType = z.infer<
   ReturnType<typeof softDeleteNotesSchema>
