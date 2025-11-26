@@ -43,7 +43,7 @@ const CreateOrEditNoteModal = ({
 
   const onSuccess = async ({ note: savedNote }: { note: NoteForFindAll }) => {
     setNote(savedNote);
-    await utils.notes.findAll.invalidate();
+    await utils.searches.searchNotes.invalidate();
   };
 
   const { mutateAsync: createNote } = trpc.notes.createNote.useMutation({
