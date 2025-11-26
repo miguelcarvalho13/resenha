@@ -1,44 +1,12 @@
-import { type Locator } from '@vitest/browser/context';
 import { expect, vi } from 'vitest';
 
 import { server } from '@/mocks/server';
 import { NO_OPTION_VALUE, type Tag } from '@/models/tags';
-import {
-  renderWithRouter,
-  type RenderWithRouterContext,
-} from '@/tests/renderUtils';
+import { createFilterRowPO, createSearchesPO } from '@/tests/pages/searches';
+import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 import { searchNotesSchema, type SearchNotesSchemaType } from '@repo/api';
-
-const createFilterRowPO = ({
-  getByRole,
-  row,
-}: {
-  getByRole: RenderWithRouterContext['getByRole'];
-  row: Locator;
-}) => {
-  const tagInput = row.getByLabelText('Tag');
-  const tagInputDropdown = getByRole('listbox', { name: 'List of tags' });
-  const tagInputDropdownOptions = tagInputDropdown.getByRole('option');
-  const operatorInput = row.getByLabelText('Operator');
-  const operatorInputDropdown = getByRole('listbox', { name: 'Operator' });
-  const operatorInputOptions = operatorInputDropdown.getByRole('option');
-  const valueInput = row.getByLabelText('Value');
-  const valueInputDropdown = getByRole('listbox', { name: 'Value' });
-  const valueInputOptions = valueInputDropdown.getByRole('option');
-
-  return {
-    tagInput,
-    tagInputDropdown,
-    tagInputDropdownOptions,
-    operatorInput,
-    operatorInputDropdown,
-    operatorInputOptions,
-    valueInput,
-    valueInputDropdown,
-    valueInputOptions,
-  };
-};
+import { createNotesPO } from '@/tests/pages/notes';
 
 type TagFilterRowPO = ReturnType<typeof createFilterRowPO>;
 
@@ -198,29 +166,24 @@ test('should correctly search for notes', async () => {
   // create mock server data
   const { stringTag, numberTag, booleanTag, dateTag } = await setupCommonData();
 
-  const { getByTestId, getByRole } = await renderWithRouter();
+  await renderWithRouter();
+  const { notes } = createNotesPO();
+  const { searchNotesButton, searchModal } = createSearchesPO();
 
   // Wait first load
-  const notes = getByTestId('note-card');
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(2));
   expect(notes.nth(0)).toHaveTextContent('A');
   expect(notes.nth(1)).toHaveTextContent('B');
 
   // Open search modal
-  await getByRole('button', { name: /Search notes/ }).click();
-  const searchModal = getByRole('dialog', { name: /Search notes/ });
-  await expect.element(searchModal).toBeVisible();
+  await searchNotesButton.click();
+  await searchModal.expectToBeVisible();
 
   // Add tag filters
-  const tagsContainer = searchModal.getByTestId('tags-filter-container');
-  const addTagButton = searchModal.getByRole('button', { name: /Add tag/ });
-  await addTagButton.click();
+  await searchModal.addTagButton.click();
 
   // string-tag search
-  const firstRow = createFilterRowPO({
-    getByRole,
-    row: tagsContainer.getByTestId('tags-filter').nth(0),
-  });
+  const firstRow = createFilterRowPO({ row: searchModal.filterRows.nth(0) });
 
   await firstRow.tagInput.fill('string-tag');
   await firstRow.tagInputDropdownOptions
@@ -229,11 +192,8 @@ test('should correctly search for notes', async () => {
   await assertRowOperatorOptions({ row: firstRow, type: 'string' });
 
   // number-tag search
-  await addTagButton.click();
-  const secondRow = createFilterRowPO({
-    getByRole,
-    row: tagsContainer.getByTestId('tags-filter').nth(1),
-  });
+  await searchModal.addTagButton.click();
+  const secondRow = createFilterRowPO({ row: searchModal.filterRows.nth(1) });
 
   await secondRow.tagInput.fill('number-tag');
   await secondRow.tagInputDropdownOptions
@@ -247,11 +207,8 @@ test('should correctly search for notes', async () => {
   await secondRow.valueInput.fill('10');
 
   // boolean-tag search
-  await addTagButton.click();
-  const thirdRow = createFilterRowPO({
-    getByRole,
-    row: tagsContainer.getByTestId('tags-filter').nth(2),
-  });
+  await searchModal.addTagButton.click();
+  const thirdRow = createFilterRowPO({ row: searchModal.filterRows.nth(2) });
 
   await thirdRow.tagInput.fill('boolean-tag');
   await thirdRow.tagInputDropdownOptions
@@ -262,11 +219,8 @@ test('should correctly search for notes', async () => {
   await thirdRow.valueInputOptions.getByText('NO').click();
 
   // date-tag search
-  await addTagButton.click();
-  const fourthRow = createFilterRowPO({
-    getByRole,
-    row: tagsContainer.getByTestId('tags-filter').nth(3),
-  });
+  await searchModal.addTagButton.click();
+  const fourthRow = createFilterRowPO({ row: searchModal.filterRows.nth(3) });
 
   await fourthRow.tagInput.fill('date-tag');
   await fourthRow.tagInputDropdownOptions
@@ -280,8 +234,8 @@ test('should correctly search for notes', async () => {
   await fourthRow.valueInput.fill('2025-10-10');
 
   // Submit search and assert notes
-  await searchModal.getByRole('button', { name: /Search/ }).click();
-  await expect.element(searchModal).not.toBeInTheDocument();
+  await searchModal.searchButton.click();
+  await searchModal.expectNotToBeVisible();
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
   expect(notes.nth(0)).toHaveTextContent('A');
   expect(getCurrentQueryFromUrl()).to.deep.eq([
@@ -327,28 +281,26 @@ test('should correctly restore search based on query params', async () => {
     },
   ] satisfies SearchNotesSchemaType['query'];
 
-  const { getByRole } = await renderWithRouter({ search: { query } });
+  await renderWithRouter({ search: { query } });
+  const { searchNotesButton, searchModal } = createSearchesPO();
 
   // URL should be restored
   expect(getCurrentQueryFromUrl()).to.deep.eq(query);
 
   // Open search modal
-  const searchButton = getByRole('button', { name: /Search notes/ });
   await expect
-    .element(searchButton)
+    .element(searchNotesButton)
     .toHaveTextContent('Currently searching for...');
-  await searchButton.click();
-  const searchModal = getByRole('dialog', { name: /Search notes/ });
-  await expect.element(searchModal).toBeVisible();
-  const tagsContainer = searchModal.getByTestId('tags-filter-container');
-  const filterRows = tagsContainer.getByTestId('tags-filter');
+  await searchNotesButton.click();
+  await searchModal.expectToBeVisible();
 
   // Assert filter rows
+  const { filterRows } = searchModal;
   await vi.waitFor(() => expect(filterRows.elements()).toHaveLength(4));
-  const firstRow = createFilterRowPO({ getByRole, row: filterRows.nth(0) });
-  const secondRow = createFilterRowPO({ getByRole, row: filterRows.nth(1) });
-  const thirdRow = createFilterRowPO({ getByRole, row: filterRows.nth(2) });
-  const fourthRow = createFilterRowPO({ getByRole, row: filterRows.nth(3) });
+  const firstRow = createFilterRowPO({ row: filterRows.nth(0) });
+  const secondRow = createFilterRowPO({ row: filterRows.nth(1) });
+  const thirdRow = createFilterRowPO({ row: filterRows.nth(2) });
+  const fourthRow = createFilterRowPO({ row: filterRows.nth(3) });
 
   // first row
   await expect.element(filterRows.nth(0)).toHaveTextContent(stringTag.name);
@@ -377,18 +329,16 @@ test('should correctly restore search based on query params', async () => {
 });
 
 test('should be possible to remove rows from search modal', async () => {
-  const { getByRole } = await renderWithRouter();
+  await renderWithRouter();
+  const { searchNotesButton, searchModal } = createSearchesPO();
+  const { filterRows } = searchModal;
 
   // Open search modal
-  await getByRole('button', { name: /Search notes/ }).click();
-  const searchModal = getByRole('dialog', { name: /Search notes/ });
-  await expect.element(searchModal).toBeVisible();
-  const tagsContainer = searchModal.getByTestId('tags-filter-container');
-  const filterRows = tagsContainer.getByTestId('tags-filter');
-  const addTagButton = searchModal.getByRole('button', { name: /Add tag/ });
+  await searchNotesButton.click();
+  await searchModal.expectToBeVisible();
 
   // Add tag filter row
-  await addTagButton.click();
+  await searchModal.addTagButton.click();
   await vi.waitFor(() => expect(filterRows.elements()).toHaveLength(1));
 
   // Remove tag filter row
@@ -422,15 +372,15 @@ test('should be possible to clear search through the search modal', async () => 
     },
   ] satisfies SearchNotesSchemaType['query'];
 
-  const { getByRole } = await renderWithRouter({ search: { query } });
+  await renderWithRouter({ search: { query } });
+  const { searchNotesButton, searchModal } = createSearchesPO();
 
   // Open search modal
-  await getByRole('button', { name: /Search notes/ }).click();
-  const searchModal = getByRole('dialog', { name: /Search notes/ });
-  await expect.element(searchModal).toBeVisible();
+  await searchNotesButton.click();
+  await searchModal.expectToBeVisible();
 
   // Clear search
-  await searchModal.getByRole('button', { name: /Clear search/ }).click();
-  await expect.element(searchModal).not.toBeInTheDocument();
+  await searchModal.clearSearchButton.click();
+  await searchModal.expectNotToBeVisible();
   expect(getCurrentQueryFromUrl()).to.deep.eq([]);
 });
