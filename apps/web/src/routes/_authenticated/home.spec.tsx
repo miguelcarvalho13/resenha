@@ -1,6 +1,7 @@
 import { expect, vi } from 'vitest';
 
 import { server } from '@/mocks/server';
+import { createNavbarPO } from '@/tests/pages/navbar';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
@@ -9,29 +10,26 @@ test('should correctly render the side navbar', async () => {
     user: await server.createUserMock({ name: 'Some Name' }),
   });
 
-  const { getByRole } = await renderWithRouter();
-
-  const navbar = getByRole('navigation');
-
-  const links = navbar.getByRole('link');
+  await renderWithRouter();
+  const { navbarLinks: links } = createNavbarPO();
 
   await vi.waitFor(() => expect(links.elements()).toHaveLength(4));
 
   // Recent
-  expect(links.nth(0)).toHaveTextContent('Recent');
-  expect(links.nth(0)).toHaveAttribute('href', '/home');
+  await expect.element(links.nth(0)).toHaveTextContent('Recent');
+  await expect.element(links.nth(0)).toHaveAttribute('href', '/home');
 
   // // My searches
-  expect(links.nth(1)).toHaveTextContent('My Searches');
-  expect(links.nth(1)).toHaveAttribute('href', '/searches');
+  await expect.element(links.nth(1)).toHaveTextContent('My Searches');
+  await expect.element(links.nth(1)).toHaveAttribute('href', '/searches');
 
   // // Trash
-  expect(links.nth(2)).toHaveTextContent('Trash');
+  await expect.element(links.nth(2)).toHaveTextContent('Trash');
   expect(links.nth(2)).toHaveAttribute('href', '/trash');
 
   // // Configurations
-  expect(links.nth(3)).toHaveTextContent('Configurations');
-  expect(links.nth(3)).toHaveAttribute('href', '/config');
+  await expect.element(links.nth(3)).toHaveTextContent('Configurations');
+  await expect.element(links.nth(3)).toHaveAttribute('href', '/config');
 });
 
 test('should correctly display user menu in the header', async () => {
@@ -39,17 +37,16 @@ test('should correctly display user menu in the header', async () => {
     user: await server.createUserMock({ name: 'Some Name' }),
   });
 
-  const { getByRole } = await renderWithRouter();
-
-  const header = getByRole('banner');
+  await renderWithRouter();
+  const { header } = createNavbarPO();
 
   // click in the button with user initials
-  await header.getByRole('button', { name: /SN/ }).click();
+  await header.avatarButton(/SN/).click();
 
-  const menu = getByRole('menu', { name: /SN/ });
+  const menu = header.avatarMenu(/SN/);
 
-  expect(menu.getByRole('menuitem').elements()).toHaveLength(1);
-  expect(menu.getByRole('menuitem').nth(0)).toHaveTextContent('Logout');
+  expect(menu.items.elements()).toHaveLength(1);
+  await expect.element(menu.logoutButton).toHaveTextContent('Logout');
 });
 
 test('should be redirected to /sign-in upon clicking on "Logout"', async () => {
@@ -57,12 +54,11 @@ test('should be redirected to /sign-in upon clicking on "Logout"', async () => {
     user: await server.createUserMock({ name: 'Some Name' }),
   });
 
-  const { getByRole } = await renderWithRouter();
+  await renderWithRouter();
+  const { header } = createNavbarPO();
 
-  await getByRole('banner').getByRole('button', { name: /SN/ }).click();
-  await getByRole('menu', { name: /SN/ })
-    .getByRole('menuitem', { name: /Logout/ })
-    .click();
+  await header.avatarButton(/SN/).click();
+  await header.avatarMenu(/SN/).logoutButton.click();
 
   await vi.waitFor(() => expect(window.location.pathname).toBe('/sign-in'));
 });
