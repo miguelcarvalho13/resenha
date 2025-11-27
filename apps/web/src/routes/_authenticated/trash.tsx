@@ -1,9 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
 
+import { SoftDeletedNotesGrid } from '@/components/note/SoftDeletedNotesGrid';
+
 export const Route = createFileRoute('/_authenticated/trash')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  return <div>Hello /trash</div>;
+  return <SoftDeletedNotesGrid />;
 }

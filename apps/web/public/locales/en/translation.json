@@ -2,21 +2,28 @@
   "common": {
     "and": "and",
     "appTitle": "Resenhaí",
+    "cancel": "Cancel",
     "close": "Close",
+    "confirm": "Confirm",
     "loading": "Loading...",
     "remove": "Remove",
     "search": "Search"
   },
   "menu": {
     "configurations": "Configurations",
+    "hamburger": "Hamburger menu",
     "mySearches": "My Searches",
     "recent": "Recent",
     "trash": "Trash"
   },
   "notes": {
     "createNote": "Create note",
+    "deleteNote": "Delete note",
     "editNote": "Edit note",
-    "noNotesFound": "No notes found"
+    "noNotesFound": "No notes found",
+    "softDeleteModal": {
+      "title": "Send note to trash?"
+    }
   },
   "search": {
     "clearSearch": "Clear search",

@@ -8,6 +8,10 @@ export const createNavbarPO = () => {
   const header = {
     it: headerLocator,
 
+    hamburgerMenu: headerLocator.getByRole('button', {
+      name: /Hamburger menu/,
+    }),
+
     // methods
     avatarButton: (name: string | RegExp) =>
       headerLocator.getByRole('button', { name }),
@@ -27,5 +31,6 @@ export const createNavbarPO = () => {
     header,
     navbar,
     navbarLinks,
+    navbarTrashLink: navbarLinks.filter({ hasText: /Trash/ }),
   };
 };

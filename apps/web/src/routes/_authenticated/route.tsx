@@ -29,12 +29,14 @@ function Index() {
         <Group h="100%">
           <Group h="100%" px="md" w={{ sm: 300 }}>
             <Burger
+              aria-label={t(($) => $.menu.hamburger)}
               opened={mobileOpened}
               onClick={toggleMobile}
               hiddenFrom="sm"
               size="sm"
             />
             <Burger
+              aria-label={t(($) => $.menu.hamburger)}
               opened={desktopOpened}
               onClick={toggleDesktop}
               visibleFrom="sm"

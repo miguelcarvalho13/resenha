@@ -19,6 +19,23 @@ export const createNotesPO = () => {
     expectNotToBeVisible: () => expect.element(modal).not.toBeInTheDocument(),
   };
 
+  const softDeleteModalIt = page.getByRole('dialog', {
+    name: /Send note to trash\?/,
+  });
+
+  const softDeleteModal = {
+    it: softDeleteModalIt,
+
+    cancelButton: softDeleteModalIt.getByRole('button', { name: /Cancel/ }),
+    confirmButton: softDeleteModalIt.getByRole('button', { name: /Confirm/ }),
+    title: softDeleteModalIt.getByRole('heading'),
+
+    // methods
+    expectToBeVisible: () => expect.element(softDeleteModalIt).toBeVisible(),
+    expectNotToBeVisible: () =>
+      expect.element(softDeleteModalIt).not.toBeInTheDocument(),
+  };
+
   const createNote = async ({ content }: { content: string }) => {
     await createNoteButton.click();
     await noteModal.expectToBeVisible();
@@ -32,6 +49,9 @@ export const createNotesPO = () => {
 
   const noteEditButton = (noteCard: Locator) =>
     noteCard.getByRole('button', { name: /Edit note/ });
+
+  const noteDeleteButton = (noteCard: Locator) =>
+    noteCard.getByRole('button', { name: /Delete note/ });
 
   const editNote = async ({
     noteCard,
@@ -59,6 +79,7 @@ export const createNotesPO = () => {
 
   return {
     createNoteButton,
+    softDeleteModal,
     notes,
     noteModal,
 
@@ -67,6 +88,7 @@ export const createNotesPO = () => {
     createNoteAndCloseModal,
     editNote,
     editNoteAndCloseModal,
+    noteDeleteButton,
     noteEditButton,
   };
 };

@@ -54,7 +54,7 @@ export const postHardDeleteNotesHandler = ({
   wait = 0,
 }: { wait?: number } = {}) =>
   http.post<PathParams, TrpcInput<RouterInput['notes']['hardDeleteNotes']>>(
-    '/api/trpc/notes.softDeleteNotes',
+    '/api/trpc/notes.hardDeleteNotes',
     async ({ request }) => {
       await delay(wait);
 

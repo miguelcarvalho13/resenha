@@ -1,7 +1,7 @@
 import { SimpleGrid } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 
-import { NoteCard } from '@/components/note/NoteCard';
+import { NoteCard } from '@/components/note/card/NoteCard';
 import { type NoteForFindAll } from '@/models/notes';
 
 interface NotesGridProps {
