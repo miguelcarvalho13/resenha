@@ -19,6 +19,23 @@ export const createNotesPO = () => {
     expectNotToBeVisible: () => expect.element(modal).not.toBeInTheDocument(),
   };
 
+  const hardDeleteModalIt = page.getByRole('dialog', {
+    name: /Delete note permanently\?/,
+  });
+
+  const hardDeleteModal = {
+    it: hardDeleteModalIt,
+
+    cancelButton: hardDeleteModalIt.getByRole('button', { name: /Cancel/ }),
+    confirmButton: hardDeleteModalIt.getByRole('button', { name: /Confirm/ }),
+    title: hardDeleteModalIt.getByRole('heading'),
+
+    // methods
+    expectToBeVisible: () => expect.element(hardDeleteModalIt).toBeVisible(),
+    expectNotToBeVisible: () =>
+      expect.element(hardDeleteModalIt).not.toBeInTheDocument(),
+  };
+
   const softDeleteModalIt = page.getByRole('dialog', {
     name: /Send note to trash\?/,
   });
@@ -79,6 +96,7 @@ export const createNotesPO = () => {
 
   return {
     createNoteButton,
+    hardDeleteModal,
     softDeleteModal,
     notes,
     noteModal,

@@ -20,6 +20,9 @@
     "createNote": "Create note",
     "deleteNote": "Delete note",
     "editNote": "Edit note",
+    "hardDeleteModal": {
+      "title": "Delete note permanently?"
+    },
     "noNotesFound": "No notes found",
     "softDeleteModal": {
       "title": "Send note to trash?"
