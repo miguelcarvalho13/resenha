@@ -6,13 +6,44 @@ export const createNotesPO = () => {
   const createNoteButton = page.getByRole('button', { name: /Create note/ });
 
   const modal = page.getByRole('dialog', { name: /(Create|Edit) note/ });
+  const fixedTagsContainer = modal.getByTestId('fixed-tags-container');
+  const tagsContainer = modal.getByTestId('tags-container');
+  const addTagMenu = page.getByRole('listbox', { name: 'List of tags' });
 
   const noteModal = {
     closeButton: modal.getByRole('button', { name: /Close/ }),
     fields: {
       content: modal.getByLabelText('Content'),
     },
-    dialog: modal,
+    fixedTagsContainer: {
+      tags: fixedTagsContainer.getByTestId('tag'),
+
+      it: fixedTagsContainer,
+    },
+    tagsContainer: {
+      addTagButton: tagsContainer.getByRole('button', { name: /Add tag/ }),
+      addTagMenu: {
+        options: addTagMenu.getByRole('option'),
+        searchInput: page.getByLabelText('Search tags'),
+
+        it: addTagMenu,
+      },
+      tags: tagsContainer.getByTestId('tag'),
+
+      it: tagsContainer,
+
+      // methods
+      editTagButton: (tagLocator: Locator, tagName: string) =>
+        tagLocator.getByRole('button', { name: new RegExp(`Edit ${tagName}`) }),
+      editTagInput: (tagName: string) =>
+        tagsContainer.getByLabelText(new RegExp(`Edit ${tagName} value`)),
+      removeTagButton: (tagLocator: Locator, tagName: string) =>
+        tagLocator.getByRole('button', {
+          name: new RegExp(`Remove ${tagName}`),
+        }),
+    },
+
+    it: modal,
 
     // methods
     expectToBeVisible: () => expect.element(modal).toBeVisible(),

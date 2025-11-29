@@ -83,15 +83,15 @@ test('should be able to list tags in a note', async () => {
   await renderWithRouter();
 
   const { notes, noteModal, ...notesPage } = createNotesPO();
+  const {
+    tagsContainer: { tags },
+  } = noteModal;
 
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
   // Open the modal for the first time and edit it
   await notesPage.noteEditButton(notes.nth(0)).click();
   await noteModal.expectToBeVisible();
-
-  const tagsContainer = noteModal.dialog.getByTestId('tags-container');
-  const tags = tagsContainer.getByTestId('tag');
 
   await vi.waitFor(() => expect(tags.elements()).toHaveLength(4));
 
@@ -107,9 +107,10 @@ test('should list all kinds of tags that are possible to add tags in a note', as
   await server.createSessionMock();
   await server.createNoteMock({ content: 'A' });
 
-  const { getByLabelText, getByRole } = await renderWithRouter();
+  await renderWithRouter();
 
   const { notes, noteModal, ...notesPage } = createNotesPO();
+  const { tagsContainer } = noteModal;
 
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
@@ -117,18 +118,13 @@ test('should list all kinds of tags that are possible to add tags in a note', as
   await notesPage.noteEditButton(notes.nth(0)).click();
   await noteModal.expectToBeVisible();
 
-  const tagsContainer = noteModal.dialog.getByTestId('tags-container');
-
-  const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
-
-  await addTagButton.click();
+  await tagsContainer.addTagButton.click();
 
   // Initially no tags should be shown
-  const addTagMenu = getByRole('listbox', { name: 'List of tags' });
-  const addTagMenuItems = addTagMenu.getByRole('option');
+  const addTagMenuItems = tagsContainer.addTagMenu.options;
   expect(addTagMenuItems.elements()).toHaveLength(0);
 
-  await getByLabelText('Search tags').fill('abc');
+  await tagsContainer.addTagMenu.searchInput.fill('abc');
 
   // After typing something, at least the creatable tags should be shown
   expect(addTagMenuItems.elements()).toHaveLength(4);
@@ -190,9 +186,10 @@ test(`should only list new tags if there's no tag with the same name already in 
     value: false,
   });
 
-  const { getByLabelText, getByRole } = await renderWithRouter();
+  await renderWithRouter();
 
   const { notes, noteModal, ...notesPage } = createNotesPO();
+  const { tagsContainer } = noteModal;
 
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
@@ -200,15 +197,10 @@ test(`should only list new tags if there's no tag with the same name already in 
   await notesPage.noteEditButton(notes.nth(0)).click();
   await noteModal.expectToBeVisible();
 
-  const tagsContainer = noteModal.dialog.getByTestId('tags-container');
-
-  const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
-
-  await addTagButton.click();
+  await tagsContainer.addTagButton.click();
 
   // Initially all tags in the system should be shown
-  const addTagMenu = getByRole('listbox', { name: 'List of tags' });
-  const addTagMenuItems = addTagMenu.getByRole('option');
+  const addTagMenuItems = tagsContainer.addTagMenu.options;
   await vi.waitFor(() => expect(addTagMenuItems.elements()).toHaveLength(4));
   await expect
     .element(addTagMenuItems.nth(0))
@@ -221,13 +213,13 @@ test(`should only list new tags if there's no tag with the same name already in 
     .toHaveTextContent('number tag: number');
   await expect.element(addTagMenuItems.nth(3)).toHaveTextContent('string tag');
 
-  await getByLabelText('Search tags').fill('string');
+  await tagsContainer.addTagMenu.searchInput.fill('string');
 
   // After typing something, only filtered tags should be shown
   expect(addTagMenuItems.elements()).toHaveLength(1);
   await expect.element(addTagMenuItems.nth(0)).toHaveTextContent('string tag');
 
-  await getByLabelText('Search tags').fill('strings');
+  await tagsContainer.addTagMenu.searchInput.fill('strings');
 
   // After searching for something not in the list, only new tags suggestion should be shown
   expect(addTagMenuItems.elements()).toHaveLength(4);
@@ -250,9 +242,10 @@ test('should be able to add tags in a note [string]', async () => {
 
   const name = 'string-tag';
 
-  const { getByLabelText, getByRole } = await renderWithRouter();
+  await renderWithRouter();
 
   const { notes, noteModal, ...notesPage } = createNotesPO();
+  const { tagsContainer } = noteModal;
 
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
@@ -260,21 +253,15 @@ test('should be able to add tags in a note [string]', async () => {
   await notesPage.noteEditButton(notes.nth(0)).click();
   await noteModal.expectToBeVisible();
 
-  const tagsContainer = noteModal.dialog.getByTestId('tags-container');
-
-  const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
-
-  await addTagButton.click();
-  await getByLabelText('Search tags').fill(name);
-  await getByRole('listbox', { name: 'List of tags' })
-    .getByRole('option')
+  await tagsContainer.addTagButton.click();
+  await tagsContainer.addTagMenu.searchInput.fill(name);
+  await tagsContainer.addTagMenu.options
     .getByText(new RegExp(`${name}$`))
     .click();
-  await expect.element(addTagButton).toBeDisabled();
-  const tags = tagsContainer.getByTestId('tag');
+  await expect.element(tagsContainer.addTagButton).toBeDisabled();
 
-  await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
-  await expect.element(tags.nth(0)).toHaveTextContent(name);
+  await vi.waitFor(() => expect(tagsContainer.tags.elements()).toHaveLength(1));
+  await expect.element(tagsContainer.tags.nth(0)).toHaveTextContent(name);
 });
 
 test('should be able to add tags in a note [number]', async () => {
@@ -284,9 +271,10 @@ test('should be able to add tags in a note [number]', async () => {
 
   const name = 'number-tag';
 
-  const { getByLabelText, getByRole } = await renderWithRouter();
+  await renderWithRouter();
 
   const { notes, noteModal, ...notesPage } = createNotesPO();
+  const { tagsContainer } = noteModal;
 
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
@@ -294,21 +282,17 @@ test('should be able to add tags in a note [number]', async () => {
   await notesPage.noteEditButton(notes.nth(0)).click();
   await noteModal.expectToBeVisible();
 
-  const tagsContainer = noteModal.dialog.getByTestId('tags-container');
-
-  const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
-
-  await addTagButton.click();
-  await getByLabelText('Search tags').fill(name);
-  await getByRole('listbox', { name: 'List of tags' })
-    .getByRole('option')
+  await tagsContainer.addTagButton.click();
+  await tagsContainer.addTagMenu.searchInput.fill(name);
+  await tagsContainer.addTagMenu.options
     .getByText(new RegExp(`${name}: number`))
     .click();
-  await expect.element(addTagButton).toBeDisabled();
-  const tags = tagsContainer.getByTestId('tag');
+  await expect.element(tagsContainer.addTagButton).toBeDisabled();
 
-  await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
-  await expect.element(tags.nth(0)).toHaveTextContent(`${name}: 10`);
+  await vi.waitFor(() => expect(tagsContainer.tags.elements()).toHaveLength(1));
+  await expect
+    .element(tagsContainer.tags.nth(0))
+    .toHaveTextContent(`${name}: 10`);
 });
 
 test('should be able to add tags in a note [date]', async () => {
@@ -320,9 +304,10 @@ test('should be able to add tags in a note [date]', async () => {
 
   const name = 'date-tag';
 
-  const { getByLabelText, getByRole } = await renderWithRouter();
+  await renderWithRouter();
 
   const { notes, noteModal, ...notesPage } = createNotesPO();
+  const { tagsContainer } = noteModal;
 
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
@@ -330,21 +315,17 @@ test('should be able to add tags in a note [date]', async () => {
   await notesPage.noteEditButton(notes.nth(0)).click();
   await noteModal.expectToBeVisible();
 
-  const tagsContainer = noteModal.dialog.getByTestId('tags-container');
-
-  const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
-
-  await addTagButton.click();
-  await getByLabelText('Search tags').fill(name);
-  await getByRole('listbox', { name: 'List of tags' })
-    .getByRole('option')
+  await tagsContainer.addTagButton.click();
+  await tagsContainer.addTagMenu.searchInput.fill(name);
+  await tagsContainer.addTagMenu.options
     .getByText(new RegExp(`${name}: date`))
     .click();
-  expect(addTagButton).toBeDisabled();
-  const tags = tagsContainer.getByTestId('tag');
+  await expect.element(tagsContainer.addTagButton).toBeDisabled();
 
-  await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
-  expect(tags.nth(0)).toHaveTextContent(`${name}: 2025-10-30`);
+  await vi.waitFor(() => expect(tagsContainer.tags.elements()).toHaveLength(1));
+  await expect
+    .element(tagsContainer.tags.nth(0))
+    .toHaveTextContent(`${name}: 2025-10-30`);
   vi.useRealTimers();
 });
 
@@ -355,9 +336,10 @@ test('should be able to add tags in a note [boolean]', async () => {
 
   const name = 'boolean-tag';
 
-  const { getByLabelText, getByRole } = await renderWithRouter();
+  await renderWithRouter();
 
   const { notes, noteModal, ...notesPage } = createNotesPO();
+  const { tagsContainer } = noteModal;
 
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
@@ -365,21 +347,17 @@ test('should be able to add tags in a note [boolean]', async () => {
   await notesPage.noteEditButton(notes.nth(0)).click();
   await noteModal.expectToBeVisible();
 
-  const tagsContainer = noteModal.dialog.getByTestId('tags-container');
-
-  const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
-
-  await addTagButton.click();
-  await getByLabelText('Search tags').fill(name);
-  await getByRole('listbox', { name: 'List of tags' })
-    .getByRole('option')
+  await tagsContainer.addTagButton.click();
+  await tagsContainer.addTagMenu.searchInput.fill(name);
+  await tagsContainer.addTagMenu.options
     .getByText(new RegExp(`${name}: yes/no`))
     .click();
-  await expect.element(addTagButton).toBeDisabled();
-  const tags = tagsContainer.getByTestId('tag');
+  await expect.element(tagsContainer.addTagButton).toBeDisabled();
 
-  await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
-  await expect.element(tags.nth(0)).toHaveTextContent(`${name}: yes`);
+  await vi.waitFor(() => expect(tagsContainer.tags.elements()).toHaveLength(1));
+  await expect
+    .element(tagsContainer.tags.nth(0))
+    .toHaveTextContent(`${name}: yes`);
 });
 
 test.each([
@@ -397,9 +375,10 @@ test.each([
     await server.createNoteMock({ content: 'A' });
     await server.createTagMock({ name, type });
 
-    const { getByLabelText, getByRole } = await renderWithRouter();
+    await renderWithRouter();
 
     const { notes, noteModal, ...notesPage } = createNotesPO();
+    const { tagsContainer } = noteModal;
 
     await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
@@ -407,24 +386,22 @@ test.each([
     await notesPage.noteEditButton(notes.nth(0)).click();
     await noteModal.expectToBeVisible();
 
-    const tagsContainer = noteModal.dialog.getByTestId('tags-container');
-
-    const addTagButton = tagsContainer.getByRole('button', { name: /Add tag/ });
-
-    await addTagButton.click();
+    await tagsContainer.addTagButton.click();
 
     // Initially all tags in the system should be shown
-    const addTagMenu = getByRole('listbox', { name: 'List of tags' });
-    const addTagMenuItems = addTagMenu.getByRole('option');
-    await getByLabelText('Search tags').fill(name);
+    const addTagMenuItems = tagsContainer.addTagMenu.options;
+    await tagsContainer.addTagMenu.searchInput.fill(name);
     await vi.waitFor(() => expect(addTagMenuItems.elements()).toHaveLength(1));
     await addTagMenuItems.nth(0).click();
 
     // After selecting the existing tag, a note tag should be visible in the note, with default values
-    await expect.element(addTagButton).toBeDisabled();
-    const tags = tagsContainer.getByTestId('tag');
-    await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
-    await expect.element(tags.nth(0)).toHaveTextContent(`${name}${value}`);
+    await expect.element(tagsContainer.addTagButton).toBeDisabled();
+    await vi.waitFor(() =>
+      expect(tagsContainer.tags.elements()).toHaveLength(1),
+    );
+    await expect
+      .element(tagsContainer.tags.nth(0))
+      .toHaveTextContent(`${name}${value}`);
 
     vi.useRealTimers();
   },
@@ -445,6 +422,7 @@ test('should be able to edit tags in a note [string]', async () => {
   await renderWithRouter();
 
   const { notes, noteModal, ...notesPage } = createNotesPO();
+  const { tagsContainer } = noteModal;
 
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
@@ -452,21 +430,16 @@ test('should be able to edit tags in a note [string]', async () => {
   await notesPage.noteEditButton(notes.nth(0)).click();
   await noteModal.expectToBeVisible();
 
-  const tagsContainer = noteModal.dialog.getByTestId('tags-container');
-  const tags = tagsContainer.getByTestId('tag');
+  const tags = tagsContainer.tags;
 
   await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
 
   // clicks in the tag to activate edit mode
   const tag = tags.nth(0);
-  const tagEditButton = tag.getByRole('button', {
-    name: new RegExp(`Edit ${currentTagName}`),
-  });
+  const tagEditButton = tagsContainer.editTagButton(tag, currentTagName);
   await tagEditButton.click();
 
-  const tagInput = tagsContainer.getByLabelText(
-    new RegExp(`Edit ${currentTagName} value`),
-  );
+  const tagInput = tagsContainer.editTagInput(currentTagName);
 
   await expect.element(tagInput).toHaveValue(currentTagName);
   await expect.element(tagInput.element()).toHaveFocus();
@@ -479,7 +452,7 @@ test('should be able to edit tags in a note [string]', async () => {
   await expect.element(tagEditButton).toBeDisabled();
   await vi.waitFor(() => expect(tags.nth(0)).toHaveTextContent('new-tag-name'));
   await expect
-    .element(tag.getByRole('button', { name: /Edit new-tag-name/ }))
+    .element(tagsContainer.editTagButton(tag, 'new-tag-name'))
     .toBeEnabled();
 });
 
@@ -498,6 +471,7 @@ test('should be able to edit tags in a note [number]', async () => {
   await renderWithRouter();
 
   const { notes, noteModal, ...notesPage } = createNotesPO();
+  const { tagsContainer } = noteModal;
 
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
@@ -505,21 +479,16 @@ test('should be able to edit tags in a note [number]', async () => {
   await notesPage.noteEditButton(notes.nth(0)).click();
   await noteModal.expectToBeVisible();
 
-  const tagsContainer = noteModal.dialog.getByTestId('tags-container');
-  const tags = tagsContainer.getByTestId('tag');
+  const tags = tagsContainer.tags;
 
   await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
 
   // clicks in the tag to activate edit mode
   const tag = tags.nth(0);
-  const tagEditButton = tag.getByRole('button', {
-    name: new RegExp(`Edit ${currentTagName}`),
-  });
+  const tagEditButton = tagsContainer.editTagButton(tag, currentTagName);
   await tagEditButton.click();
 
-  const tagInput = tagsContainer.getByLabelText(
-    new RegExp(`Edit ${currentTagName} value`),
-  );
+  const tagInput = tagsContainer.editTagInput(currentTagName);
 
   await expect.element(tagInput).toHaveValue('10');
   await expect.element(tagInput.element()).toHaveFocus();
@@ -551,6 +520,7 @@ test('should be able to edit tags in a note [date]', async () => {
   await renderWithRouter();
 
   const { notes, noteModal, ...notesPage } = createNotesPO();
+  const { tagsContainer } = noteModal;
 
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
@@ -558,21 +528,16 @@ test('should be able to edit tags in a note [date]', async () => {
   await notesPage.noteEditButton(notes.nth(0)).click();
   await noteModal.expectToBeVisible();
 
-  const tagsContainer = noteModal.dialog.getByTestId('tags-container');
-  const tags = tagsContainer.getByTestId('tag');
+  const tags = tagsContainer.tags;
 
   await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
 
   // clicks in the tag to activate edit mode
   const tag = tags.nth(0);
-  const tagEditButton = tag.getByRole('button', {
-    name: new RegExp(`Edit ${currentTagName}`),
-  });
+  const tagEditButton = tagsContainer.editTagButton(tag, currentTagName);
   await tagEditButton.click();
 
-  const tagInput = tagsContainer.getByLabelText(
-    new RegExp(`Edit ${currentTagName} value`),
-  );
+  const tagInput = tagsContainer.editTagInput(currentTagName);
 
   await expect.element(tagInput).toHaveValue('2025-10-31');
   await expect.element(tagInput.element()).toHaveFocus();
@@ -604,6 +569,7 @@ test('should be able to edit tags in a note [boolean]', async () => {
   await renderWithRouter();
 
   const { notes, noteModal, ...notesPage } = createNotesPO();
+  const { tagsContainer } = noteModal;
 
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
@@ -611,21 +577,16 @@ test('should be able to edit tags in a note [boolean]', async () => {
   await notesPage.noteEditButton(notes.nth(0)).click();
   await noteModal.expectToBeVisible();
 
-  const tagsContainer = noteModal.dialog.getByTestId('tags-container');
-  const tags = tagsContainer.getByTestId('tag');
+  const tags = tagsContainer.tags;
 
   await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
 
   // clicks in the tag to activate edit mode
   const tag = tags.nth(0);
-  const tagEditButton = tag.getByRole('button', {
-    name: new RegExp(`Edit ${currentTagName}`),
-  });
+  const tagEditButton = tagsContainer.editTagButton(tag, currentTagName);
   await tagEditButton.click();
 
-  const tagInput = tagsContainer.getByLabelText(
-    new RegExp(`Edit ${currentTagName} value`),
-  );
+  const tagInput = tagsContainer.editTagInput(currentTagName);
 
   await expect.element(tagInput).toHaveValue('YES');
   await expect.element(tagInput.element()).toHaveFocus();
@@ -657,6 +618,7 @@ test.each([
     await renderWithRouter();
 
     const { notes, noteModal, ...notesPage } = createNotesPO();
+    const { tagsContainer } = noteModal;
 
     await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
@@ -664,20 +626,15 @@ test.each([
     await notesPage.noteEditButton(notes.nth(0)).click();
     await noteModal.expectToBeVisible();
 
-    const tagsContainer = noteModal.dialog.getByTestId('tags-container');
-    const tags = tagsContainer.getByTestId('tag');
+    const tags = tagsContainer.tags;
 
     await vi.waitFor(() => expect(tags.elements()).toHaveLength(1));
 
     // clicks in the tag delete button
     server.timing = 100;
     const tag = tags.nth(0);
-    const tagDeleteButton = tag.getByRole('button', {
-      name: new RegExp(`Remove ${name}`),
-    });
-    const tagEditButton = tag.getByRole('button', {
-      name: new RegExp(`Edit ${name}`),
-    });
+    const tagDeleteButton = tagsContainer.removeTagButton(tag, name);
+    const tagEditButton = tagsContainer.editTagButton(tag, name);
     await tagDeleteButton.click();
 
     // While deleting, both edit and delete buttons should be disabled
@@ -701,6 +658,7 @@ test('should render "created" and "updated" fixed/default tags', async () => {
   await renderWithRouter();
 
   const { notes, noteModal, ...notesPage } = createNotesPO();
+  const { fixedTagsContainer } = noteModal;
 
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
 
@@ -708,11 +666,7 @@ test('should render "created" and "updated" fixed/default tags', async () => {
   await notesPage.noteEditButton(notes.nth(0)).click();
   await noteModal.expectToBeVisible();
 
-  const fixedTagsContainer = noteModal.dialog.getByTestId(
-    'fixed-tags-container',
-  );
-
-  const tags = fixedTagsContainer.getByTestId('tag');
+  const tags = fixedTagsContainer.tags;
 
   await vi.waitFor(() => expect(tags.elements()).toHaveLength(2));
 
