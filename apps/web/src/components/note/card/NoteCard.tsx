@@ -29,7 +29,7 @@ export const NoteCard = ({ note }: NoteCardProps) => {
               aria-label={t(($) => $.notes.editNote)}
               onClick={() => openNoteModal(note)}
               radius="xl"
-              variant="filled"
+              variant="subtle"
             >
               <TbPencil />
             </ActionIcon>

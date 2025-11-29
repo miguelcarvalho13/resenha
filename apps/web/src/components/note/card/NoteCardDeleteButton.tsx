@@ -58,7 +58,7 @@ export const NoteCardDeleteButton = ({ note }: NoteCardDeleteButtonProps) => {
         color="red"
         onClick={handleOnClick}
         radius="xl"
-        variant="filled"
+        variant="subtle"
       >
         <TbTrash />
       </ActionIcon>
