@@ -75,8 +75,11 @@ const CreateOrEditNoteModal = ({
       <Stack>
         <Textarea
           aria-label="Content"
+          autosize
           placeholder="Start typing here..."
           key={form.key('content')}
+          maxRows={20}
+          minRows={6}
           {...form.getInputProps('content')}
           onChange={(e) => {
             form.getInputProps('content').onChange(e);
