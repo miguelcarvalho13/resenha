@@ -45,6 +45,9 @@ test('should update modal content when reopening the modal after a save', async 
     content: 'B',
   });
 
+  // Note within the grid should be updated
+  await expect.element(notes.nth(0)).toHaveTextContent('B');
+
   // Reopen the modal
   await notesPage.noteEditButton(notes.nth(0)).click();
   await noteModal.expectToBeVisible();

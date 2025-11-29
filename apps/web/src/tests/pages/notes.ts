@@ -129,6 +129,7 @@ export const createNotesPO = () => {
   }) => {
     await editNote({ noteCard, content });
     await noteModal.closeButton.click();
+    await noteModal.expectNotToBeVisible();
   };
 
   return {
