@@ -64,6 +64,7 @@
     "editTagValue": "Edit {{name}} value",
     "fixed": {
       "created": "created",
+      "deleted": "deleted",
       "updated": "updated"
     },
     "listOfTags": "List of tags",

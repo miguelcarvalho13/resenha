@@ -19,6 +19,12 @@ export const createNotesPO = () => {
       tags: fixedTagsContainer.getByTestId('tag'),
 
       it: fixedTagsContainer,
+
+      // methods
+      removeTagButton: (tagLocator: Locator, tagName: string) =>
+        tagLocator.getByRole('button', {
+          name: new RegExp(`Remove ${tagName}`),
+        }),
     },
     tagsContainer: {
       addTagButton: tagsContainer.getByRole('button', { name: /Add tag/ }),
