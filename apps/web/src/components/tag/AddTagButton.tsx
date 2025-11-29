@@ -1,7 +1,7 @@
 import { Button, Combobox, useCombobox } from '@mantine/core';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TbCirclePlus } from 'react-icons/tb';
+import { TbPlus } from 'react-icons/tb';
 
 import { TagWrapper } from '@/components/tag/TagWrapper';
 import { type NoteTag } from '@/models/tags';
@@ -132,7 +132,7 @@ export const AddTagButton = ({ noteId }: AddTagButtonProps) => {
         <Button
           disabled={isPending}
           justify="center"
-          leftSection={<TbCirclePlus className="-mr-2" />}
+          leftSection={<TbPlus className="-mr-2" />}
           onClick={() => combobox.toggleDropdown()}
           radius="xl"
           size="compact-xs"
