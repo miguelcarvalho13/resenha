@@ -5,12 +5,6 @@ import superjson from 'superjson';
 
 import { trpc } from '@/utils/trpc';
 
-const baseUrl =
-  import.meta.env.MODE === 'test'
-    ? // vitest default port
-      'http://localhost:63315'
-    : import.meta.env.VITE_API_URL;
-
 const trpcLink = import.meta.env.MODE === 'test' ? httpLink : httpBatchLink;
 
 export function TrpcWrapper({ children }: { children: React.ReactNode }) {
@@ -24,7 +18,7 @@ export function TrpcWrapper({ children }: { children: React.ReactNode }) {
               ...options,
               credentials: 'include',
             }),
-          url: baseUrl + '/api/trpc',
+          url: `${window.location.origin}/api/trpc`,
           transformer: superjson,
         }),
       ],
