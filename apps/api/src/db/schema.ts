@@ -1,15 +1,16 @@
 import { relations } from 'drizzle-orm';
 import {
+  boolean,
+  date,
+  doublePrecision,
+  json,
+  pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
-  boolean,
-  uuid,
-  pgEnum,
-  doublePrecision,
-  date,
-  primaryKey,
   unique,
+  uuid,
 } from 'drizzle-orm/pg-core';
 
 // Tables
@@ -156,6 +157,27 @@ export const noteTags = pgTable(
   (table) => [primaryKey({ columns: [table.noteId, table.tagId] })],
 );
 
+export const searches = pgTable('searches', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  content: json('content').notNull(),
+  favorited: boolean().default(false).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  deletedAt: timestamp('deleted_at'),
+  deletedBy: text('deleted_by').references(() => users.id, {
+    onDelete: 'cascade',
+  }),
+  updatedAt: timestamp('updated_at')
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  updatedBy: text('updated_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+});
+
 // Relations
 export const notesRelations = relations(notes, ({ one }) => ({
   // Notes -> User
@@ -212,6 +234,22 @@ export const noteTagsRelations = relations(noteTags, ({ one }) => ({
   }),
 }));
 
+export const searchesRelations = relations(searches, ({ one }) => ({
+  // Searches -> User
+  creator: one(users, {
+    fields: [searches.createdBy],
+    references: [users.id],
+  }),
+  deleter: one(users, {
+    fields: [searches.deletedBy],
+    references: [users.id],
+  }),
+  updater: one(users, {
+    fields: [searches.updatedBy],
+    references: [users.id],
+  }),
+}));
+
 export const usersRelations = relations(users, ({ many }) => ({
   // Users -> Notes
   createdNotes: many(notes),
@@ -221,4 +259,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 
   // Users -> NoteTags
   createdNoteTags: many(noteTags),
+
+  // Users -> Searches
+  createdSearches: many(searches),
 }));

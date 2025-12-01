@@ -1,0 +1,15 @@
+CREATE TABLE "searches" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"content" json NOT NULL,
+	"favorited" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"created_by" text NOT NULL,
+	"deleted_at" timestamp,
+	"deleted_by" text,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"updated_by" text NOT NULL
+);
+--> statement-breakpoint
+ALTER TABLE "searches" ADD CONSTRAINT "searches_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "searches" ADD CONSTRAINT "searches_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "searches" ADD CONSTRAINT "searches_updated_by_users_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
