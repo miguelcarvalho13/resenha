@@ -160,6 +160,7 @@ export const noteTags = pgTable(
 export const searches = pgTable('searches', {
   id: uuid('id').defaultRandom().primaryKey(),
   content: json('content').notNull(),
+  name: text('name'),
   favorited: boolean().default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   createdBy: text('created_by')
