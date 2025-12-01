@@ -13,6 +13,8 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 
+import { type SearchNotesSchemaType } from '@api/schemas/searches';
+
 // Tables
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -159,7 +161,7 @@ export const noteTags = pgTable(
 
 export const searches = pgTable('searches', {
   id: uuid('id').defaultRandom().primaryKey(),
-  content: json('content').notNull(),
+  content: json('content').notNull().$type<SearchNotesSchemaType>(),
   name: text('name'),
   favorited: boolean().default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
