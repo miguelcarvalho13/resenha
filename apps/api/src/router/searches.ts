@@ -3,8 +3,9 @@ import { and, desc, eq, gt, gte, isNull, lt, lte } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 
 import { db } from '@api/db';
-import { notes, noteTags } from '@api/db/schema';
+import { notes, noteTags, searches } from '@api/db/schema';
 import {
+  createSearchSchema,
   type DateOperatorsType,
   searchNotesSchema,
 } from '@api/schemas/searches';
@@ -28,6 +29,26 @@ const whereFactory = (type: DateOperatorsType['type']) => {
 };
 
 export const searchesRouter = router({
+  createSearch: protectedProcedure
+    .input(createSearchSchema())
+    .mutation(async ({ input, ctx }) => {
+      const { content } = input;
+
+      const [newSearch] = await db
+        .insert(searches)
+        .values({
+          content,
+          createdBy: ctx.user.id,
+          updatedBy: ctx.user.id,
+        })
+        .returning();
+
+      return {
+        success: true,
+        search: newSearch,
+      };
+    }),
+
   searchNotes: protectedProcedure
     .input(searchNotesSchema())
     .query(async ({ input, ctx }) => {

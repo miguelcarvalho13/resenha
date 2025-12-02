@@ -99,6 +99,11 @@ export const searchNotesSchema = () =>
     ),
   });
 
+export const createSearchSchema = () =>
+  z.object({
+    content: searchNotesSchema(),
+  });
+
 export type BooleanOperatorsType = z.infer<typeof booleanOperators>;
 export type DateOperatorsType = z.infer<typeof dateOperators>;
 export type NumberOperatorsType = z.infer<typeof numberOperators>;
@@ -106,4 +111,8 @@ export type StringOperatorsType = z.infer<typeof stringOperators>;
 
 export type SearchNotesSchemaType = z.infer<
   ReturnType<typeof searchNotesSchema>
+>;
+
+export type CreateSearchSchemaType = z.infer<
+  ReturnType<typeof createSearchSchema>
 >;

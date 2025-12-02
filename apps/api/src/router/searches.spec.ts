@@ -8,6 +8,7 @@ import { db } from '@api/db';
 import * as schema from '@api/db/schema';
 import {
   type BooleanOperatorsType,
+  type CreateSearchSchemaType,
   type DateOperatorsType,
   type NumberOperatorsType,
   type SearchNotesSchemaType,
@@ -29,6 +30,50 @@ beforeEach(() => {
 afterEach(async () => {
   app?.close();
   await reset(db, schema);
+});
+
+describe('searches.createSearch', () => {
+  test('should be correctly handled', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+    const search = {
+      content: {
+        query: [
+          { field: 'deleted', operator: { type: '>', value: '2000-01-01' } },
+        ],
+      },
+    } satisfies CreateSearchSchemaType;
+
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.createSearch')
+      .send({ json: search })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const [createdSearch] = await db.select().from(schema.searches).limit(1);
+
+    expect(createdSearch.content).to.deep.equal(search.content);
+    expect(createdSearch.createdAt).not.toBeNull();
+    expect(createdSearch.updatedAt).not.toBeNull();
+    expect(createdSearch.favorited).toBeFalsy();
+    expect(createdSearch.name).toBeNull();
+    expect(createdSearch.deletedAt).toBeNull();
+    expect(createdSearch.deletedBy).toBeNull();
+    expect(createdSearch.createdBy).toBe(user.id);
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.createSearch')
+      .send({
+        json: {
+          content: { query: [] },
+        } satisfies CreateSearchSchemaType,
+      });
+
+    expect(res.status).toBe(401);
+    expect((await db.select().from(schema.searches)).length).toBe(0);
+  });
 });
 
 describe('tags.searchNotes', () => {
