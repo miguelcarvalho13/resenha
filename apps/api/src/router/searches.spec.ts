@@ -76,7 +76,7 @@ describe('searches.createSearch', () => {
   });
 });
 
-describe('tags.searchNotes', () => {
+describe('searches.searchNotes', () => {
   test('should be correctly handled [string] operator "="', async () => {
     if (!app) throw new Error('app not started');
 
