@@ -104,6 +104,14 @@ export const createSearchSchema = () =>
     content: searchNotesSchema(),
   });
 
+export const editSearchSchema = () =>
+  z.object({
+    content: z.object({ ...searchNotesSchema().shape }).optional(),
+    favorited: z.boolean().optional(),
+    id: z.uuid(),
+    name: z.string().optional(),
+  });
+
 export type BooleanOperatorsType = z.infer<typeof booleanOperators>;
 export type DateOperatorsType = z.infer<typeof dateOperators>;
 export type NumberOperatorsType = z.infer<typeof numberOperators>;
@@ -116,3 +124,5 @@ export type SearchNotesSchemaType = z.infer<
 export type CreateSearchSchemaType = z.infer<
   ReturnType<typeof createSearchSchema>
 >;
+
+export type EditSearchSchemaType = z.infer<ReturnType<typeof editSearchSchema>>;

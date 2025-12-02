@@ -7,6 +7,7 @@ import { notes, noteTags, searches } from '@api/db/schema';
 import {
   createSearchSchema,
   type DateOperatorsType,
+  editSearchSchema,
   searchNotesSchema,
 } from '@api/schemas/searches';
 import { protectedProcedure, router } from '@api/trpc';
@@ -46,6 +47,41 @@ export const searchesRouter = router({
       return {
         success: true,
         search: newSearch,
+      };
+    }),
+
+  editSearch: protectedProcedure
+    .input(editSearchSchema())
+    .mutation(async ({ input, ctx }) => {
+      const { id } = input;
+
+      const [search] = await db
+        .select()
+        .from(searches)
+        .where(eq(searches.id, id))
+        .limit(1);
+
+      if (search.createdBy !== ctx.user.id) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        });
+      }
+
+      const [updatedSearch] = await db
+        .update(searches)
+        .set({
+          ...('content' in input ? { content: input.content } : {}),
+          ...('favorited' in input ? { favorited: input.favorited } : {}),
+          ...('name' in input ? { name: input.name } : {}),
+          updatedBy: ctx.user.id,
+        })
+        .where(eq(searches.id, id))
+        .returning();
+
+      return {
+        success: true,
+        search: updatedSearch,
       };
     }),
 

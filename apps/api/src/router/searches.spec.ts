@@ -10,6 +10,7 @@ import {
   type BooleanOperatorsType,
   type CreateSearchSchemaType,
   type DateOperatorsType,
+  type EditSearchSchemaType,
   type NumberOperatorsType,
   type SearchNotesSchemaType,
 } from '@api/schemas/searches';
@@ -18,6 +19,7 @@ import {
   createNoteThroughApi,
   softDeleteNotesThroughApi,
 } from '@api/tests/noteUtils';
+import { createSearchThroughApi } from '@api/tests/searchUtils';
 import { createAndSignInUser } from '@api/tests/sessionUtils';
 import { createNoteTagThroughApi } from '@api/tests/tagUtils';
 
@@ -73,6 +75,108 @@ describe('searches.createSearch', () => {
 
     expect(res.status).toBe(401);
     expect((await db.select().from(schema.searches)).length).toBe(0);
+  });
+});
+
+describe('searches.editSearch', () => {
+  test('should be correctly handled', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+
+    const createdSearch = await createSearchThroughApi({
+      app: app!,
+      authCookie,
+    });
+    const content = {
+      query: [
+        { field: 'deleted', operator: { type: '>', value: '2000-01-01' } },
+      ],
+    } satisfies EditSearchSchemaType['content'];
+
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.editSearch')
+      .send({
+        json: {
+          content,
+          favorited: true,
+          id: createdSearch.id,
+          name: 'my search',
+        } satisfies EditSearchSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const [updatedSearch] = await db.select().from(schema.searches).limit(1);
+
+    expect(updatedSearch.content).to.deep.equal(content);
+    expect(updatedSearch.name).to.deep.equal('my search');
+    expect(updatedSearch.favorited).toBeTruthy();
+    expect(updatedSearch.createdAt).not.toBeNull();
+    expect(updatedSearch.updatedAt).not.toBeNull();
+
+    // the created user should be the same
+    expect(updatedSearch.createdBy).toBe(user.id);
+    expect(createdSearch.createdBy).toBe(updatedSearch.createdBy);
+
+    // the created date should also remain the same
+    expect(updatedSearch.createdAt).not.toBeNull();
+    expect(createdSearch.createdAt).toEqual(updatedSearch.createdAt);
+
+    // the updated date should be more recent than the created date
+    expect(updatedSearch.updatedAt.getTime()).toBeGreaterThan(
+      createdSearch.updatedAt.getTime(),
+    );
+  });
+
+  test('should not allow edition for a search created by a different user', async () => {
+    const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
+      app!,
+      {
+        name: 'Another User',
+        email: 'another@example.com',
+      },
+    );
+
+    const searchCreatedByAnotherUser = await createSearchThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+    });
+
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.editSearch')
+      .send({
+        json: {
+          id: searchCreatedByAnotherUser.id,
+          name: 'my search',
+        } satisfies EditSearchSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(401);
+
+    // search should remain the same
+    const [updatedSearch] = await db.select().from(schema.searches).limit(1);
+    expect(updatedSearch.content).to.deep.equal(
+      searchCreatedByAnotherUser.content,
+    );
+    expect(updatedSearch.name).toEqual(searchCreatedByAnotherUser.name);
+    expect(updatedSearch.createdAt).toEqual(
+      searchCreatedByAnotherUser.createdAt,
+    );
+    expect(updatedSearch.updatedAt).toEqual(
+      searchCreatedByAnotherUser.updatedAt,
+    );
+    expect(updatedSearch.createdBy).toBe(searchCreatedByAnotherUser.createdBy);
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.editSearch')
+      .send();
+
+    expect(res.status).toBe(401);
   });
 });
 
