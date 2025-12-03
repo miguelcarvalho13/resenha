@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { and, desc, eq, gt, gte, isNull, lt, lte } from 'drizzle-orm';
+import { and, desc, eq, gt, gte, inArray, isNull, lt, lte } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 
 import { db } from '@api/db';
@@ -9,6 +9,7 @@ import {
   type DateOperatorsType,
   editSearchSchema,
   searchNotesSchema,
+  softDeleteSearchesSchema,
 } from '@api/schemas/searches';
 import { protectedProcedure, router } from '@api/trpc';
 import { partition } from '@api/utils/array';
@@ -179,6 +180,46 @@ export const searchesRouter = router({
       return {
         success: true,
         notes: allNotes.map(({ note }) => note),
+      };
+    }),
+
+  softDeleteSearches: protectedProcedure
+    .input(softDeleteSearchesSchema())
+    .mutation(async ({ input, ctx }) => {
+      const { searchIds } = input;
+
+      const requestedSearches = await db
+        .select()
+        .from(searches)
+        .where(inArray(searches.id, searchIds));
+
+      if (
+        requestedSearches.some(({ createdBy }) => createdBy !== ctx.user.id)
+      ) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        });
+      }
+
+      const softDeleteSearches = await db
+        .update(searches)
+        .set({
+          deletedAt: new Date(),
+          deletedBy: ctx.user.id,
+          updatedBy: ctx.user.id,
+        })
+        .where(
+          and(
+            inArray(searches.id, searchIds),
+            eq(searches.createdBy, ctx.user.id),
+          ),
+        )
+        .returning();
+
+      return {
+        success: true,
+        searches: softDeleteSearches,
       };
     }),
 });

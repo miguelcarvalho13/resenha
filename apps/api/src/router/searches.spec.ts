@@ -13,6 +13,7 @@ import {
   type EditSearchSchemaType,
   type NumberOperatorsType,
   type SearchNotesSchemaType,
+  type SoftDeleteSearchesSchemaType,
 } from '@api/schemas/searches';
 import { startApp } from '@api/server';
 import {
@@ -75,6 +76,114 @@ describe('searches.createSearch', () => {
 
     expect(res.status).toBe(401);
     expect((await db.select().from(schema.searches)).length).toBe(0);
+  });
+});
+
+describe('searches.softDeleteSearches', () => {
+  test('should be correctly handled', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+
+    const createdSearch = await createSearchThroughApi({
+      app: app!,
+      authCookie,
+    });
+
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.softDeleteSearches')
+      .send({
+        json: {
+          searchIds: [createdSearch.id],
+        } satisfies SoftDeleteSearchesSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const [updatedSearch] = await db.select().from(schema.searches).limit(1);
+
+    expect(updatedSearch.content).to.deep.equal(createdSearch.content);
+    expect(updatedSearch.createdAt).not.toBeNull();
+    expect(updatedSearch.updatedAt).not.toBeNull();
+    expect(updatedSearch.deletedAt).not.toBeNull();
+
+    // the created user should be the same
+    expect(updatedSearch.createdBy).toBe(user.id);
+    expect(createdSearch.createdBy).toBe(updatedSearch.createdBy);
+
+    // the created date should also remain the same
+    expect(updatedSearch.createdAt).not.toBeNull();
+    expect(createdSearch.createdAt).toEqual(updatedSearch.createdAt);
+
+    // the deleted user should be present
+    expect(updatedSearch.deletedBy).not.toBeNull();
+    expect(updatedSearch.deletedBy).toBe(user.id);
+
+    // the updated date should be more recent than the created date
+    expect(updatedSearch.updatedAt.getTime()).toBeGreaterThan(
+      createdSearch.updatedAt.getTime(),
+    );
+
+    // the deleted date should be more recent than the created date
+    expect(updatedSearch.deletedAt?.getTime()).toBeGreaterThan(
+      createdSearch.updatedAt.getTime(),
+    );
+  });
+
+  test('should not allow soft deletion for a search created by a different user', async () => {
+    const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
+      app!,
+      {
+        name: 'Another User',
+        email: 'another@example.com',
+      },
+    );
+
+    const searchCreatedByAnotherUser = await createSearchThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+    });
+
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const searchCreatedByCurrentUser = await createSearchThroughApi({
+      app: app!,
+      authCookie,
+    });
+
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.softDeleteSearches')
+      .send({
+        json: {
+          searchIds: [
+            searchCreatedByCurrentUser.id,
+            searchCreatedByAnotherUser.id,
+          ],
+        } satisfies SoftDeleteSearchesSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(401);
+
+    // searches should remain the same
+    const updatedSearches = await db.select().from(schema.searches).limit(2);
+
+    expect(updatedSearches).to.deep.equal([
+      searchCreatedByAnotherUser,
+      searchCreatedByCurrentUser,
+    ]);
+
+    expect(updatedSearches[0].deletedAt).toBeNull();
+    expect(updatedSearches[0].deletedBy).toBeNull();
+    expect(updatedSearches[1].deletedAt).toBeNull();
+    expect(updatedSearches[1].deletedBy).toBeNull();
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.softDeleteSearches')
+      .send();
+
+    expect(res.status).toBe(401);
   });
 });
 
