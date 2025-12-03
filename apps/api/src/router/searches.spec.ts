@@ -26,7 +26,7 @@ import {
   createSearchThroughApi,
   softDeleteSearchesThroughApi,
 } from '@api/tests/searchUtils';
-import { createAndSignInUser } from '@api/tests/sessionUtils';
+import { createAndSignInUser, createUser } from '@api/tests/sessionUtils';
 import { createNoteTagThroughApi } from '@api/tests/tagUtils';
 
 let app: Server | null = null;
@@ -81,6 +81,72 @@ describe('searches.createSearch', () => {
 
     expect(res.status).toBe(401);
     expect((await db.select().from(schema.searches)).length).toBe(0);
+  });
+});
+
+describe('searches.findAllSearches', () => {
+  test('should be correctly handled', async () => {
+    const { authCookie } = await createAndSignInUser(app!);
+
+    await createSearchThroughApi({ app: app!, authCookie });
+
+    const res = await supertest(app!)
+      .get('/api/trpc/searches.findAllSearches')
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const allSearches = await db.select().from(schema.searches);
+    expect(res.body.result.data.json.searches).to.deep.equal([
+      {
+        ...allSearches[0],
+        createdAt: allSearches[0].createdAt.toISOString(),
+        updatedAt: allSearches[0].updatedAt.toISOString(),
+      },
+    ]);
+  });
+
+  test('should only return searches created by the user', async () => {
+    const anotherUser = await createUser(app!, {
+      name: 'Another User',
+      email: 'another@example.com',
+    });
+
+    await db.insert(schema.searches).values({
+      content: { query: [] },
+      createdBy: anotherUser.id,
+      updatedBy: anotherUser.id,
+    });
+
+    const { authCookie, user } = await createAndSignInUser(app!);
+
+    // First creates a search for the current user
+    await createSearchThroughApi({ app: app!, authCookie });
+
+    const res = await supertest(app!)
+      .get('/api/trpc/searches.findAllSearches')
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const allSearchesFromLoggedInUser = await db
+      .select()
+      .from(schema.searches)
+      .where(eq(schema.searches.createdBy, user.id));
+
+    expect(res.body.result.data.json.searches).to.deep.equal([
+      {
+        ...allSearchesFromLoggedInUser[0],
+        createdAt: allSearchesFromLoggedInUser[0].createdAt.toISOString(),
+        updatedAt: allSearchesFromLoggedInUser[0].updatedAt.toISOString(),
+      },
+    ]);
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!).get('/api/trpc/searches.findAllSearches');
+
+    expect(res.status).toBe(401);
   });
 });
 

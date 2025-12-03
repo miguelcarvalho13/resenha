@@ -53,6 +53,19 @@ export const searchesRouter = router({
       };
     }),
 
+  findAllSearches: protectedProcedure.query(async ({ ctx }) => {
+    const allSearches = await db
+      .select()
+      .from(searches)
+      .where(eq(searches.createdBy, ctx.user.id))
+      .orderBy(desc(searches.updatedAt));
+
+    return {
+      success: true,
+      searches: allSearches,
+    };
+  }),
+
   hardDeleteSearches: protectedProcedure
     .input(hardDeleteSearchesSchema())
     .mutation(async ({ input, ctx }) => {
