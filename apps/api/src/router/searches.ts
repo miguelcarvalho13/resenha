@@ -8,6 +8,7 @@ import {
   createSearchSchema,
   type DateOperatorsType,
   editSearchSchema,
+  hardDeleteSearchesSchema,
   searchNotesSchema,
   softDeleteSearchesSchema,
 } from '@api/schemas/searches';
@@ -48,6 +49,41 @@ export const searchesRouter = router({
       return {
         success: true,
         search: newSearch,
+      };
+    }),
+
+  hardDeleteSearches: protectedProcedure
+    .input(hardDeleteSearchesSchema())
+    .mutation(async ({ input, ctx }) => {
+      const { searchIds } = input;
+
+      const requestedSearches = await db
+        .select()
+        .from(searches)
+        .where(inArray(searches.id, searchIds));
+
+      if (
+        requestedSearches.some(({ createdBy }) => createdBy !== ctx.user.id)
+      ) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        });
+      }
+
+      const hardDeleteSearches = await db
+        .delete(searches)
+        .where(
+          and(
+            inArray(searches.id, searchIds),
+            eq(searches.createdBy, ctx.user.id),
+          ),
+        )
+        .returning();
+
+      return {
+        success: true,
+        searches: hardDeleteSearches,
       };
     }),
 

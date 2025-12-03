@@ -11,6 +11,7 @@ import {
   type CreateSearchSchemaType,
   type DateOperatorsType,
   type EditSearchSchemaType,
+  type HardDeleteSearchesSchemaType,
   type NumberOperatorsType,
   type SearchNotesSchemaType,
   type SoftDeleteSearchesSchemaType,
@@ -76,6 +77,76 @@ describe('searches.createSearch', () => {
 
     expect(res.status).toBe(401);
     expect((await db.select().from(schema.searches)).length).toBe(0);
+  });
+});
+
+describe('searches.hardDeleteSearches', () => {
+  test('should be correctly handled', async () => {
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const createdSearch = await createSearchThroughApi({
+      app: app!,
+      authCookie,
+    });
+
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.hardDeleteSearches')
+      .send({
+        json: {
+          searchIds: [createdSearch.id],
+        } satisfies HardDeleteSearchesSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+    expect(await db.select().from(schema.searches)).toHaveLength(0);
+  });
+
+  test('should not allow hard deletion for a search created by a different user', async () => {
+    const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
+      app!,
+      {
+        name: 'Another User',
+        email: 'another@example.com',
+      },
+    );
+
+    const searchCreatedByAnotherUser = await createSearchThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+    });
+
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const searchCreatedByCurrentUser = await createSearchThroughApi({
+      app: app!,
+      authCookie,
+    });
+
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.hardDeleteSearches')
+      .send({
+        json: {
+          searchIds: [
+            searchCreatedByCurrentUser.id,
+            searchCreatedByAnotherUser.id,
+          ],
+        } satisfies HardDeleteSearchesSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(401);
+
+    // searches should not have been deleted
+    expect(await db.select().from(schema.searches)).toHaveLength(2);
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.hardDeleteSearches')
+      .send();
+
+    expect(res.status).toBe(401);
   });
 });
 
