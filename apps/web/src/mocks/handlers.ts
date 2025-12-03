@@ -6,7 +6,15 @@ import {
   postSoftDeleteNotesHandler,
   postUndoSoftDeletedNotesHandler,
 } from './routes/notes';
-import { getSearchNotesHandler } from './routes/searches';
+import {
+  getFindAllSearchesHandler,
+  getSearchNotesHandler,
+  postCreateSearchHandler,
+  postEditSearchHandler,
+  postHardDeleteSearchesHandler,
+  postSoftDeleteSearchesHandler,
+  postUndoSoftDeletedSearchesHandler,
+} from './routes/searches';
 import {
   getSessionHandler,
   postSignInWithEmail,
@@ -37,7 +45,13 @@ export const handlers = [
   postUndoSoftDeletedNotesHandler(),
 
   // searches
+  getFindAllSearchesHandler(),
   getSearchNotesHandler(),
+  postCreateSearchHandler(),
+  postEditSearchHandler(),
+  postHardDeleteSearchesHandler(),
+  postSoftDeleteSearchesHandler(),
+  postUndoSoftDeletedSearchesHandler(),
 
   // tags
   getFindAllTagsHandler(),

@@ -3,6 +3,7 @@ import { delay, http, type PathParams } from 'msw';
 
 import {
   createTrpcJson,
+  extractTrpcInput,
   extractTrpcInputQuery,
   type TrpcInput,
 } from '@/mocks/factories/trpc';
@@ -11,6 +12,147 @@ import { utils as apiUtils } from '@repo/api';
 import { noteMock } from '../models/notes';
 import { noteTagMock } from '../models/tags';
 import { server } from '../server';
+import { createSearchMock } from '../factories/searches';
+import { searchMock } from '../models/searches';
+
+export const postCreateSearchHandler = ({ wait = 0 }: { wait?: number } = {}) =>
+  http.post<PathParams, TrpcInput<RouterInput['searches']['createSearch']>>(
+    '/api/trpc/searches.createSearch',
+    async ({ request }) => {
+      await delay(wait);
+
+      const input = extractTrpcInput(await request.clone().json());
+
+      return createTrpcJson({
+        success: true,
+        search: await createSearchMock({
+          content: input.content,
+        }),
+      } satisfies RouterOutput['searches']['createSearch']);
+    },
+  );
+
+export const postEditSearchHandler = ({ wait = 0 }: { wait?: number } = {}) =>
+  http.post<PathParams, TrpcInput<RouterInput['searches']['editSearch']>>(
+    '/api/trpc/searches.editSearch',
+    async ({ request }) => {
+      await delay(wait);
+
+      const input = extractTrpcInput(await request.clone().json());
+
+      const updatedSearch = await searchMock.update(
+        (q) => q.where({ id: input.id }),
+        {
+          data(search) {
+            if ('content' in input && input.content) {
+              search.content = input.content;
+            }
+
+            if ('favorited' in input && input.favorited !== undefined) {
+              search.favorited = input.favorited;
+            }
+
+            if ('name' in input && input.name !== undefined) {
+              search.name = input.name;
+            }
+          },
+        },
+      );
+
+      return createTrpcJson({
+        success: true,
+        search: updatedSearch!,
+      } satisfies RouterOutput['searches']['editSearch']);
+    },
+  );
+
+export const postHardDeleteSearchesHandler = ({
+  wait = 0,
+}: { wait?: number } = {}) =>
+  http.post<
+    PathParams,
+    TrpcInput<RouterInput['searches']['hardDeleteSearches']>
+  >('/api/trpc/searches.hardDeleteSearches', async ({ request }) => {
+    await delay(wait);
+
+    const input = extractTrpcInput(await request.clone().json());
+
+    const hardDeletedSearches = searchMock.deleteMany((q) =>
+      q.where({ id: (id) => input.searchIds.includes(id) }),
+    );
+
+    return createTrpcJson({
+      success: true,
+      searches: hardDeletedSearches,
+    } satisfies RouterOutput['searches']['hardDeleteSearches']);
+  });
+
+export const postSoftDeleteSearchesHandler = ({
+  wait = 0,
+}: { wait?: number } = {}) =>
+  http.post<
+    PathParams,
+    TrpcInput<RouterInput['searches']['softDeleteSearches']>
+  >('/api/trpc/searches.softDeleteSearches', async ({ request }) => {
+    await delay(wait);
+
+    const input = extractTrpcInput(await request.clone().json());
+
+    const softDeletedSearches = await searchMock.updateMany(
+      (q) => q.where({ id: (id) => input.searchIds.includes(id) }),
+      {
+        data(search) {
+          const now = new Date();
+          search.deletedAt = now;
+          search.deletedBy = search.createdBy;
+          search.deletedByUser = search.createdByUser;
+          search.updatedAt = now;
+        },
+      },
+    );
+
+    return createTrpcJson({
+      success: true,
+      searches: softDeletedSearches,
+    } satisfies RouterOutput['searches']['softDeleteSearches']);
+  });
+
+export const postUndoSoftDeletedSearchesHandler = ({
+  wait = 0,
+}: { wait?: number } = {}) =>
+  http.post<
+    PathParams,
+    TrpcInput<RouterInput['searches']['undoSoftDeletedSearches']>
+  >('/api/trpc/searches.undoSoftDeletedSearches', async ({ request }) => {
+    await delay(wait);
+
+    const input = extractTrpcInput(await request.clone().json());
+
+    const restoredSoftDeleteSearches = await searchMock.updateMany(
+      (q) => q.where({ id: (id) => input.searchIds.includes(id) }),
+      {
+        data(search) {
+          search.deletedAt = null;
+          search.deletedBy = null;
+          search.deletedByUser = undefined;
+          search.updatedAt = new Date();
+        },
+      },
+    );
+
+    return createTrpcJson({
+      success: true,
+      searches: restoredSoftDeleteSearches,
+    } satisfies RouterOutput['searches']['undoSoftDeletedSearches']);
+  });
+
+export const getFindAllSearchesHandler = () =>
+  http.get('/api/trpc/searches.findAllSearches', () =>
+    createTrpcJson({
+      success: true,
+      searches: searchMock.all(),
+    } satisfies RouterOutput['searches']['findAllSearches']),
+  );
 
 export const getSearchNotesHandler = ({ wait = 0 }: { wait?: number } = {}) =>
   http.get<PathParams, TrpcInput<RouterInput['searches']['searchNotes']>>(
