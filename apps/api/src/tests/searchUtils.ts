@@ -1,10 +1,13 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { type Server } from 'http';
 import supertest from 'supertest';
 
 import { db } from '@api/db';
 import { searches } from '@api/db/schema';
-import { type CreateSearchSchemaType } from '@api/schemas/searches';
+import {
+  type CreateSearchSchemaType,
+  type SoftDeleteSearchesSchemaType,
+} from '@api/schemas/searches';
 
 export const createSearchThroughApi = async ({
   app,
@@ -27,4 +30,30 @@ export const createSearchThroughApi = async ({
     .limit(1);
 
   return createdSearch;
+};
+
+export const softDeleteSearchesThroughApi = async ({
+  app,
+  authCookie,
+  searchIds,
+}: {
+  app: Server;
+  authCookie: string;
+  searchIds: string[];
+}) => {
+  await supertest(app!)
+    .post('/api/trpc/searches.softDeleteSearches')
+    .send({
+      json: {
+        searchIds,
+      } satisfies SoftDeleteSearchesSchemaType,
+    })
+    .set('Cookie', authCookie);
+
+  const softDeletedSearches = await db
+    .select()
+    .from(searches)
+    .where(inArray(searches.id, searchIds));
+
+  return { notes: softDeletedSearches };
 };

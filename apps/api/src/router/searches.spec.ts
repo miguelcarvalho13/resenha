@@ -15,13 +15,17 @@ import {
   type NumberOperatorsType,
   type SearchNotesSchemaType,
   type SoftDeleteSearchesSchemaType,
+  type UndoSoftDeletedSearchesSchemaType,
 } from '@api/schemas/searches';
 import { startApp } from '@api/server';
 import {
   createNoteThroughApi,
   softDeleteNotesThroughApi,
 } from '@api/tests/noteUtils';
-import { createSearchThroughApi } from '@api/tests/searchUtils';
+import {
+  createSearchThroughApi,
+  softDeleteSearchesThroughApi,
+} from '@api/tests/searchUtils';
 import { createAndSignInUser } from '@api/tests/sessionUtils';
 import { createNoteTagThroughApi } from '@api/tests/tagUtils';
 
@@ -843,6 +847,137 @@ describe('searches.searchNotes', () => {
 
   test('should be a protected route', async () => {
     const res = await supertest(app!).get('/api/trpc/searches.searchNotes');
+
+    expect(res.status).toBe(401);
+  });
+});
+
+describe('searches.undoSoftDeletedSearches', () => {
+  test('should be correctly handled', async () => {
+    const { authCookie, user } = await createAndSignInUser(app!);
+
+    const createdSearch = await createSearchThroughApi({
+      app: app!,
+      authCookie,
+    });
+
+    // soft deletes searches
+    await softDeleteSearchesThroughApi({
+      app: app!,
+      authCookie,
+      searchIds: [createdSearch.id],
+    });
+
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.undoSoftDeletedSearches')
+      .send({
+        json: {
+          searchIds: [createdSearch.id],
+        } satisfies UndoSoftDeletedSearchesSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    const [updatedSearch] = await db.select().from(schema.searches).limit(1);
+
+    expect(updatedSearch.content).to.deep.equal(createdSearch.content);
+    expect(updatedSearch.createdAt).not.toBeNull();
+    expect(updatedSearch.updatedAt).not.toBeNull();
+    expect(updatedSearch.deletedAt).toBeNull();
+
+    // the created user should be the same
+    expect(updatedSearch.createdBy).toBe(user.id);
+    expect(createdSearch.createdBy).toBe(updatedSearch.createdBy);
+
+    // the created date should also remain the same
+    expect(updatedSearch.createdAt).not.toBeNull();
+    expect(createdSearch.createdAt).toEqual(updatedSearch.createdAt);
+
+    // the deleted user should be present
+    expect(updatedSearch.deletedBy).toBeNull();
+
+    // the updated date should be more recent than the created date
+    expect(updatedSearch.updatedAt.getTime()).toBeGreaterThan(
+      createdSearch.updatedAt.getTime(),
+    );
+  });
+
+  test('should not allow undo soft deletion for a search created by a different user', async () => {
+    const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
+      app!,
+      {
+        name: 'Another User',
+        email: 'another@example.com',
+      },
+    );
+
+    const searchCreatedByAnotherUser = await createSearchThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+    });
+
+    await softDeleteSearchesThroughApi({
+      app: app!,
+      authCookie: authCookieForAnotherUser,
+      searchIds: [searchCreatedByAnotherUser.id],
+    });
+
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const searchCreatedByCurrentUser = await createSearchThroughApi({
+      app: app!,
+      authCookie,
+    });
+
+    await softDeleteSearchesThroughApi({
+      app: app!,
+      authCookie,
+      searchIds: [searchCreatedByCurrentUser.id],
+    });
+
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.undoSoftDeletedSearches')
+      .send({
+        json: {
+          searchIds: [
+            searchCreatedByCurrentUser.id,
+            searchCreatedByAnotherUser.id,
+          ],
+        } satisfies UndoSoftDeletedSearchesSchemaType,
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(401);
+
+    // searches should remain the same
+    const updatedSearches = await db.select().from(schema.searches).limit(2);
+
+    expect(updatedSearches).to.deep.equal([
+      {
+        ...searchCreatedByAnotherUser,
+        deletedAt: updatedSearches[0].deletedAt,
+        deletedBy: updatedSearches[0].deletedBy,
+        updatedAt: updatedSearches[0].updatedAt,
+      },
+      {
+        ...searchCreatedByCurrentUser,
+        deletedAt: updatedSearches[1].deletedAt,
+        deletedBy: updatedSearches[1].deletedBy,
+        updatedAt: updatedSearches[1].updatedAt,
+      },
+    ]);
+
+    expect(updatedSearches[0].deletedAt).not.toBeNull();
+    expect(updatedSearches[0].deletedBy).not.toBeNull();
+    expect(updatedSearches[1].deletedAt).not.toBeNull();
+    expect(updatedSearches[1].deletedBy).not.toBeNull();
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!)
+      .post('/api/trpc/searches.undoSoftDeletedSearches')
+      .send();
 
     expect(res.status).toBe(401);
   });

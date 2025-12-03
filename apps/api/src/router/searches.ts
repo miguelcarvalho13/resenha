@@ -11,6 +11,7 @@ import {
   hardDeleteSearchesSchema,
   searchNotesSchema,
   softDeleteSearchesSchema,
+  undoSoftDeletedSearchesSchema,
 } from '@api/schemas/searches';
 import { protectedProcedure, router } from '@api/trpc';
 import { partition } from '@api/utils/array';
@@ -256,6 +257,46 @@ export const searchesRouter = router({
       return {
         success: true,
         searches: softDeleteSearches,
+      };
+    }),
+
+  undoSoftDeletedSearches: protectedProcedure
+    .input(undoSoftDeletedSearchesSchema())
+    .mutation(async ({ input, ctx }) => {
+      const { searchIds } = input;
+
+      const requestedSearches = await db
+        .select()
+        .from(searches)
+        .where(inArray(searches.id, searchIds));
+
+      if (
+        requestedSearches.some(({ createdBy }) => createdBy !== ctx.user.id)
+      ) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        });
+      }
+
+      const restoredSoftDeleteSearches = await db
+        .update(searches)
+        .set({
+          deletedAt: null,
+          deletedBy: null,
+          updatedBy: ctx.user.id,
+        })
+        .where(
+          and(
+            inArray(searches.id, searchIds),
+            eq(searches.createdBy, ctx.user.id),
+          ),
+        )
+        .returning();
+
+      return {
+        success: true,
+        searches: restoredSoftDeleteSearches,
       };
     }),
 });

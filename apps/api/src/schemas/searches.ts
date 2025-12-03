@@ -114,6 +114,11 @@ export const softDeleteSearchesSchema = () =>
     searchIds: z.array(z.uuid()),
   });
 
+export const undoSoftDeletedSearchesSchema = () =>
+  z.object({
+    searchIds: z.array(z.uuid()),
+  });
+
 export const editSearchSchema = () =>
   z.object({
     content: z.object({ ...searchNotesSchema().shape }).optional(),
@@ -141,6 +146,10 @@ export type HardDeleteSearchesSchemaType = z.infer<
 
 export type SoftDeleteSearchesSchemaType = z.infer<
   ReturnType<typeof softDeleteSearchesSchema>
+>;
+
+export type UndoSoftDeletedSearchesSchemaType = z.infer<
+  ReturnType<typeof undoSoftDeletedSearchesSchema>
 >;
 
 export type EditSearchSchemaType = z.infer<ReturnType<typeof editSearchSchema>>;
