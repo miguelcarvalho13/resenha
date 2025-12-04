@@ -27,6 +27,7 @@ export const createFilterRowPO = ({ row }: { row: Locator }) => {
 
 export const createSearchesPO = () => {
   const searchNotesButton = page.getByRole('button', { name: /Search notes/ });
+  const searches = page.getByTestId('search-card');
   const modal = page.getByRole('dialog', { name: /Search notes/ });
   const modalFiltersContainer = modal.getByTestId('tags-filter-container');
 
@@ -43,8 +44,21 @@ export const createSearchesPO = () => {
     expectNotToBeVisible: () => expect.element(modal).not.toBeInTheDocument(),
   };
 
+  const searchDeleteButton = (searchCard: Locator) =>
+    searchCard.getByRole('button', { name: /Delete search/ });
+  const searchNameButton = (searchCard: Locator) =>
+    searchCard.getByLabelText('Search name');
+  const searchFavoriteButton = (searchCard: Locator) =>
+    searchCard.getByRole('button', { name: /Favorite search/ });
+
   return {
+    searches,
     searchModal,
     searchNotesButton,
+
+    // methods
+    searchDeleteButton,
+    searchNameButton,
+    searchFavoriteButton,
   };
 };

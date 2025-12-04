@@ -32,6 +32,7 @@ export const createNavbarPO = () => {
     navbar,
     navbarLinks,
     navbarHomeLink: navbarLinks.filter({ hasText: /Recent/ }),
+    navbarSearchesLink: navbarLinks.filter({ hasText: /Searches/ }),
     navbarTrashLink: navbarLinks.filter({ hasText: /Trash/ }),
   };
 };

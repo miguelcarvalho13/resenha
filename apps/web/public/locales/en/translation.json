@@ -5,6 +5,7 @@
     "cancel": "Cancel",
     "close": "Close",
     "confirm": "Confirm",
+    "is": "is",
     "loading": "Loading...",
     "remove": "Remove",
     "search": "Search"
@@ -38,6 +39,7 @@
       "tag": "Tag",
       "value": "Value"
     },
+    "noSearchesFound": "No searches found",
     "operator": "-",
     "operator_<": "less than",
     "operator_<=": "less than or equals to",
