@@ -2,7 +2,7 @@ import { expect, vi } from 'vitest';
 
 import { server } from '@/mocks/server';
 import { createNavbarPO } from '@/tests/pages/navbar';
-import { createSearchesPO } from '@/tests/pages/searches';
+import { createFilterRowPO, createSearchesPO } from '@/tests/pages/searches';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
 
@@ -79,4 +79,39 @@ test('should be possible to see stored searches within /searches', async () => {
     .toHaveTextContent(
       /boolean-tag is NO and number-tag >= 10 and date-tag > 2000-01-01/,
     );
+});
+
+test('should store searches made within the search modal', async () => {
+  // create mock server data
+  await server.createSessionMock();
+  await server.createTagMock({ name: 'my-tag', type: 'string' });
+
+  await renderWithRouter();
+  const { searches, searchNotesButton, searchModal } = createSearchesPO();
+  const { header, navbarSearchesLink } = createNavbarPO();
+
+  // Open search modal
+  await searchNotesButton.click();
+  await searchModal.expectToBeVisible();
+
+  // Add tag filters
+  await searchModal.addTagButton.click();
+
+  // tag search
+  const firstRow = createFilterRowPO({ row: searchModal.filterRows.nth(0) });
+  await firstRow.tagInput.fill('my-tag');
+  await firstRow.tagInputDropdownOptions.getByText(/my-tag/).click();
+
+  // Submit search
+  await searchModal.searchButton.click();
+  await searchModal.expectNotToBeVisible();
+
+  // navigate to searches
+  await header.hamburgerMenu.click();
+  await navbarSearchesLink.click();
+  await header.hamburgerMenu.click();
+  await vi.waitFor(() => expect(searches.elements()).toHaveLength(1));
+
+  // validate cards texts
+  await expect.element(searches.nth(0)).toHaveTextContent(/my-tag/);
 });

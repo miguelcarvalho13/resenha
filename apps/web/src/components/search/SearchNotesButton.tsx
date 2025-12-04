@@ -20,6 +20,7 @@ export const SearchNotesButton = () => {
   });
   const navigate = useNavigate({ from: HomeRoute.fullPath });
   const { data: tagsData } = trpc.tags.findAllTags.useQuery();
+  const { mutate: recordSearch } = trpc.searches.createSearch.useMutation();
 
   return (
     <>
@@ -41,12 +42,19 @@ export const SearchNotesButton = () => {
                 })}
                 onClearSearch={() => navigate({})}
                 onSubmit={(values) => {
-                  void navigate({
-                    search: fromSearchNotesSchemaToSearchParams({
-                      values,
-                      tags: tagsData?.tags ?? [],
-                    }),
+                  const search = fromSearchNotesSchemaToSearchParams({
+                    values,
+                    tags: tagsData?.tags ?? [],
                   });
+
+                  if (search.query) {
+                    recordSearch({
+                      content: {
+                        query: search.query,
+                      },
+                    });
+                  }
+                  void navigate({ search });
                 }}
               />
             ),
