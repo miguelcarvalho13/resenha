@@ -106,6 +106,36 @@ describe('searches.findAllSearches', () => {
     ]);
   });
 
+  test('should not return soft deleted searches', async () => {
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const firstSearch = await createSearchThroughApi({ app: app!, authCookie });
+    const secondSearch = await createSearchThroughApi({
+      app: app!,
+      authCookie,
+    });
+
+    await softDeleteSearchesThroughApi({
+      app: app!,
+      authCookie,
+      searchIds: [firstSearch.id],
+    });
+
+    const res = await supertest(app!)
+      .get('/api/trpc/searches.findAllSearches')
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    expect(res.body.result.data.json.searches).to.deep.equal([
+      {
+        ...secondSearch,
+        createdAt: secondSearch.createdAt.toISOString(),
+        updatedAt: secondSearch.updatedAt.toISOString(),
+      },
+    ]);
+  });
+
   test('should only return searches created by the user', async () => {
     const anotherUser = await createUser(app!, {
       name: 'Another User',

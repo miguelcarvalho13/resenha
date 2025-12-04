@@ -57,7 +57,9 @@ export const searchesRouter = router({
     const allSearches = await db
       .select()
       .from(searches)
-      .where(eq(searches.createdBy, ctx.user.id))
+      .where(
+        and(isNull(searches.deletedAt), eq(searches.createdBy, ctx.user.id)),
+      )
       .orderBy(desc(searches.updatedAt));
 
     return {

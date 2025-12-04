@@ -150,7 +150,7 @@ export const getFindAllSearchesHandler = () =>
   http.get('/api/trpc/searches.findAllSearches', () =>
     createTrpcJson({
       success: true,
-      searches: searchMock.all(),
+      searches: searchMock.findMany((q) => q.where({ deletedAt: null })),
     } satisfies RouterOutput['searches']['findAllSearches']),
   );
 
