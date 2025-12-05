@@ -1,8 +1,9 @@
-import { AppShell, Burger, Group, Stack, Title } from '@mantine/core';
+import { AppShell, Box, Burger, Group, Stack, Title } from '@mantine/core';
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { NavLinkStyled } from '@/components/link/NavLinkStyled';
+import { FavoritedSearchesLinks } from '@/components/search/FavoritedSearchesLinks';
 import { SearchNotesButton } from '@/components/search/SearchNotesButton';
 import UserMenu from '@/components/user/UserMenu';
 import { useDisclosure } from '@mantine/hooks';
@@ -53,10 +54,14 @@ function Index() {
       </AppShell.Header>
 
       <AppShell.Navbar py="md">
-        <Stack justify="space-between" h="100%">
+        <Stack h="100%" justify="space-between">
           <Stack gap={0}>
             <NavLinkStyled to="/home" label={t(($) => $.menu.recent)} />
             <NavLinkStyled to="/searches" label={t(($) => $.menu.mySearches)} />
+          </Stack>
+          <Box mx="sm" bd="1px dashed gray.2" />
+          <Stack h="100%" justify="flex-start" px="sm">
+            <FavoritedSearchesLinks />
           </Stack>
           <Stack gap={0}>
             <NavLinkStyled to="/trash" label={t(($) => $.menu.trash)} />

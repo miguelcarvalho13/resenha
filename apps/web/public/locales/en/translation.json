@@ -36,6 +36,7 @@
     "deleteSearchModal": {
       "title": "Delete search?"
     },
+    "favoriteSearch": "Favorite search",
     "modal": {
       "addTag": "Add tag",
       "description": "Find notes with:",

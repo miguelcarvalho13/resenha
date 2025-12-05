@@ -4,6 +4,7 @@ export const createNavbarPO = () => {
   const headerLocator = page.getByRole('banner');
   const navbar = page.getByRole('navigation');
   const navbarLinks = navbar.getByRole('link');
+  const navbarSearches = navbar.getByTestId('search-favorite');
 
   const header = {
     it: headerLocator,
@@ -31,6 +32,7 @@ export const createNavbarPO = () => {
     header,
     navbar,
     navbarLinks,
+    navbarSearches,
     navbarHomeLink: navbarLinks.filter({ hasText: /Recent/ }),
     navbarSearchesLink: navbarLinks.filter({ hasText: /Searches/ }),
     navbarTrashLink: navbarLinks.filter({ hasText: /Trash/ }),

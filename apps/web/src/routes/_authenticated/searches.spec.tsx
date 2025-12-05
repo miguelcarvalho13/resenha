@@ -144,7 +144,7 @@ test('should be possible to delete recorded searches', async () => {
   await header.hamburgerMenu.click();
   await vi.waitFor(() => expect(searches.elements()).toHaveLength(2));
 
-  // delete first search
+  // delete a search
   await searchDeleteButton(searches.nth(1)).click();
   await deleteModal.expectToBeVisible();
   await expect.element(deleteModal.title).toHaveTextContent('Delete search?');
@@ -156,4 +156,75 @@ test('should be possible to delete recorded searches', async () => {
   await expect
     .element(searches.nth(0))
     .toHaveTextContent(/deleted = 2000-01-01/);
+});
+
+test('should be possible to favorite recorded searches', async () => {
+  // create mock server data
+  await server.createSessionMock();
+  const tag1 = await server.createTagMock({ name: 'my-tag', type: 'string' });
+
+  await server.createSearchMock({
+    content: {
+      query: [
+        { field: 'deleted', operator: { type: '=', value: '2000-01-01' } },
+      ],
+    },
+  });
+  await server.createSearchMock({
+    content: {
+      query: [{ tagId: tag1.id, type: 'string', operator: { type: '=' } }],
+    },
+  });
+
+  await renderWithRouter();
+  const { searches, searchFavoriteButton } = createSearchesPO();
+  const { header, navbarSearchesLink, navbarSearches } = createNavbarPO();
+
+  // navigate to searches
+  await header.hamburgerMenu.click();
+  await navbarSearchesLink.click();
+  await header.hamburgerMenu.click();
+  await vi.waitFor(() => expect(searches.elements()).toHaveLength(2));
+
+  // initially, no searches should be present in favorites
+  expect(navbarSearches.elements()).toHaveLength(0);
+
+  // favorite a search
+  await searchFavoriteButton(searches.nth(1)).click();
+
+  // assert updated navbar favorites
+  await vi.waitFor(() => expect(navbarSearches.elements()).toHaveLength(1));
+  await expect.element(navbarSearches.nth(0)).toHaveTextContent(/my-tag/);
+});
+
+test('should be possible to unfavorite searches', async () => {
+  // create mock server data
+  await server.createSessionMock();
+  const tag1 = await server.createTagMock({ name: 'my-tag', type: 'string' });
+
+  await server.createSearchMock({
+    favorited: true,
+    content: {
+      query: [{ tagId: tag1.id, type: 'string', operator: { type: '=' } }],
+    },
+  });
+
+  await renderWithRouter();
+  const { searches, searchFavoriteButton } = createSearchesPO();
+  const { header, navbarSearchesLink, navbarSearches } = createNavbarPO();
+
+  // navigate to searches
+  await header.hamburgerMenu.click();
+  await navbarSearchesLink.click();
+  await header.hamburgerMenu.click();
+  await vi.waitFor(() => expect(searches.elements()).toHaveLength(1));
+
+  // initially, no searches should be present in favorites
+  expect(navbarSearches.elements()).toHaveLength(1);
+
+  // favorite a search
+  await searchFavoriteButton(searches.nth(0)).click();
+
+  // assert updated navbar favorites
+  await vi.waitFor(() => expect(navbarSearches.elements()).toHaveLength(0));
 });
