@@ -190,7 +190,11 @@ test('should be possible to favorite recorded searches', async () => {
   expect(navbarSearches.elements()).toHaveLength(0);
 
   // favorite a search
+  server.timing = 200;
   await searchFavoriteButton(searches.nth(1)).click();
+
+  // The navbar search should be disabled while saving
+  await expect.element(searchFavoriteButton(searches.nth(0))).toBeDisabled();
 
   // assert updated navbar favorites
   await vi.waitFor(() => expect(navbarSearches.elements()).toHaveLength(1));
@@ -223,7 +227,14 @@ test('should be possible to unfavorite searches', async () => {
   expect(navbarSearches.elements()).toHaveLength(1);
 
   // favorite a search
+  server.timing = 500;
   await searchFavoriteButton(searches.nth(0)).click();
+
+  // Both the grid and navbar favorite buttons should be disabled
+  await expect.element(searchFavoriteButton(searches.nth(0))).toBeDisabled();
+  await expect
+    .element(searchFavoriteButton(navbarSearches.nth(0)))
+    .toBeDisabled();
 
   // assert updated navbar favorites
   await vi.waitFor(() => expect(navbarSearches.elements()).toHaveLength(0));
