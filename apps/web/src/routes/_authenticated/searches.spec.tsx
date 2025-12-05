@@ -115,3 +115,45 @@ test('should store searches made within the search modal', async () => {
   // validate cards texts
   await expect.element(searches.nth(0)).toHaveTextContent(/my-tag/);
 });
+
+test('should be possible to delete recorded searches', async () => {
+  // create mock server data
+  await server.createSessionMock();
+  const tag1 = await server.createTagMock({ name: 'my-tag', type: 'string' });
+
+  await server.createSearchMock({
+    content: {
+      query: [
+        { field: 'deleted', operator: { type: '=', value: '2000-01-01' } },
+      ],
+    },
+  });
+  await server.createSearchMock({
+    content: {
+      query: [{ tagId: tag1.id, type: 'string', operator: { type: '=' } }],
+    },
+  });
+
+  await renderWithRouter();
+  const { searches, searchDeleteButton, deleteModal } = createSearchesPO();
+  const { header, navbarSearchesLink } = createNavbarPO();
+
+  // navigate to searches
+  await header.hamburgerMenu.click();
+  await navbarSearchesLink.click();
+  await header.hamburgerMenu.click();
+  await vi.waitFor(() => expect(searches.elements()).toHaveLength(2));
+
+  // delete first search
+  await searchDeleteButton(searches.nth(1)).click();
+  await deleteModal.expectToBeVisible();
+  await expect.element(deleteModal.title).toHaveTextContent('Delete search?');
+  await deleteModal.confirmButton.click();
+  await deleteModal.expectNotToBeVisible();
+
+  // assert updated grid
+  await vi.waitFor(() => expect(searches.elements()).toHaveLength(1));
+  await expect
+    .element(searches.nth(0))
+    .toHaveTextContent(/deleted = 2000-01-01/);
+});

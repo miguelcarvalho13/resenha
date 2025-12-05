@@ -44,6 +44,23 @@ export const createSearchesPO = () => {
     expectNotToBeVisible: () => expect.element(modal).not.toBeInTheDocument(),
   };
 
+  const deleteModalIt = page.getByRole('dialog', {
+    name: /Delete search\?/,
+  });
+
+  const deleteModal = {
+    it: deleteModalIt,
+
+    cancelButton: deleteModalIt.getByRole('button', { name: /Cancel/ }),
+    confirmButton: deleteModalIt.getByRole('button', { name: /Confirm/ }),
+    title: deleteModalIt.getByRole('heading'),
+
+    // methods
+    expectToBeVisible: () => expect.element(deleteModalIt).toBeVisible(),
+    expectNotToBeVisible: () =>
+      expect.element(deleteModalIt).not.toBeInTheDocument(),
+  };
+
   const searchDeleteButton = (searchCard: Locator) =>
     searchCard.getByRole('button', { name: /Delete search/ });
   const searchNameButton = (searchCard: Locator) =>
@@ -55,6 +72,7 @@ export const createSearchesPO = () => {
     searches,
     searchModal,
     searchNotesButton,
+    deleteModal,
 
     // methods
     searchDeleteButton,

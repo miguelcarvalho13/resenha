@@ -1,7 +1,8 @@
-import { Paper, Stack, Text } from '@mantine/core';
+import { Group, Paper, Stack, Text } from '@mantine/core';
 
 import { type Search } from '@/models/searches';
 import { SearchReadableText } from '../SearchReadableText';
+import { SearchCardDeleteButton } from './SearchCardDeleteButton';
 
 interface SearchCardProps {
   search: Search;
@@ -13,6 +14,10 @@ export const SearchCard = ({ search }: SearchCardProps) => (
       <Text className="line-clamp-2">
         <SearchReadableText search={search} />
       </Text>
+
+      <Group gap="xs" justify="end">
+        <SearchCardDeleteButton search={search} />
+      </Group>
     </Stack>
   </Paper>
 );
