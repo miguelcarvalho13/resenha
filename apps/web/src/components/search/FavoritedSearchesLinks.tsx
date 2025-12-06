@@ -3,6 +3,7 @@ import { Group, Skeleton, Text } from '@mantine/core';
 import { trpc } from '@/utils/trpc';
 import { SearchFavoriteButton } from './SearchFavoriteButton';
 import { SearchReadableText } from './SearchReadableText';
+import { NavLinkStyled } from '../link/NavLinkStyled';
 
 export const FavoritedSearchesLinks = () => {
   const { data: findAllResponse, isLoading } =
@@ -24,9 +25,19 @@ export const FavoritedSearchesLinks = () => {
     <>
       {favoritedSearches?.map((search) => (
         <Group data-testid="search-favorite" key={search.id} wrap="nowrap">
-          <Text flex={1} truncate="end">
-            {search.name ? search.name : <SearchReadableText search={search} />}
-          </Text>
+          <NavLinkStyled
+            to="/searches/{-$searchId}"
+            label={
+              <Text flex={1} truncate="end">
+                {search.name ? (
+                  search.name
+                ) : (
+                  <SearchReadableText search={search} />
+                )}
+              </Text>
+            }
+            params={{ searchId: search.id }}
+          />
           <SearchFavoriteButton search={search} />
         </Group>
       ))}

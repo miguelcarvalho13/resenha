@@ -33,3 +33,29 @@ test('should be possible to click in the search within the grid to navigate to i
     expect(window.location.pathname).toBe(`/searches/${search.id}`),
   );
 });
+test('should be possible to click in the search within the navbar to navigate to it', async () => {
+  // create mock server data
+  await server.createSessionMock();
+  const tag1 = await server.createTagMock({ name: 'my-tag', type: 'string' });
+
+  const search = await server.createSearchMock({
+    favorited: true,
+    content: {
+      query: [{ tagId: tag1.id, type: 'string', operator: { type: '=' } }],
+    },
+  });
+
+  await renderWithRouter();
+  const { searchLink } = createSearchesPO();
+  const { header, navbarSearches } = createNavbarPO();
+
+  // navigate to specific search
+  await header.hamburgerMenu.click();
+  await vi.waitFor(() => expect(navbarSearches.elements()).toHaveLength(1));
+
+  // click in the link and wait for page load
+  await searchLink(navbarSearches.nth(0)).click();
+  await vi.waitFor(() =>
+    expect(window.location.pathname).toBe(`/searches/${search.id}`),
+  );
+});
