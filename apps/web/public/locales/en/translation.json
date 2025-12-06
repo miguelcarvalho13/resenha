@@ -32,7 +32,6 @@
   },
   "search": {
     "clearSearch": "Clear search",
-    "currentlySearchingFor": "Currently searching for...",
     "deleteSearch": "Delete search",
     "deleteSearchModal": {
       "title": "Delete search?"

@@ -4,13 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { TbZoom } from 'react-icons/tb';
 
 import { Route as HomeRoute } from '@/routes/_authenticated/home';
+import { trpc } from '@/utils/trpc';
 import { modals } from '@mantine/modals';
 import { SearchNotesModal } from './searchNotesModal/SearchNotesModal';
 import {
   fromSearchNotesSchemaToSearchParams,
   fromSearchParamsToSearchNotesSchema,
 } from './searchNotesModal/SearchNotesModal.utils';
-import { trpc } from '@/utils/trpc';
+import { SearchReadableText } from './SearchReadableText';
 
 export const SearchNotesButton = () => {
   const { t } = useTranslation();
@@ -63,8 +64,10 @@ export const SearchNotesButton = () => {
         variant="transparent"
       >
         {searchParams?.query ? (
-          <Text c="dark" visibleFrom="xs">
-            {t(($) => $.search.currentlySearchingFor)}
+          <Text c="dark" visibleFrom="xs" truncate="end">
+            <SearchReadableText
+              search={{ content: { query: searchParams.query } }}
+            />
           </Text>
         ) : (
           <Text c="dimmed" visibleFrom="xs">

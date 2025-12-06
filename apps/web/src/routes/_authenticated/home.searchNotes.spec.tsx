@@ -290,7 +290,9 @@ test('should correctly restore search based on query params', async () => {
   // Open search modal
   await expect
     .element(searchNotesButton)
-    .toHaveTextContent('Currently searching for...');
+    .toHaveTextContent(
+      'string-tag and number-tag <= 10 and boolean-tag is NO and date-tag >= 2025-10-10',
+    );
   await searchNotesButton.click();
   await searchModal.expectToBeVisible();
 

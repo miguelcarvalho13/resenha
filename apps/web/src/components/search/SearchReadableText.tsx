@@ -7,7 +7,7 @@ import { Skeleton } from '@mantine/core';
 import { TagWrapper } from '../tag/TagWrapper';
 
 interface SearchReadableTextProps {
-  search: Search;
+  search: Pick<Search, 'content'>;
 }
 
 export const SearchReadableText = ({ search }: SearchReadableTextProps) => {
