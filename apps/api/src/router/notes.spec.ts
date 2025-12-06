@@ -130,7 +130,7 @@ describe('notes.hardDeleteNotes', () => {
   test('should be a protected route', async () => {
     const res = await supertest(app!)
       .post('/api/trpc/notes.hardDeleteNotes')
-      .send();
+      .send({});
 
     expect(res.status).toBe(401);
   });
@@ -232,7 +232,7 @@ describe('notes.softDeleteNotes', () => {
   test('should be a protected route', async () => {
     const res = await supertest(app!)
       .post('/api/trpc/notes.softDeleteNotes')
-      .send();
+      .send({});
 
     expect(res.status).toBe(401);
   });
@@ -357,7 +357,7 @@ describe('notes.undoDeleteNotes', () => {
   test('should be a protected route', async () => {
     const res = await supertest(app!)
       .post('/api/trpc/notes.undoSoftDeletedNotes')
-      .send();
+      .send({});
 
     expect(res.status).toBe(401);
   });

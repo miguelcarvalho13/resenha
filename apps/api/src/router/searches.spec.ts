@@ -244,7 +244,7 @@ describe('searches.hardDeleteSearches', () => {
   test('should be a protected route', async () => {
     const res = await supertest(app!)
       .post('/api/trpc/searches.hardDeleteSearches')
-      .send();
+      .send({});
 
     expect(res.status).toBe(401);
   });
@@ -352,7 +352,7 @@ describe('searches.softDeleteSearches', () => {
   test('should be a protected route', async () => {
     const res = await supertest(app!)
       .post('/api/trpc/searches.softDeleteSearches')
-      .send();
+      .send({});
 
     expect(res.status).toBe(401);
   });
@@ -454,7 +454,7 @@ describe('searches.editSearch', () => {
   test('should be a protected route', async () => {
     const res = await supertest(app!)
       .post('/api/trpc/searches.editSearch')
-      .send();
+      .send({});
 
     expect(res.status).toBe(401);
   });
@@ -1073,7 +1073,7 @@ describe('searches.undoSoftDeletedSearches', () => {
   test('should be a protected route', async () => {
     const res = await supertest(app!)
       .post('/api/trpc/searches.undoSoftDeletedSearches')
-      .send();
+      .send({});
 
     expect(res.status).toBe(401);
   });
