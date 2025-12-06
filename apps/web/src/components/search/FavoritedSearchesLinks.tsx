@@ -25,7 +25,7 @@ export const FavoritedSearchesLinks = () => {
       {favoritedSearches?.map((search) => (
         <Group data-testid="search-favorite" key={search.id} wrap="nowrap">
           <Text flex={1} truncate="end">
-            <SearchReadableText search={search} />
+            {search.name ? search.name : <SearchReadableText search={search} />}
           </Text>
           <SearchFavoriteButton search={search} />
         </Group>

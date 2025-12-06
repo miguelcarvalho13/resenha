@@ -8,7 +8,8 @@
     "is": "is",
     "loading": "Loading...",
     "remove": "Remove",
-    "search": "Search"
+    "search": "Search",
+    "untitled": "Untitled"
   },
   "menu": {
     "configurations": "Configurations",
@@ -51,6 +52,7 @@
     "operator_=": "equals to",
     "operator_>": "greater than",
     "operator_>=": "greater than or equals to",
+    "searchName": "Search name",
     "searchNotes": "Search notes"
   },
   "signInSignUp": {

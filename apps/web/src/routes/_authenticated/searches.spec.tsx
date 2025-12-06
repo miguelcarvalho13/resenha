@@ -1,4 +1,5 @@
 import { expect, vi } from 'vitest';
+import { userEvent } from '@vitest/browser/context';
 
 import { server } from '@/mocks/server';
 import { createNavbarPO } from '@/tests/pages/navbar';
@@ -40,6 +41,7 @@ test('should be possible to see stored searches within /searches', async () => {
     },
   });
   await server.createSearchMock({
+    name: 'my search',
     content: {
       query: [
         {
@@ -58,7 +60,7 @@ test('should be possible to see stored searches within /searches', async () => {
   });
 
   await renderWithRouter();
-  const { searches } = createSearchesPO();
+  const { searches, searchNameInput } = createSearchesPO();
   const { header, navbarSearchesLink } = createNavbarPO();
 
   // navigate to searches
@@ -68,12 +70,28 @@ test('should be possible to see stored searches within /searches', async () => {
   await vi.waitFor(() => expect(searches.elements()).toHaveLength(3));
 
   // validate cards texts
+  await expect.element(searchNameInput(searches.nth(0))).toHaveValue('');
+  await expect
+    .element(searchNameInput(searches.nth(0)))
+    .toHaveAttribute('placeholder', 'Untitled');
   await expect
     .element(searches.nth(0))
     .toHaveTextContent(/deleted = 2000-01-01/);
+
+  await expect.element(searchNameInput(searches.nth(1))).toHaveValue('');
+  await expect
+    .element(searchNameInput(searches.nth(1)))
+    .toHaveAttribute('placeholder', 'Untitled');
   await expect
     .element(searches.nth(1))
     .toHaveTextContent(/my-tag and my-other-tag/);
+
+  await expect
+    .element(searchNameInput(searches.nth(2)))
+    .toHaveValue('my search');
+  await expect
+    .element(searchNameInput(searches.nth(2)))
+    .toHaveAttribute('placeholder', 'Untitled');
   await expect
     .element(searches.nth(2))
     .toHaveTextContent(
@@ -114,6 +132,42 @@ test('should store searches made within the search modal', async () => {
 
   // validate cards texts
   await expect.element(searches.nth(0)).toHaveTextContent(/my-tag/);
+});
+
+test('should be possible to rename recorded searches', async () => {
+  // create mock server data
+  await server.createSessionMock();
+  const tag1 = await server.createTagMock({ name: 'my-tag', type: 'string' });
+
+  await server.createSearchMock({
+    name: 'search-1',
+    favorited: true,
+    content: {
+      query: [{ tagId: tag1.id, type: 'string', operator: { type: '=' } }],
+    },
+  });
+
+  await renderWithRouter();
+  const { searches, searchNameInput } = createSearchesPO();
+  const { header, navbarSearchesLink, navbarSearches } = createNavbarPO();
+
+  // navigate to searches
+  await header.hamburgerMenu.click();
+  await navbarSearchesLink.click();
+  await header.hamburgerMenu.click();
+  await vi.waitFor(() => expect(searches.elements()).toHaveLength(1));
+
+  // rename a search
+  await searchNameInput(searches.nth(0)).clear();
+  await searchNameInput(searches.nth(0)).fill('another name');
+  await userEvent.tab();
+
+  // assert updated grid and navbar links
+  await vi.waitFor(() => expect(searches.elements()).toHaveLength(1));
+  await expect
+    .element(searchNameInput(searches.nth(0)))
+    .toHaveValue('another name');
+  await expect.element(navbarSearches.nth(0)).toHaveTextContent(/another name/);
 });
 
 test('should be possible to delete recorded searches', async () => {

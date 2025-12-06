@@ -63,7 +63,7 @@ export const createSearchesPO = () => {
 
   const searchDeleteButton = (searchCard: Locator) =>
     searchCard.getByRole('button', { name: /Delete search/ });
-  const searchNameButton = (searchCard: Locator) =>
+  const searchNameInput = (searchCard: Locator) =>
     searchCard.getByLabelText('Search name');
   const searchFavoriteButton = (searchCard: Locator) =>
     searchCard.getByRole('button', { name: /Favorite search/ });
@@ -76,7 +76,7 @@ export const createSearchesPO = () => {
 
     // methods
     searchDeleteButton,
-    searchNameButton,
+    searchNameInput,
     searchFavoriteButton,
   };
 };
