@@ -1,3 +1,4 @@
+import { ActionIcon, type ActionIconProps, Tooltip } from '@mantine/core';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
 import { useTranslation } from 'react-i18next';
@@ -5,13 +6,15 @@ import { TbStar, TbStarFilled } from 'react-icons/tb';
 
 import { type Search } from '@/models/searches';
 import { trpc } from '@/utils/trpc';
-import { ActionIcon, Tooltip } from '@mantine/core';
 
-interface SearchFavoriteButtonProps {
+interface SearchFavoriteButtonProps extends Omit<ActionIconProps, 'onClick'> {
   search: Search;
 }
 
-export const SearchFavoriteButton = ({ search }: SearchFavoriteButtonProps) => {
+export const SearchFavoriteButton = ({
+  search,
+  ...props
+}: SearchFavoriteButtonProps) => {
   const { t } = useTranslation();
   const utils = trpc.useUtils();
   const { mutate: editSearch } = trpc.searches.editSearch.useMutation();
@@ -46,6 +49,7 @@ export const SearchFavoriteButton = ({ search }: SearchFavoriteButtonProps) => {
         onClick={handleOnClick}
         radius="xl"
         variant="subtle"
+        {...props}
       >
         {search.favorited ? <TbStarFilled /> : <TbStar />}
       </ActionIcon>

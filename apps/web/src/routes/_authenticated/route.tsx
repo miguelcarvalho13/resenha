@@ -3,7 +3,7 @@ import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { NavLinkStyled } from '@/components/link/NavLinkStyled';
-import { FavoritedSearchesLinks } from '@/components/search/FavoritedSearchesLinks';
+import { NavbarSearchesLinks } from '@/components/search/navbarSearchesLinks/NavbarSearchesLinks';
 import { SearchNotesButton } from '@/components/search/SearchNotesButton';
 import UserMenu from '@/components/user/UserMenu';
 import { useDisclosure } from '@mantine/hooks';
@@ -65,7 +65,7 @@ function Index() {
           </Stack>
           <Box mx="sm" bd="1px dashed gray.2" />
           <Stack h="100%" justify="flex-start">
-            <FavoritedSearchesLinks />
+            <NavbarSearchesLinks />
           </Stack>
           <Stack gap={0}>
             <NavLinkStyled to="/trash" label={t(($) => $.menu.trash)} />
