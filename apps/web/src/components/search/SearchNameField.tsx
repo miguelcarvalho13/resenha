@@ -37,8 +37,11 @@ export const SearchNameField = ({ search, ...props }: SearchNameFieldProps) => {
     validate: zod4Resolver(searchNameSchema),
   });
 
-  const handleSubmit = ({ name }: SearchNameSchemaType) =>
-    editSearch({ id: search.id, name }, { onSuccess });
+  const handleSubmit = ({ name }: SearchNameSchemaType) => {
+    if (name === search.name) return;
+
+    return editSearch({ id: search.id, name }, { onSuccess });
+  };
 
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
