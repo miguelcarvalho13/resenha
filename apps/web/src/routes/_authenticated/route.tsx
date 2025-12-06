@@ -59,6 +59,7 @@ function Index() {
             <NavLinkStyled to="/home" label={t(($) => $.menu.recent)} />
             <NavLinkStyled
               to="/searches/{-$searchId}"
+              params={{ searchId: undefined }}
               label={t(($) => $.menu.mySearches)}
             />
           </Stack>
