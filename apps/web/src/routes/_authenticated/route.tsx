@@ -57,7 +57,10 @@ function Index() {
         <Stack h="100%" justify="space-between">
           <Stack gap={0}>
             <NavLinkStyled to="/home" label={t(($) => $.menu.recent)} />
-            <NavLinkStyled to="/searches" label={t(($) => $.menu.mySearches)} />
+            <NavLinkStyled
+              to="/searches/{-$searchId}"
+              label={t(($) => $.menu.mySearches)}
+            />
           </Stack>
           <Box mx="sm" bd="1px dashed gray.2" />
           <Stack h="100%" justify="flex-start" px="sm">

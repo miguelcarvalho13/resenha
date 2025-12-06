@@ -15,9 +15,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PublicSignUpRouteImport } from './routes/_public/sign-up'
 import { Route as PublicSignInRouteImport } from './routes/_public/sign-in'
 import { Route as AuthenticatedTrashRouteImport } from './routes/_authenticated/trash'
-import { Route as AuthenticatedSearchesRouteImport } from './routes/_authenticated/searches'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedConfigRouteImport } from './routes/_authenticated/config'
+import { Route as AuthenticatedSearchesChar123SearchIdChar125RouteImport } from './routes/_authenticated/searches.{-$searchId}'
 
 const PublicRouteRoute = PublicRouteRouteImport.update({
   id: '/_public',
@@ -47,11 +47,6 @@ const AuthenticatedTrashRoute = AuthenticatedTrashRouteImport.update({
   path: '/trash',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSearchesRoute = AuthenticatedSearchesRouteImport.update({
-  id: '/searches',
-  path: '/searches',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   id: '/home',
   path: '/home',
@@ -62,24 +57,30 @@ const AuthenticatedConfigRoute = AuthenticatedConfigRouteImport.update({
   path: '/config',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSearchesChar123SearchIdChar125Route =
+  AuthenticatedSearchesChar123SearchIdChar125RouteImport.update({
+    id: '/searches/{-$searchId}',
+    path: '/searches/{-$searchId}',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/config': typeof AuthenticatedConfigRoute
   '/home': typeof AuthenticatedHomeRoute
-  '/searches': typeof AuthenticatedSearchesRoute
   '/trash': typeof AuthenticatedTrashRoute
   '/sign-in': typeof PublicSignInRoute
   '/sign-up': typeof PublicSignUpRoute
+  '/searches/{-$searchId}': typeof AuthenticatedSearchesChar123SearchIdChar125Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/config': typeof AuthenticatedConfigRoute
   '/home': typeof AuthenticatedHomeRoute
-  '/searches': typeof AuthenticatedSearchesRoute
   '/trash': typeof AuthenticatedTrashRoute
   '/sign-in': typeof PublicSignInRoute
   '/sign-up': typeof PublicSignUpRoute
+  '/searches/{-$searchId}': typeof AuthenticatedSearchesChar123SearchIdChar125Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,10 +89,10 @@ export interface FileRoutesById {
   '/_public': typeof PublicRouteRouteWithChildren
   '/_authenticated/config': typeof AuthenticatedConfigRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
-  '/_authenticated/searches': typeof AuthenticatedSearchesRoute
   '/_authenticated/trash': typeof AuthenticatedTrashRoute
   '/_public/sign-in': typeof PublicSignInRoute
   '/_public/sign-up': typeof PublicSignUpRoute
+  '/_authenticated/searches/{-$searchId}': typeof AuthenticatedSearchesChar123SearchIdChar125Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -99,19 +100,19 @@ export interface FileRouteTypes {
     | '/'
     | '/config'
     | '/home'
-    | '/searches'
     | '/trash'
     | '/sign-in'
     | '/sign-up'
+    | '/searches/{-$searchId}'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/config'
     | '/home'
-    | '/searches'
     | '/trash'
     | '/sign-in'
     | '/sign-up'
+    | '/searches/{-$searchId}'
   id:
     | '__root__'
     | '/'
@@ -119,10 +120,10 @@ export interface FileRouteTypes {
     | '/_public'
     | '/_authenticated/config'
     | '/_authenticated/home'
-    | '/_authenticated/searches'
     | '/_authenticated/trash'
     | '/_public/sign-in'
     | '/_public/sign-up'
+    | '/_authenticated/searches/{-$searchId}'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -175,13 +176,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTrashRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/searches': {
-      id: '/_authenticated/searches'
-      path: '/searches'
-      fullPath: '/searches'
-      preLoaderRoute: typeof AuthenticatedSearchesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/home': {
       id: '/_authenticated/home'
       path: '/home'
@@ -196,21 +190,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfigRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/searches/{-$searchId}': {
+      id: '/_authenticated/searches/{-$searchId}'
+      path: '/searches/{-$searchId}'
+      fullPath: '/searches/{-$searchId}'
+      preLoaderRoute: typeof AuthenticatedSearchesChar123SearchIdChar125RouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedConfigRoute: typeof AuthenticatedConfigRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
-  AuthenticatedSearchesRoute: typeof AuthenticatedSearchesRoute
   AuthenticatedTrashRoute: typeof AuthenticatedTrashRoute
+  AuthenticatedSearchesChar123SearchIdChar125Route: typeof AuthenticatedSearchesChar123SearchIdChar125Route
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConfigRoute: AuthenticatedConfigRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
-  AuthenticatedSearchesRoute: AuthenticatedSearchesRoute,
   AuthenticatedTrashRoute: AuthenticatedTrashRoute,
+  AuthenticatedSearchesChar123SearchIdChar125Route:
+    AuthenticatedSearchesChar123SearchIdChar125Route,
 }
 
 const AuthenticatedRouteRouteWithChildren =

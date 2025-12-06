@@ -3,14 +3,16 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { AllSearchesGrid } from '@/components/search/AllSearchesGrid';
 
-export const Route = createFileRoute('/_authenticated/searches')({
+export const Route = createFileRoute('/_authenticated/searches/{-$searchId}')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { searchId } = Route.useParams();
+
   return (
     <Stack p="xl">
-      <AllSearchesGrid />
+      {searchId ? `/searches/${searchId}` : <AllSearchesGrid />}
     </Stack>
   );
 }
