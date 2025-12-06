@@ -15,7 +15,7 @@ export const NoteCard = ({ note }: NoteCardProps) => {
   const { openNoteModal } = useOpenCreateOrEditNoteModal();
 
   return (
-    <Paper data-testid="note-card" shadow="xs" p="xl">
+    <Paper data-testid="note-card" shadow="xs" p="md">
       <Stack h="100%" justify="space-between">
         <Text className="line-clamp-2">{note.content}</Text>
 
