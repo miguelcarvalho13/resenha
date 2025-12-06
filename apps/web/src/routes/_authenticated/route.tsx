@@ -64,7 +64,7 @@ function Index() {
             />
           </Stack>
           <Box mx="sm" bd="1px dashed gray.2" />
-          <Stack h="100%" justify="flex-start" px="sm">
+          <Stack h="100%" justify="flex-start">
             <FavoritedSearchesLinks />
           </Stack>
           <Stack gap={0}>
