@@ -127,6 +127,11 @@ export const editSearchSchema = () =>
     name: z.string().optional(),
   });
 
+export const findSearchByIdSchema = () =>
+  z.object({
+    searchId: z.uuid(),
+  });
+
 export type BooleanOperatorsType = z.infer<typeof booleanOperators>;
 export type DateOperatorsType = z.infer<typeof dateOperators>;
 export type NumberOperatorsType = z.infer<typeof numberOperators>;
@@ -153,3 +158,6 @@ export type UndoSoftDeletedSearchesSchemaType = z.infer<
 >;
 
 export type EditSearchSchemaType = z.infer<ReturnType<typeof editSearchSchema>>;
+export type FindSearchByIdSchemaType = z.infer<
+  ReturnType<typeof findSearchByIdSchema>
+>;

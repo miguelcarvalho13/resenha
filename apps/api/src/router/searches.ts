@@ -8,6 +8,7 @@ import {
   createSearchSchema,
   type DateOperatorsType,
   editSearchSchema,
+  findSearchByIdSchema,
   hardDeleteSearchesSchema,
   searchNotesSchema,
   softDeleteSearchesSchema,
@@ -67,6 +68,32 @@ export const searchesRouter = router({
       searches: allSearches,
     };
   }),
+
+  findSearchById: protectedProcedure
+    .input(findSearchByIdSchema())
+    .query(async ({ ctx, input }) => {
+      const [search] = await db
+        .select()
+        .from(searches)
+        .where(
+          and(
+            eq(searches.id, input.searchId),
+            eq(searches.createdBy, ctx.user.id),
+          ),
+        );
+
+      if (!search) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Object not found',
+        });
+      }
+
+      return {
+        success: true,
+        search,
+      };
+    }),
 
   hardDeleteSearches: protectedProcedure
     .input(hardDeleteSearchesSchema())

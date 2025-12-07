@@ -11,6 +11,7 @@ import {
   type CreateSearchSchemaType,
   type DateOperatorsType,
   type EditSearchSchemaType,
+  type FindSearchByIdSchemaType,
   type HardDeleteSearchesSchemaType,
   type NumberOperatorsType,
   type SearchNotesSchemaType,
@@ -175,6 +176,70 @@ describe('searches.findAllSearches', () => {
 
   test('should be a protected route', async () => {
     const res = await supertest(app!).get('/api/trpc/searches.findAllSearches');
+
+    expect(res.status).toBe(401);
+  });
+});
+
+describe('searches.findSearchById', () => {
+  test('should be correctly handled', async () => {
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const search = await createSearchThroughApi({ app: app!, authCookie });
+
+    const res = await supertest(app!)
+      .get('/api/trpc/searches.findSearchById')
+      .query({
+        input: JSON.stringify({
+          json: {
+            searchId: search.id,
+          } satisfies FindSearchByIdSchemaType,
+        }),
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(200);
+
+    expect(res.body.result.data.json.search).to.deep.equal({
+      ...search,
+      createdAt: search.createdAt.toISOString(),
+      updatedAt: search.updatedAt.toISOString(),
+    });
+  });
+
+  test('should only return searches created by the user', async () => {
+    const anotherUser = await createUser(app!, {
+      name: 'Another User',
+      email: 'another@example.com',
+    });
+
+    const [searchCreatedByAnotherUser] = await db
+      .insert(schema.searches)
+      .values({
+        content: { query: [] },
+        createdBy: anotherUser.id,
+        updatedBy: anotherUser.id,
+      })
+      .returning();
+
+    const { authCookie } = await createAndSignInUser(app!);
+
+    const res = await supertest(app!)
+      .get('/api/trpc/searches.findSearchById')
+      .query({
+        input: JSON.stringify({
+          json: {
+            searchId: searchCreatedByAnotherUser.id,
+          } satisfies FindSearchByIdSchemaType,
+        }),
+      })
+      .set('Cookie', authCookie);
+
+    expect(res.status).toBe(404);
+  });
+
+  test('should be a protected route', async () => {
+    const res = await supertest(app!).get('/api/trpc/searches.findSearchById');
 
     expect(res.status).toBe(401);
   });
