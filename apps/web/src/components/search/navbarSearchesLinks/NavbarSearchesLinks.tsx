@@ -1,11 +1,14 @@
 import { Skeleton } from '@mantine/core';
+import { useQuery } from '@tanstack/react-query';
 
-import { trpc } from '@/utils/trpc';
+import { useTRPC } from '@/utils/trpc';
 import { NavbarSearchLink } from './NavbarSearchLink';
 
 export const NavbarSearchesLinks = () => {
-  const { data: findAllResponse, isLoading } =
-    trpc.searches.findAllSearches.useQuery();
+  const trpc = useTRPC();
+  const { data: findAllResponse, isLoading } = useQuery(
+    trpc.searches.findAllSearches.queryOptions(),
+  );
 
   const favoritedSearches = findAllResponse?.searches.filter(
     (s) => s.favorited,

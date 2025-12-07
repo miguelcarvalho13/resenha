@@ -1,8 +1,9 @@
-import { trpc } from '@/utils/trpc';
 import { ActionIcon, Flex, Group, Text } from '@mantine/core';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-
 import { TbMinus } from 'react-icons/tb';
+
+import { useTRPC } from '@/utils/trpc';
 import { useSearchModalFormContext } from './SearchNotesModal.form';
 import { SearchNotesModalRowOperatorInput } from './SearchNotesModalRowOperatorInput';
 import { SearchNotesModalRowTagInput } from './SearchNotesModalRowTagInput';
@@ -13,11 +14,12 @@ interface SearchNotesModalRowProps {
 }
 
 export const SearchNotesModalRow = ({ index }: SearchNotesModalRowProps) => {
+  const trpc = useTRPC();
   const { t } = useTranslation();
   const form = useSearchModalFormContext();
 
   const tagId = form.getValues().query[index].tagId;
-  const { data: tagsData } = trpc.tags.findAllTags.useQuery();
+  const { data: tagsData } = useQuery(trpc.tags.findAllTags.queryOptions());
   const currentTag = tagsData?.tags.find(({ id }) => id === tagId);
 
   return (

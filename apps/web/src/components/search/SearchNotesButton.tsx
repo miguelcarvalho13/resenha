@@ -1,10 +1,11 @@
 import { Button, Text } from '@mantine/core';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { TbZoom } from 'react-icons/tb';
 
 import { Route as HomeRoute } from '@/routes/_authenticated/home';
-import { trpc } from '@/utils/trpc';
+import { useTRPC } from '@/utils/trpc';
 import { modals } from '@mantine/modals';
 import { SearchNotesModal } from './searchNotesModal/SearchNotesModal';
 import {
@@ -14,14 +15,17 @@ import {
 import { SearchReadableText } from './SearchReadableText';
 
 export const SearchNotesButton = () => {
+  const trpc = useTRPC();
   const { t } = useTranslation();
   const searchParams = useSearch({
     from: HomeRoute.id,
     shouldThrow: false,
   });
   const navigate = useNavigate({ from: HomeRoute.fullPath });
-  const { data: tagsData } = trpc.tags.findAllTags.useQuery();
-  const { mutate: recordSearch } = trpc.searches.createSearch.useMutation();
+  const { data: tagsData } = useQuery(trpc.tags.findAllTags.queryOptions());
+  const { mutate: recordSearch } = useMutation(
+    trpc.searches.createSearch.mutationOptions(),
+  );
 
   return (
     <>

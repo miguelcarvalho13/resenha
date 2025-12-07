@@ -1,11 +1,12 @@
 import { TextInput, type TextInputProps } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useTranslation } from 'react-i18next';
 import z from 'zod';
 
 import { type Search } from '@/models/searches';
-import { trpc } from '@/utils/trpc';
+import { useTRPC } from '@/utils/trpc';
 
 interface SearchNameFieldProps
   extends Omit<TextInputProps, 'aria-label' | 'variant' | 'placeholder'> {
@@ -19,13 +20,17 @@ const searchNameSchema = z.object({
 type SearchNameSchemaType = z.infer<typeof searchNameSchema>;
 
 export const SearchNameField = ({ search, ...props }: SearchNameFieldProps) => {
+  const trpc = useTRPC();
   const { t } = useTranslation();
-  const utils = trpc.useUtils();
-  const { mutate: editSearch, isPending } =
-    trpc.searches.editSearch.useMutation();
+  const queryClient = useQueryClient();
+  const { mutate: editSearch, isPending } = useMutation(
+    trpc.searches.editSearch.mutationOptions(),
+  );
 
   const onSuccess = () => {
-    void utils.searches.findAllSearches.invalidate();
+    void queryClient.invalidateQueries(
+      trpc.searches.findAllSearches.pathFilter(),
+    );
   };
 
   const form = useForm({

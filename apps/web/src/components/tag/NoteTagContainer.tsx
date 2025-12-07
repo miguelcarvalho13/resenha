@@ -1,8 +1,9 @@
 import { Group, Skeleton } from '@mantine/core';
+import { useQuery } from '@tanstack/react-query';
 
 import { NoteTag } from '@/components/tag/NoteTag';
 import { type NoteForFindAll } from '@/models/notes';
-import { trpc } from '@/utils/trpc';
+import { useTRPC } from '@/utils/trpc';
 import { AddTagButton } from './AddTagButton';
 
 interface NoteTagContainerProps {
@@ -10,11 +11,15 @@ interface NoteTagContainerProps {
 }
 
 export const NoteTagContainer = ({ note }: NoteTagContainerProps) => {
-  const { isLoading: isLoadingTags } = trpc.tags.findAllTags.useQuery();
-  const { data, isLoading: isLoadingNoteTags } =
-    trpc.tags.findAllNoteTags.useQuery({
+  const trpc = useTRPC();
+  const { isLoading: isLoadingTags } = useQuery(
+    trpc.tags.findAllTags.queryOptions(),
+  );
+  const { data, isLoading: isLoadingNoteTags } = useQuery(
+    trpc.tags.findAllNoteTags.queryOptions({
       noteId: note.id,
-    });
+    }),
+  );
 
   if (isLoadingTags || isLoadingNoteTags) {
     return <Skeleton />;

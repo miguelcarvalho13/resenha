@@ -1,5 +1,7 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
 import { type NoteTag as NoteTagModel } from '@/models/tags';
-import { trpc } from '@/utils/trpc';
+import { useTRPC } from '@/utils/trpc';
 import { NoteTagBoolean } from './NoteTagBoolean';
 import { NoteTagDate } from './NoteTagDate';
 import { NoteTagNumber } from './NoteTagNumber';
@@ -10,21 +12,26 @@ interface NoteTagProps {
 }
 
 export const NoteTag = ({ noteTag }: NoteTagProps) => {
-  const utils = trpc.useUtils();
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
   const onSuccess = async () => {
-    await utils.tags.findAllNoteTags.invalidate({ noteId: noteTag.noteId });
+    await queryClient.invalidateQueries(
+      trpc.tags.findAllNoteTags.queryFilter({ noteId: noteTag.noteId }),
+    );
   };
 
-  const { mutate: editNoteTag, isPending: isPendingEdition } =
-    trpc.tags.editNoteTag.useMutation({
+  const { mutate: editNoteTag, isPending: isPendingEdition } = useMutation(
+    trpc.tags.editNoteTag.mutationOptions({
       onSuccess,
-    });
+    }),
+  );
 
-  const { mutate: deleteNoteTag, isPending: isPendingDeletion } =
-    trpc.tags.deleteNoteTag.useMutation({
+  const { mutate: deleteNoteTag, isPending: isPendingDeletion } = useMutation(
+    trpc.tags.deleteNoteTag.mutationOptions({
       onSuccess,
-    });
+    }),
+  );
 
   const handleTagEdit = (value: NoteTagModel['value']) => {
     editNoteTag({

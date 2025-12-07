@@ -1,9 +1,13 @@
-import { trpc } from '@/utils/trpc';
+import { useQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@/utils/trpc';
 import { SearchesGrid } from './SearchesGrid';
 
 export const AllSearchesGrid = () => {
-  const { data: findAllResponse, isLoading } =
-    trpc.searches.findAllSearches.useQuery();
+  const trpc = useTRPC();
+  const { data: findAllResponse, isLoading } = useQuery(
+    trpc.searches.findAllSearches.queryOptions(),
+  );
 
   if (isLoading) {
     return null;

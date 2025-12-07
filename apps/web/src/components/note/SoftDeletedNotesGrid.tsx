@@ -1,4 +1,6 @@
-import { trpc } from '@/utils/trpc';
+import { useQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@/utils/trpc';
 import { type SearchNotesSchemaType } from '@repo/api';
 import { NotesGrid } from './NotesGrid';
 
@@ -7,8 +9,10 @@ const query: SearchNotesSchemaType['query'] = [
 ];
 
 export const SoftDeletedNotesGrid = () => {
-  const { data: softDeletedNotesData, isLoading } =
-    trpc.searches.searchNotes.useQuery({ query });
+  const trpc = useTRPC();
+  const { data: softDeletedNotesData, isLoading } = useQuery(
+    trpc.searches.searchNotes.queryOptions({ query }),
+  );
 
   if (isLoading) {
     return null;

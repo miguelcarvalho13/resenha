@@ -1,11 +1,15 @@
 import { ActionIcon, type ActionIconProps, Tooltip } from '@mantine/core';
-import { useIsFetching, useIsMutating } from '@tanstack/react-query';
-import { getQueryKey } from '@trpc/react-query';
+import {
+  useIsFetching,
+  useIsMutating,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { TbStar, TbStarFilled } from 'react-icons/tb';
 
 import { type Search } from '@/models/searches';
-import { trpc } from '@/utils/trpc';
+import { useTRPC } from '@/utils/trpc';
 
 interface SearchFavoriteButtonProps extends Omit<ActionIconProps, 'onClick'> {
   search: Search;
@@ -15,19 +19,24 @@ export const SearchFavoriteButton = ({
   search,
   ...props
 }: SearchFavoriteButtonProps) => {
+  const trpc = useTRPC();
   const { t } = useTranslation();
-  const utils = trpc.useUtils();
-  const { mutate: editSearch } = trpc.searches.editSearch.useMutation();
+  const queryClient = useQueryClient();
+  const { mutate: editSearch } = useMutation(
+    trpc.searches.editSearch.mutationOptions(),
+  );
 
   const onSuccess = () => {
-    void utils.searches.findAllSearches.invalidate();
+    void queryClient.invalidateQueries(
+      trpc.searches.findAllSearches.pathFilter(),
+    );
   };
 
   const mutationsCount = useIsMutating({
-    mutationKey: getQueryKey(trpc.searches.editSearch),
+    mutationKey: trpc.searches.editSearch.mutationKey(),
   });
   const queriesCount = useIsFetching({
-    queryKey: getQueryKey(trpc.searches.findAllSearches),
+    queryKey: trpc.searches.findAllSearches.queryKey(),
   });
 
   const isPending = mutationsCount > 0 || queriesCount > 0;

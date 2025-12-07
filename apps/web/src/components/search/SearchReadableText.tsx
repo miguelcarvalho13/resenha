@@ -1,8 +1,9 @@
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import { type Search } from '@/models/searches';
 import { TAG_COLOR } from '@/utils/tags';
-import { trpc } from '@/utils/trpc';
+import { useTRPC } from '@/utils/trpc';
 import { Skeleton } from '@mantine/core';
 import { TagWrapper } from '../tag/TagWrapper';
 
@@ -11,9 +12,11 @@ interface SearchReadableTextProps {
 }
 
 export const SearchReadableText = ({ search }: SearchReadableTextProps) => {
+  const trpc = useTRPC();
   const { t } = useTranslation();
-  const { data: tagsData, isLoading: isLoadingTags } =
-    trpc.tags.findAllTags.useQuery();
+  const { data: tagsData, isLoading: isLoadingTags } = useQuery(
+    trpc.tags.findAllTags.queryOptions(),
+  );
 
   const getTagName = (id: string) =>
     tagsData?.tags.find((t) => t.id === id)?.name ?? '';

@@ -6,13 +6,14 @@ import {
   useCombobox,
 } from '@mantine/core';
 import { type GetInputPropsReturnType } from '@mantine/form';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Tag } from '@/components/tag/Tag';
 import { TagWrapper } from '@/components/tag/TagWrapper';
 import { TAG_COLOR } from '@/utils/tags';
-import { trpc } from '@/utils/trpc';
+import { useTRPC } from '@/utils/trpc';
 
 interface SearchNotesModalRowTagInputProps extends GetInputPropsReturnType {
   flex?: MantineStyleProps['flex'];
@@ -27,6 +28,7 @@ export const SearchNotesModalRowTagInput = ({
   onBlur,
   error,
 }: SearchNotesModalRowTagInputProps) => {
+  const trpc = useTRPC();
   const { t } = useTranslation();
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
@@ -34,7 +36,9 @@ export const SearchNotesModalRowTagInput = ({
 
   const [search, setSearch] = useState('');
 
-  const { data: tagsData, isLoading } = trpc.tags.findAllTags.useQuery();
+  const { data: tagsData, isLoading } = useQuery(
+    trpc.tags.findAllTags.queryOptions(),
+  );
 
   const currentTag =
     tagsData?.tags.find(({ id }) => id === value) ??

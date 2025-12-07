@@ -1,6 +1,7 @@
 import { Box, Stack, Textarea } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useThrottledCallback } from '@mantine/hooks';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { z } from 'zod';
@@ -8,7 +9,7 @@ import { z } from 'zod';
 import { FixedNoteTagContainer } from '@/components/tag/FixedNoteTagContainer';
 import { NoteTagContainer } from '@/components/tag/NoteTagContainer';
 import { type NoteForFindAll } from '@/models/notes';
-import { trpc } from '@/utils/trpc';
+import { useTRPC } from '@/utils/trpc';
 
 interface CreateOrEditNoteModalProps {
   note?: NoteForFindAll;
@@ -31,8 +32,9 @@ const getFormValues = ({
 const CreateOrEditNoteModal = ({
   note: noteArg,
 }: CreateOrEditNoteModalProps) => {
+  const trpc = useTRPC();
   const [note, setNote] = useState(noteArg);
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
   const form = useForm({
     mode: 'uncontrolled',
@@ -43,16 +45,20 @@ const CreateOrEditNoteModal = ({
 
   const onSuccess = async ({ note: savedNote }: { note: NoteForFindAll }) => {
     setNote(savedNote);
-    await utils.searches.searchNotes.invalidate();
+    await queryClient.invalidateQueries(trpc.searches.searchNotes.pathFilter());
   };
 
-  const { mutateAsync: createNote } = trpc.notes.createNote.useMutation({
-    onSuccess,
-  });
+  const { mutateAsync: createNote } = useMutation(
+    trpc.notes.createNote.mutationOptions({
+      onSuccess,
+    }),
+  );
 
-  const { mutateAsync: editNote } = trpc.notes.editNote.useMutation({
-    onSuccess,
-  });
+  const { mutateAsync: editNote } = useMutation(
+    trpc.notes.editNote.mutationOptions({
+      onSuccess,
+    }),
+  );
 
   const handleSubmit = useThrottledCallback(
     (values: CreateOrEditSchemaType) => {

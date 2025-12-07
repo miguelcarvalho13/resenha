@@ -1,9 +1,13 @@
-import { trpc } from '@/utils/trpc';
+import { useQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@/utils/trpc';
 import { NotesGrid } from './NotesGrid';
 
 export const RecentNotesGrid = () => {
-  const { data: findAllResponse, isLoading } =
-    trpc.searches.searchNotes.useQuery({ query: [] });
+  const trpc = useTRPC();
+  const { data: findAllResponse, isLoading } = useQuery(
+    trpc.searches.searchNotes.queryOptions({ query: [] }),
+  );
 
   if (isLoading) {
     return null;

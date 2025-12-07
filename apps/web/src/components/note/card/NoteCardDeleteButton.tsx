@@ -1,26 +1,32 @@
 import { ActionIcon, Tooltip } from '@mantine/core';
+import { modals } from '@mantine/modals';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { TbTrash } from 'react-icons/tb';
-import { modals } from '@mantine/modals';
 
 import { type NoteForFindAll } from '@/models/notes';
-import { trpc } from '@/utils/trpc';
+import { useTRPC } from '@/utils/trpc';
 
 interface NoteCardDeleteButtonProps {
   note: NoteForFindAll;
 }
 
 export const NoteCardDeleteButton = ({ note }: NoteCardDeleteButtonProps) => {
+  const trpc = useTRPC();
   const { t } = useTranslation();
-  const utils = trpc.useUtils();
-  const { mutate: softDeleteNotes } = trpc.notes.softDeleteNotes.useMutation();
-  const { mutate: hardDeleteNotes } = trpc.notes.hardDeleteNotes.useMutation();
+  const queryClient = useQueryClient();
+  const { mutate: softDeleteNotes } = useMutation(
+    trpc.notes.softDeleteNotes.mutationOptions(),
+  );
+  const { mutate: hardDeleteNotes } = useMutation(
+    trpc.notes.hardDeleteNotes.mutationOptions(),
+  );
 
   const isSoftDeleted = !!note.deletedAt;
 
   const onSuccess = () => {
     modals.closeAll();
-    void utils.searches.searchNotes.invalidate();
+    void queryClient.invalidateQueries(trpc.searches.searchNotes.pathFilter());
   };
 
   const handleSoftDelete = () => {

@@ -1,11 +1,12 @@
 import { Button, Combobox, useCombobox } from '@mantine/core';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TbPlus } from 'react-icons/tb';
 
 import { TagWrapper } from '@/components/tag/TagWrapper';
 import { type NoteTag } from '@/models/tags';
-import { trpc } from '@/utils/trpc';
+import { useTRPC } from '@/utils/trpc';
 import { Tag } from './Tag';
 
 const FIXED_OPTION_VALUES = {
@@ -36,19 +37,25 @@ const getNowDateValue = () => {
 };
 
 export const AddTagButton = ({ noteId }: AddTagButtonProps) => {
+  const trpc = useTRPC();
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const { data: tagsData } = trpc.tags.findAllTags.useQuery();
-  const { data: noteTagsData } = trpc.tags.findAllNoteTags.useQuery({ noteId });
+  const { data: tagsData } = useQuery(trpc.tags.findAllTags.queryOptions());
+  const { data: noteTagsData } = useQuery(
+    trpc.tags.findAllNoteTags.queryOptions({ noteId }),
+  );
 
-  const { mutate: createNoteTag, isPending } =
-    trpc.tags.createNoteTag.useMutation({
+  const { mutate: createNoteTag, isPending } = useMutation(
+    trpc.tags.createNoteTag.mutationOptions({
       onSuccess: async () => {
-        await utils.tags.findAllNoteTags.invalidate({ noteId });
+        await queryClient.invalidateQueries(
+          trpc.tags.findAllNoteTags.queryFilter({ noteId }),
+        );
       },
-    });
+    }),
+  );
 
   const combobox = useCombobox({
     onDropdownClose: () => {

@@ -1,10 +1,11 @@
 import { ActionIcon, Tooltip } from '@mantine/core';
 import { modals } from '@mantine/modals';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { TbTrash } from 'react-icons/tb';
 
 import { type Search } from '@/models/searches';
-import { trpc } from '@/utils/trpc';
+import { useTRPC } from '@/utils/trpc';
 
 interface SearchCardDeleteButtonProps {
   search: Search;
@@ -13,14 +14,18 @@ interface SearchCardDeleteButtonProps {
 export const SearchCardDeleteButton = ({
   search,
 }: SearchCardDeleteButtonProps) => {
+  const trpc = useTRPC();
   const { t } = useTranslation();
-  const utils = trpc.useUtils();
-  const { mutate: softDeleteSearches } =
-    trpc.searches.softDeleteSearches.useMutation();
+  const queryClient = useQueryClient();
+  const { mutate: softDeleteSearches } = useMutation(
+    trpc.searches.softDeleteSearches.mutationOptions(),
+  );
 
   const onSuccess = () => {
     modals.closeAll();
-    void utils.searches.findAllSearches.invalidate();
+    void queryClient.invalidateQueries(
+      trpc.searches.findAllSearches.pathFilter(),
+    );
   };
 
   const handleOnClick = () => {
