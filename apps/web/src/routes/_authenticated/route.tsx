@@ -64,7 +64,13 @@ function Index() {
             />
           </Stack>
           <Box mx="sm" bd="1px dashed gray.2" />
-          <Stack h="100%" justify="flex-start">
+          <Stack
+            className="overflow-auto"
+            flex={1}
+            gap={0}
+            justify="flex-start"
+            pos="relative"
+          >
             <NavbarSearchesLinks />
           </Stack>
           <Stack gap={0}>
