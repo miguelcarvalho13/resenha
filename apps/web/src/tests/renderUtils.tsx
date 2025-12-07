@@ -5,12 +5,12 @@ import { render } from 'vitest-browser-react';
 
 import { routeTree } from '@/routeTree.gen';
 import { type HomeSearchParams } from '@/routes/_authenticated/home';
-import { trpcClient } from '@/utils/trpc';
+import { makeTrpcClientOptions } from '@/utils/trpc';
 import { TestWrapper } from './TestWrapper';
 
 const getTestRouter = ({ queryClient }: { queryClient: QueryClient }) => {
   const router = createRouter({
-    context: { queryClient, trpcClient },
+    context: { queryClient, trpc: makeTrpcClientOptions(queryClient) },
     defaultPendingMinMs: 0,
     routeTree,
   });

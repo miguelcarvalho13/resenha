@@ -154,6 +154,33 @@ export const getFindAllSearchesHandler = () =>
     } satisfies RouterOutput['searches']['findAllSearches']),
   );
 
+export const getFindSearchByIdHandler = ({
+  wait = 0,
+}: { wait?: number } = {}) =>
+  http.get<PathParams, TrpcInput<RouterInput['searches']['findSearchById']>>(
+    '/api/trpc/searches.findSearchById',
+    async ({ request }) => {
+      await delay(wait || server.timing);
+
+      const input = extractTrpcInputQuery<
+        RouterInput['searches']['findSearchById']
+      >(request.url);
+
+      const search = searchMock.findFirst((q) =>
+        q.where({ id: input.searchId }),
+      );
+
+      if (!search) {
+        throw new Error('[msw] Search not found');
+      }
+
+      return createTrpcJson({
+        success: true,
+        search,
+      } satisfies RouterOutput['searches']['findSearchById']);
+    },
+  );
+
 export const getSearchNotesHandler = ({ wait = 0 }: { wait?: number } = {}) =>
   http.get<PathParams, TrpcInput<RouterInput['searches']['searchNotes']>>(
     '/api/trpc/searches.searchNotes',

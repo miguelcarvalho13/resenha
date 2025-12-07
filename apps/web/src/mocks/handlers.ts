@@ -8,6 +8,7 @@ import {
 } from './routes/notes';
 import {
   getFindAllSearchesHandler,
+  getFindSearchByIdHandler,
   getSearchNotesHandler,
   postCreateSearchHandler,
   postEditSearchHandler,
@@ -46,6 +47,7 @@ export const handlers = [
 
   // searches
   getFindAllSearchesHandler(),
+  getFindSearchByIdHandler(),
   getSearchNotesHandler(),
   postCreateSearchHandler(),
   postEditSearchHandler(),

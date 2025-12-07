@@ -11,7 +11,7 @@ import { TrpcWrapper } from './components/TrpcWrapper';
 import './index.css';
 import { routeTree } from './routeTree.gen';
 import './i18n';
-import { trpcClient } from '@/utils/trpc';
+import { makeTrpcClientOptions } from '@/utils/trpc';
 
 dayjs.extend(customParseFormat);
 
@@ -20,7 +20,7 @@ const queryClient = new QueryClient();
 const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
-  context: { queryClient, trpcClient },
+  context: { queryClient, trpc: makeTrpcClientOptions(queryClient) },
   defaultPreloadStaleTime: 0,
   scrollRestoration: true,
 });

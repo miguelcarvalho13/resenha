@@ -1,6 +1,6 @@
-import { SimpleGrid } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 
+import { CommonGrid } from '@/components/common/CommonGrid';
 import { NoteCard } from '@/components/note/card/NoteCard';
 import { type NoteForFindAll } from '@/models/notes';
 
@@ -16,14 +16,10 @@ export const NotesGrid = ({ notes }: NotesGridProps) => {
   }
 
   return (
-    <SimpleGrid
-      cols={{ base: 1, sm: 2, lg: 4 }}
-      spacing={{ base: 10, sm: 'xl' }}
-      verticalSpacing={{ base: 'md', sm: 'xl' }}
-    >
+    <CommonGrid>
       {notes.map((note) => (
         <NoteCard key={note.id} note={note} />
       ))}
-    </SimpleGrid>
+    </CommonGrid>
   );
 };
