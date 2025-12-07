@@ -1,13 +1,16 @@
+import { QueryClient } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { act } from 'react';
 import { render } from 'vitest-browser-react';
 
 import { routeTree } from '@/routeTree.gen';
 import { type HomeSearchParams } from '@/routes/_authenticated/home';
+import { trpcClient } from '@/utils/trpc';
 import { TestWrapper } from './TestWrapper';
 
-const getTestRouter = () => {
+const getTestRouter = ({ queryClient }: { queryClient: QueryClient }) => {
   const router = createRouter({
+    context: { queryClient, trpcClient },
     defaultPendingMinMs: 0,
     routeTree,
   });
@@ -21,10 +24,11 @@ const getTestRouter = () => {
 export async function renderWithRouter({
   search,
 }: { search?: HomeSearchParams } = {}) {
-  const router = getTestRouter();
+  const queryClient = new QueryClient();
+  const router = getTestRouter({ queryClient });
 
   const renderResult = render(
-    <TestWrapper>
+    <TestWrapper queryClient={queryClient}>
       <RouterProvider<typeof router> router={router} />
     </TestWrapper>,
   );
