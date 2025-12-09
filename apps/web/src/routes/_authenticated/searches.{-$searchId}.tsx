@@ -6,6 +6,7 @@ import z from 'zod';
 import { SearchedNotesGrid } from '@/components/note/SearchedNotesGrid';
 import { AllSearchesGrid } from '@/components/search/AllSearchesGrid';
 import { searchNotesSchema } from '@repo/api';
+import { UpdateSearchAlert } from '@/components/search/UpdateSearchAlert';
 
 const searchSearchSchema = z.object({
   query: z.array(searchNotesSchema().shape.query.unwrap()).nullish(),
@@ -34,7 +35,14 @@ function RouteComponent() {
 
   return (
     <Stack p="xl">
-      {searchId ? <SearchedNotesGrid /> : <AllSearchesGrid />}
+      {searchId ? (
+        <>
+          <UpdateSearchAlert />
+          <SearchedNotesGrid />
+        </>
+      ) : (
+        <AllSearchesGrid />
+      )}
     </Stack>
   );
 }

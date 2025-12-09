@@ -33,6 +33,18 @@ export const createSearchesPO = () => {
   const modal = page.getByRole('dialog', { name: /Search notes/ });
   const modalFiltersContainer = modal.getByTestId('tags-filter-container');
 
+  const updateSearchAlertLocator = page.getByRole('alert', {
+    name: /Update search\?/,
+  });
+
+  const updateSearchAlert = {
+    it: updateSearchAlertLocator,
+
+    updateButton: updateSearchAlertLocator.getByRole('button', {
+      name: /Update search/,
+    }),
+  };
+
   const searchModal = {
     addTagButton: modal.getByRole('button', { name: /Add tag/ }),
     clearSearchButton: modal.getByRole('button', { name: /Clear search/ }),
@@ -76,6 +88,7 @@ export const createSearchesPO = () => {
     searchModal,
     searchNotesButton,
     deleteModal,
+    updateSearchAlert,
 
     // methods
     searchDeleteButton,

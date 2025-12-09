@@ -52,7 +52,12 @@
     "operator_>": "greater than",
     "operator_>=": "greater than or equals to",
     "searchName": "Search name",
-    "searchNotes": "Search notes"
+    "searchNotes": "Search notes",
+    "updateSearchAlert": {
+      "body": "The current search filters doesn't match the recorded search filters. Do you want to update your search?",
+      "button": "Update search",
+      "title": "Update search?"
+    }
   },
   "signInSignUp": {
     "alreadyRegistered": "Already registered?",
