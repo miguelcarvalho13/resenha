@@ -11,8 +11,10 @@ export const createFilterRowPO = ({ row }: { row: Locator }) => {
   const valueInput = row.getByLabelText('Value');
   const valueInputDropdown = page.getByRole('listbox', { name: 'Value' });
   const valueInputOptions = valueInputDropdown.getByRole('option');
+  const removeButton = row.getByRole('button', { name: /Remove/ });
 
   return {
+    removeButton,
     tagInput,
     tagInputDropdown,
     tagInputDropdownOptions,

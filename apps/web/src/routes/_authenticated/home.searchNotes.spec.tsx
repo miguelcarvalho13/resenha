@@ -335,10 +335,8 @@ test('should be possible to remove rows from search modal', async () => {
   await vi.waitFor(() => expect(filterRows.elements()).toHaveLength(1));
 
   // Remove tag filter row
-  await filterRows
-    .nth(0)
-    .getByRole('button', { name: /Remove/ })
-    .click();
+  const firstRow = createFilterRowPO({ row: filterRows.nth(0) });
+  await firstRow.removeButton.click();
   await vi.waitFor(() => expect(filterRows.elements()).toHaveLength(0));
 });
 
