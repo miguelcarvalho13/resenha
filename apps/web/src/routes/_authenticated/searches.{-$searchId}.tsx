@@ -1,10 +1,17 @@
 import { Stack } from '@mantine/core';
 import { createFileRoute } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
+import { zodValidator } from '@tanstack/zod-adapter';
+import z from 'zod';
 
-import { AllSearchesGrid } from '@/components/search/AllSearchesGrid';
-import { useTRPC } from '@/utils/trpc';
 import { SearchedNotesGrid } from '@/components/note/SearchedNotesGrid';
+import { AllSearchesGrid } from '@/components/search/AllSearchesGrid';
+import { searchNotesSchema } from '@repo/api';
+
+const searchSearchSchema = z.object({
+  query: z.array(searchNotesSchema().shape.query.unwrap()).nullish(),
+});
+
+export type SearchSearchParams = z.infer<typeof searchSearchSchema>;
 
 export const Route = createFileRoute('/_authenticated/searches/{-$searchId}')({
   component: RouteComponent,
@@ -18,23 +25,16 @@ export const Route = createFileRoute('/_authenticated/searches/{-$searchId}')({
       );
     }
   },
+
+  validateSearch: zodValidator(searchSearchSchema),
 });
 
 function RouteComponent() {
   const { searchId } = Route.useParams();
-  const trpc = useTRPC();
-  const { data: searchData } = useQuery({
-    ...trpc.searches.findSearchById.queryOptions({ searchId: searchId! }),
-    enabled: !!searchId,
-  });
 
   return (
     <Stack p="xl">
-      {searchId ? (
-        <SearchedNotesGrid search={searchData?.search} />
-      ) : (
-        <AllSearchesGrid />
-      )}
+      {searchId ? <SearchedNotesGrid /> : <AllSearchesGrid />}
     </Stack>
   );
 }

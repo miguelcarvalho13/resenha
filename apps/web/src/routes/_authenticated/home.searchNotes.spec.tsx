@@ -2,11 +2,12 @@ import { expect, vi } from 'vitest';
 
 import { server } from '@/mocks/server';
 import { NO_OPTION_VALUE, type Tag } from '@/models/tags';
+import { createNotesPO } from '@/tests/pages/notes';
 import { createFilterRowPO, createSearchesPO } from '@/tests/pages/searches';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
-import { searchNotesSchema, type SearchNotesSchemaType } from '@repo/api';
-import { createNotesPO } from '@/tests/pages/notes';
+import { getCurrentQueryFromUrl } from '@/utils/tests/search';
+import { type SearchNotesSchemaType } from '@repo/api';
 
 type TagFilterRowPO = ReturnType<typeof createFilterRowPO>;
 
@@ -63,16 +64,6 @@ const assertRowOperatorOptions = async ({
     default:
       throw new Error('Tag type not defined');
   }
-};
-
-const getCurrentQueryFromUrl = () => {
-  const queryString = new URLSearchParams(window.location.search).get('query');
-
-  if (!queryString) return [];
-
-  return searchNotesSchema().shape.query.parse(
-    JSON.parse(decodeURIComponent(queryString)),
-  );
 };
 
 const setupCommonData = async () => {

@@ -1,28 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
-import { useSearch } from '@tanstack/react-router';
 
-import { Route as HomeRoute } from '@/routes/_authenticated/home';
 import { useTRPC } from '@/utils/trpc';
+import { useCurrentSearch } from '../search/useCurrentSearch';
 import { NotesGrid } from './NotesGrid';
-import { type Search } from '@/models/searches';
 
-interface SearchedNotesGridProps {
-  search?: Search;
-}
-
-export const SearchedNotesGrid = ({ search }: SearchedNotesGridProps) => {
+export const SearchedNotesGrid = () => {
   const trpc = useTRPC();
 
-  const searchParams = useSearch({
-    from: HomeRoute.id,
-    shouldThrow: false,
-  });
-
-  const query = searchParams?.query ?? search?.content.query;
+  const currentSearch = useCurrentSearch();
   const { data: findAllResponse, isLoading } = useQuery(
-    trpc.searches.searchNotes.queryOptions({
-      query: query ?? [],
-    }),
+    trpc.searches.searchNotes.queryOptions(currentSearch),
   );
 
   if (isLoading) {

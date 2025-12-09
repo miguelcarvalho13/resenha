@@ -28,7 +28,8 @@ test('should be possible to click in the search within the grid to navigate to i
   });
 
   await renderWithRouter();
-  const { searches, searchLink } = createSearchesPO();
+  const { searches, searchNotesButton, searchModal, searchLink } =
+    createSearchesPO();
   const { header, navbarSearchesLink } = createNavbarPO();
   const { notes } = createNotesPO();
 
@@ -47,6 +48,14 @@ test('should be possible to click in the search within the grid to navigate to i
   // wait for searched notes to load
   await vi.waitFor(() => expect(notes.elements()).toHaveLength(1));
   await expect.element(notes.nth(0)).toHaveTextContent(/A/);
+
+  // the search modal should have its state populated
+  await expect.element(searchNotesButton).toHaveTextContent('my-tag');
+  await searchNotesButton.click();
+  await searchModal.expectToBeVisible();
+  const { filterRows } = searchModal;
+  await vi.waitFor(() => expect(filterRows.elements()).toHaveLength(1));
+  await expect.element(filterRows.nth(0)).toHaveTextContent('my-tag');
 });
 
 test('should be possible to click in the search within the navbar to navigate to it', async () => {
