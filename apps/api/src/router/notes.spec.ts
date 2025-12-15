@@ -1,8 +1,6 @@
 import { eq } from 'drizzle-orm';
-import { reset } from 'drizzle-seed';
-import { type Server } from 'http';
 import supertest from 'supertest';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { describe, expect } from 'vitest';
 
 import { db } from '@api/db';
 import * as schema from '@api/db/schema';
@@ -13,26 +11,15 @@ import {
   type SoftDeleteNotesSchemaType,
   type UndoSoftDeletedNotesSchemaType,
 } from '@api/schemas/notes';
-import { startApp } from '@api/server';
 import {
   createNoteThroughApi,
   softDeleteNotesThroughApi,
 } from '@api/tests/noteUtils';
 import { createAndSignInUser, createUser } from '@api/tests/sessionUtils';
-
-let app: Server | null = null;
-
-beforeEach(() => {
-  app = startApp({ port: 3001 });
-});
-
-afterEach(async () => {
-  app?.close();
-  await reset(db, schema);
-});
+import { test } from '@api/tests/testExtend';
 
 describe('notes.createNote', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     expect((await db.select().from(schema.notes)).length).toBe(0);
     const { authCookie, user } = await createAndSignInUser(app!);
 
@@ -55,7 +42,7 @@ describe('notes.createNote', () => {
     expect(createdNote.createdBy).toBe(user.id);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     expect((await db.select().from(schema.notes)).length).toBe(0);
 
     const res = await supertest(app!)
@@ -73,7 +60,7 @@ describe('notes.createNote', () => {
 });
 
 describe('notes.hardDeleteNotes', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie } = await createAndSignInUser(app!);
 
     const createdNote = await createNoteThroughApi({ app: app!, authCookie });
@@ -91,7 +78,9 @@ describe('notes.hardDeleteNotes', () => {
     expect(await db.select().from(schema.notes)).toHaveLength(0);
   });
 
-  test('should not allow hard deletion for a note created by a different user', async () => {
+  test('should not allow hard deletion for a note created by a different user', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       {
@@ -127,7 +116,7 @@ describe('notes.hardDeleteNotes', () => {
     expect(await db.select().from(schema.notes)).toHaveLength(2);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/notes.hardDeleteNotes')
       .send({});
@@ -137,7 +126,7 @@ describe('notes.hardDeleteNotes', () => {
 });
 
 describe('notes.softDeleteNotes', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
 
     const createdNote = await createNoteThroughApi({ app: app!, authCookie });
@@ -183,7 +172,9 @@ describe('notes.softDeleteNotes', () => {
     );
   });
 
-  test('should not allow soft deletion for a note created by a different user', async () => {
+  test('should not allow soft deletion for a note created by a different user', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       {
@@ -229,7 +220,7 @@ describe('notes.softDeleteNotes', () => {
     expect(updatedNotes[1].deletedBy).toBeNull();
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/notes.softDeleteNotes')
       .send({});
@@ -239,7 +230,7 @@ describe('notes.softDeleteNotes', () => {
 });
 
 describe('notes.undoDeleteNotes', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
 
     const createdNote = await createNoteThroughApi({ app: app!, authCookie });
@@ -286,7 +277,9 @@ describe('notes.undoDeleteNotes', () => {
     );
   });
 
-  test('should not allow undo soft deletion for a note created by a different user', async () => {
+  test('should not allow undo soft deletion for a note created by a different user', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       {
@@ -354,7 +347,7 @@ describe('notes.undoDeleteNotes', () => {
     expect(updatedNotes[1].deletedBy).not.toBeNull();
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/notes.undoSoftDeletedNotes')
       .send({});
@@ -364,7 +357,7 @@ describe('notes.undoDeleteNotes', () => {
 });
 
 describe('notes.editNote', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
 
     await createNoteThroughApi({ app: app!, authCookie });
@@ -402,7 +395,9 @@ describe('notes.editNote', () => {
     );
   });
 
-  test('should not allow edition for a note created for a different user', async () => {
+  test('should not allow edition for a note created for a different user', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       {
@@ -442,7 +437,7 @@ describe('notes.editNote', () => {
     expect(updatedNote.createdBy).toBe(noteCreatedForAnotherUser.createdBy);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/notes.editNote')
       .send({
@@ -456,7 +451,7 @@ describe('notes.editNote', () => {
 });
 
 describe('notes.findAll', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie } = await createAndSignInUser(app!);
 
     // First creates a note for the user
@@ -478,7 +473,7 @@ describe('notes.findAll', () => {
     ]);
   });
 
-  test('should only return notes created by the user', async () => {
+  test('should only return notes created by the user', async ({ app }) => {
     const anotherUser = await createUser(app!, {
       name: 'Another User',
       email: 'another@example.com',
@@ -515,7 +510,7 @@ describe('notes.findAll', () => {
     ]);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!).get('/api/trpc/notes.findAll');
 
     expect(res.status).toBe(401);

@@ -1,8 +1,6 @@
 import { eq } from 'drizzle-orm';
-import { reset } from 'drizzle-seed';
-import { type Server } from 'http';
 import supertest from 'supertest';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { describe, expect } from 'vitest';
 
 import { db } from '@api/db';
 import * as schema from '@api/db/schema';
@@ -14,27 +12,16 @@ import {
   type EditTagSchemaType,
   type FindAllNoteTagsSchemaType,
 } from '@api/schemas/tags';
-import { startApp } from '@api/server';
 import { createNoteThroughApi } from '@api/tests/noteUtils';
 import { createAndSignInUser, createUser } from '@api/tests/sessionUtils';
 import {
   createNoteTagThroughApi,
   createTagThroughApi,
 } from '@api/tests/tagUtils';
-
-let app: Server | null = null;
-
-beforeEach(() => {
-  app = startApp({ port: 3001 });
-});
-
-afterEach(async () => {
-  app?.close();
-  await reset(db, schema);
-});
+import { test } from '@api/tests/testExtend';
 
 describe('tags.createTag', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     expect((await db.select().from(schema.tags)).length).toBe(0);
     const { authCookie, user } = await createAndSignInUser(app!);
 
@@ -60,7 +47,7 @@ describe('tags.createTag', () => {
     expect(createdTag.updatedBy).toBe(user.id);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/tags.createTag')
       .send({
@@ -76,7 +63,7 @@ describe('tags.createTag', () => {
 });
 
 describe('tags.editTag', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
 
     await createTagThroughApi({ app: app!, authCookie });
@@ -121,7 +108,9 @@ describe('tags.editTag', () => {
     );
   });
 
-  test('should not allow edition for a tag created by a different user', async () => {
+  test('should not allow edition for a tag created by a different user', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       {
@@ -162,7 +151,7 @@ describe('tags.editTag', () => {
     expect(updatedTag.updatedBy).toBe(tagCreatedForAnotherUser.updatedBy);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/tags.editTag')
       .send({ json: {} });
@@ -172,7 +161,7 @@ describe('tags.editTag', () => {
 });
 
 describe('tags.findAllTags', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie } = await createAndSignInUser(app!);
 
     // First creates a note for the user
@@ -194,7 +183,7 @@ describe('tags.findAllTags', () => {
     ]);
   });
 
-  test('should only return tags created by the user', async () => {
+  test('should only return tags created by the user', async ({ app }) => {
     const anotherUser = await createUser(app!, {
       name: 'Another User',
       email: 'another@example.com',
@@ -232,7 +221,7 @@ describe('tags.findAllTags', () => {
     ]);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!).get('/api/trpc/tags.findAllTags');
 
     expect(res.status).toBe(401);
@@ -240,7 +229,7 @@ describe('tags.findAllTags', () => {
 });
 
 describe('tags.createNoteTag', () => {
-  test('should correctly handle note tag [string]', async () => {
+  test('should correctly handle note tag [string]', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
     await createNoteThroughApi({ app: app!, authCookie });
 
@@ -286,7 +275,7 @@ describe('tags.createNoteTag', () => {
     expect(createdNoteTag.updatedBy).toBe(user.id);
   });
 
-  test('should correctly handle note tag [number]', async () => {
+  test('should correctly handle note tag [number]', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
     await createNoteThroughApi({ app: app!, authCookie });
 
@@ -333,7 +322,7 @@ describe('tags.createNoteTag', () => {
     expect(createdNoteTag.updatedBy).toBe(user.id);
   });
 
-  test('should correctly handle note tag [date]', async () => {
+  test('should correctly handle note tag [date]', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
     await createNoteThroughApi({ app: app!, authCookie });
 
@@ -380,7 +369,7 @@ describe('tags.createNoteTag', () => {
     expect(createdNoteTag.updatedBy).toBe(user.id);
   });
 
-  test('should correctly handle note tag [boolean]', async () => {
+  test('should correctly handle note tag [boolean]', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
     await createNoteThroughApi({ app: app!, authCookie });
 
@@ -427,7 +416,9 @@ describe('tags.createNoteTag', () => {
     expect(createdNoteTag.updatedBy).toBe(user.id);
   });
 
-  test('should not create a new tag if a tag of same name and type already exists', async () => {
+  test('should not create a new tag if a tag of same name and type already exists', async ({
+    app,
+  }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
     await createNoteThroughApi({ app: app!, authCookie });
     await createTagThroughApi({
@@ -478,7 +469,9 @@ describe('tags.createNoteTag', () => {
     expect(createdNoteTag.updatedBy).toBe(user.id);
   });
 
-  test('should return an error if user does not have access to passed note', async () => {
+  test('should return an error if user does not have access to passed note', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       { name: 'Another User', email: 'another@example.com' },
@@ -512,7 +505,9 @@ describe('tags.createNoteTag', () => {
     expect((await db.select().from(schema.notes)).length).toBe(1);
   });
 
-  test('should create new tag even if the tag exists for another user', async () => {
+  test('should create new tag even if the tag exists for another user', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       { name: 'Another User', email: 'another@example.com' },
@@ -543,7 +538,7 @@ describe('tags.createNoteTag', () => {
     expect((await db.select().from(schema.tags)).length).toBe(2);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/tags.createNoteTag')
       .send({ json: {} });
@@ -553,7 +548,7 @@ describe('tags.createNoteTag', () => {
 });
 
 describe('tags.deleteNoteTag', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie } = await createAndSignInUser(app!);
 
     await createNoteTagThroughApi({ app: app!, authCookie });
@@ -582,7 +577,9 @@ describe('tags.deleteNoteTag', () => {
     expect(updatedNoteTag).toBeFalsy();
   });
 
-  test('should not allow deletion for a note tag created in a note by a different user', async () => {
+  test('should not allow deletion for a note tag created in a note by a different user', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       {
@@ -620,7 +617,7 @@ describe('tags.deleteNoteTag', () => {
     expect(updatedNoteTag).toBeTruthy();
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/tags.deleteNoteTag')
       .send({ json: {} });
@@ -630,7 +627,7 @@ describe('tags.deleteNoteTag', () => {
 });
 
 describe('tags.editNoteTag', () => {
-  test('should be correctly handled [string]', async () => {
+  test('should be correctly handled [string]', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
 
     await createNoteTagThroughApi({ app: app!, authCookie });
@@ -687,7 +684,7 @@ describe('tags.editNoteTag', () => {
     );
   });
 
-  test('should be correctly handled [number]', async () => {
+  test('should be correctly handled [number]', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
 
     await createNoteTagThroughApi({
@@ -747,7 +744,7 @@ describe('tags.editNoteTag', () => {
     );
   });
 
-  test('should be correctly handled [date]', async () => {
+  test('should be correctly handled [date]', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
 
     await createNoteTagThroughApi({
@@ -807,7 +804,7 @@ describe('tags.editNoteTag', () => {
     );
   });
 
-  test('should be correctly handled [boolean]', async () => {
+  test('should be correctly handled [boolean]', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
 
     await createNoteTagThroughApi({
@@ -867,7 +864,9 @@ describe('tags.editNoteTag', () => {
     );
   });
 
-  test('should not allow edition for a note tag created by a different user', async () => {
+  test('should not allow edition for a note tag created by a different user', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       {
@@ -936,7 +935,7 @@ describe('tags.editNoteTag', () => {
     );
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/tags.editNoteTag')
       .send({ json: {} });
@@ -946,7 +945,7 @@ describe('tags.editNoteTag', () => {
 });
 
 describe('tags.findAllNoteTags', () => {
-  test('should be correctly handled [string]', async () => {
+  test('should be correctly handled [string]', async ({ app }) => {
     const { authCookie } = await createAndSignInUser(app!);
 
     await createNoteTagThroughApi({ app: app!, authCookie });
@@ -980,7 +979,7 @@ describe('tags.findAllNoteTags', () => {
     ]);
   });
 
-  test('should be correctly handled [number]', async () => {
+  test('should be correctly handled [number]', async ({ app }) => {
     const { authCookie } = await createAndSignInUser(app!);
 
     await createNoteTagThroughApi({
@@ -1024,7 +1023,7 @@ describe('tags.findAllNoteTags', () => {
     ]);
   });
 
-  test('should be correctly handled [date]', async () => {
+  test('should be correctly handled [date]', async ({ app }) => {
     const { authCookie } = await createAndSignInUser(app!);
 
     await createNoteTagThroughApi({
@@ -1068,7 +1067,7 @@ describe('tags.findAllNoteTags', () => {
     ]);
   });
 
-  test('should be correctly handled [boolean]', async () => {
+  test('should be correctly handled [boolean]', async ({ app }) => {
     const { authCookie } = await createAndSignInUser(app!);
 
     await createNoteTagThroughApi({
@@ -1112,7 +1111,9 @@ describe('tags.findAllNoteTags', () => {
     ]);
   });
 
-  test('should only return note tags for notes created by the user', async () => {
+  test('should only return note tags for notes created by the user', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       {
@@ -1148,7 +1149,7 @@ describe('tags.findAllNoteTags', () => {
     expect(res.status).toBe(401);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!).get('/api/trpc/tags.findAllNoteTags');
 
     expect(res.status).toBe(401);

@@ -1,8 +1,6 @@
 import { eq } from 'drizzle-orm';
-import { reset } from 'drizzle-seed';
-import { type Server } from 'http';
 import supertest from 'supertest';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { describe, expect } from 'vitest';
 
 import { db } from '@api/db';
 import * as schema from '@api/db/schema';
@@ -18,7 +16,6 @@ import {
   type SoftDeleteSearchesSchemaType,
   type UndoSoftDeletedSearchesSchemaType,
 } from '@api/schemas/searches';
-import { startApp } from '@api/server';
 import {
   createNoteThroughApi,
   softDeleteNotesThroughApi,
@@ -29,20 +26,10 @@ import {
 } from '@api/tests/searchUtils';
 import { createAndSignInUser, createUser } from '@api/tests/sessionUtils';
 import { createNoteTagThroughApi } from '@api/tests/tagUtils';
-
-let app: Server | null = null;
-
-beforeEach(() => {
-  app = startApp({ port: 3001 });
-});
-
-afterEach(async () => {
-  app?.close();
-  await reset(db, schema);
-});
+import { test } from '@api/tests/testExtend';
 
 describe('searches.createSearch', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
     const search = {
       content: {
@@ -71,7 +58,7 @@ describe('searches.createSearch', () => {
     expect(createdSearch.createdBy).toBe(user.id);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/searches.createSearch')
       .send({
@@ -86,7 +73,7 @@ describe('searches.createSearch', () => {
 });
 
 describe('searches.findAllSearches', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie } = await createAndSignInUser(app!);
 
     await createSearchThroughApi({ app: app!, authCookie });
@@ -107,7 +94,7 @@ describe('searches.findAllSearches', () => {
     ]);
   });
 
-  test('should not return soft deleted searches', async () => {
+  test('should not return soft deleted searches', async ({ app }) => {
     const { authCookie } = await createAndSignInUser(app!);
 
     const firstSearch = await createSearchThroughApi({ app: app!, authCookie });
@@ -137,7 +124,7 @@ describe('searches.findAllSearches', () => {
     ]);
   });
 
-  test('should only return searches created by the user', async () => {
+  test('should only return searches created by the user', async ({ app }) => {
     const anotherUser = await createUser(app!, {
       name: 'Another User',
       email: 'another@example.com',
@@ -174,7 +161,7 @@ describe('searches.findAllSearches', () => {
     ]);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!).get('/api/trpc/searches.findAllSearches');
 
     expect(res.status).toBe(401);
@@ -182,7 +169,7 @@ describe('searches.findAllSearches', () => {
 });
 
 describe('searches.findSearchById', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie } = await createAndSignInUser(app!);
 
     const search = await createSearchThroughApi({ app: app!, authCookie });
@@ -207,7 +194,7 @@ describe('searches.findSearchById', () => {
     });
   });
 
-  test('should only return searches created by the user', async () => {
+  test('should only return searches created by the user', async ({ app }) => {
     const anotherUser = await createUser(app!, {
       name: 'Another User',
       email: 'another@example.com',
@@ -238,7 +225,7 @@ describe('searches.findSearchById', () => {
     expect(res.status).toBe(404);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!).get('/api/trpc/searches.findSearchById');
 
     expect(res.status).toBe(401);
@@ -246,7 +233,7 @@ describe('searches.findSearchById', () => {
 });
 
 describe('searches.hardDeleteSearches', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie } = await createAndSignInUser(app!);
 
     const createdSearch = await createSearchThroughApi({
@@ -267,7 +254,9 @@ describe('searches.hardDeleteSearches', () => {
     expect(await db.select().from(schema.searches)).toHaveLength(0);
   });
 
-  test('should not allow hard deletion for a search created by a different user', async () => {
+  test('should not allow hard deletion for a search created by a different user', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       {
@@ -306,7 +295,7 @@ describe('searches.hardDeleteSearches', () => {
     expect(await db.select().from(schema.searches)).toHaveLength(2);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/searches.hardDeleteSearches')
       .send({});
@@ -316,7 +305,7 @@ describe('searches.hardDeleteSearches', () => {
 });
 
 describe('searches.softDeleteSearches', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
 
     const createdSearch = await createSearchThroughApi({
@@ -365,7 +354,9 @@ describe('searches.softDeleteSearches', () => {
     );
   });
 
-  test('should not allow soft deletion for a search created by a different user', async () => {
+  test('should not allow soft deletion for a search created by a different user', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       {
@@ -414,7 +405,7 @@ describe('searches.softDeleteSearches', () => {
     expect(updatedSearches[1].deletedBy).toBeNull();
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/searches.softDeleteSearches')
       .send({});
@@ -424,7 +415,7 @@ describe('searches.softDeleteSearches', () => {
 });
 
 describe('searches.editSearch', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
 
     const createdSearch = await createSearchThroughApi({
@@ -473,7 +464,9 @@ describe('searches.editSearch', () => {
     );
   });
 
-  test('should not allow edition for a search created by a different user', async () => {
+  test('should not allow edition for a search created by a different user', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       {
@@ -516,7 +509,7 @@ describe('searches.editSearch', () => {
     expect(updatedSearch.createdBy).toBe(searchCreatedByAnotherUser.createdBy);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/searches.editSearch')
       .send({});
@@ -526,7 +519,7 @@ describe('searches.editSearch', () => {
 });
 
 describe('searches.searchNotes', () => {
-  test('should be correctly handled [string] operator "="', async () => {
+  test('should be correctly handled [string] operator "="', async ({ app }) => {
     if (!app) throw new Error('app not started');
 
     const { authCookie } = await createAndSignInUser(app);
@@ -568,7 +561,7 @@ describe('searches.searchNotes', () => {
     ]);
   });
 
-  test.each([
+  test.for([
     { valueA: 9, valueB: 10, operator: { type: '<', value: 10 } },
     { valueA: 10, valueB: 10.1, operator: { type: '<=', value: 10 } },
     { valueA: 10, valueB: 9, operator: { type: '=', value: 10 } },
@@ -580,9 +573,7 @@ describe('searches.searchNotes', () => {
     operator: NumberOperatorsType;
   }[])(
     'should correctly handle search considering number tags with query: $operator',
-    async ({ valueA, valueB, operator }) => {
-      if (!app) throw new Error('app not started');
-
+    async ({ valueA, valueB, operator }, { app }) => {
       const { authCookie } = await createAndSignInUser(app);
 
       const noteA = await createNoteThroughApi({ app, authCookie });
@@ -633,7 +624,7 @@ describe('searches.searchNotes', () => {
     },
   );
 
-  test.each([
+  test.for([
     { valueA: true, valueB: false, operator: { type: '=', value: true } },
     { valueA: false, valueB: true, operator: { type: '=', value: false } },
   ] as const satisfies {
@@ -642,9 +633,7 @@ describe('searches.searchNotes', () => {
     operator: BooleanOperatorsType;
   }[])(
     'should correctly handle search considering boolean tags with query: $operator',
-    async ({ valueA, valueB, operator }) => {
-      if (!app) throw new Error('app not started');
-
+    async ({ valueA, valueB, operator }, { app }) => {
       const { authCookie } = await createAndSignInUser(app);
 
       const noteA = await createNoteThroughApi({ app, authCookie });
@@ -695,7 +684,7 @@ describe('searches.searchNotes', () => {
     },
   );
 
-  test.each([
+  test.for([
     {
       valueA: '2025-11-10',
       valueB: '2025-11-11',
@@ -727,9 +716,7 @@ describe('searches.searchNotes', () => {
     operator: DateOperatorsType;
   }[])(
     'should correctly handle search considering date tags with query: $operator',
-    async ({ valueA, valueB, operator }) => {
-      if (!app) throw new Error('app not started');
-
+    async ({ valueA, valueB, operator }, { app }) => {
       const { authCookie } = await createAndSignInUser(app);
 
       const noteA = await createNoteThroughApi({ app, authCookie });
@@ -780,7 +767,7 @@ describe('searches.searchNotes', () => {
     },
   );
 
-  test('should not return deleted notes by default', async () => {
+  test('should not return deleted notes by default', async ({ app }) => {
     if (!app) throw new Error('app not started');
 
     const { authCookie } = await createAndSignInUser(app);
@@ -812,7 +799,9 @@ describe('searches.searchNotes', () => {
     ]);
   });
 
-  test('should return deleted notes if requested in the query', async () => {
+  test('should return deleted notes if requested in the query', async ({
+    app,
+  }) => {
     if (!app) throw new Error('app not started');
 
     const { authCookie } = await createAndSignInUser(app);
@@ -865,7 +854,9 @@ describe('searches.searchNotes', () => {
     ]);
   });
 
-  test('should correctly handle search considering multiple operators', async () => {
+  test('should correctly handle search considering multiple operators', async ({
+    app,
+  }) => {
     if (!app) throw new Error('app not started');
 
     const { authCookie } = await createAndSignInUser(app);
@@ -1006,7 +997,7 @@ describe('searches.searchNotes', () => {
     ]);
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!).get('/api/trpc/searches.searchNotes');
 
     expect(res.status).toBe(401);
@@ -1014,7 +1005,7 @@ describe('searches.searchNotes', () => {
 });
 
 describe('searches.undoSoftDeletedSearches', () => {
-  test('should be correctly handled', async () => {
+  test('should be correctly handled', async ({ app }) => {
     const { authCookie, user } = await createAndSignInUser(app!);
 
     const createdSearch = await createSearchThroughApi({
@@ -1064,7 +1055,9 @@ describe('searches.undoSoftDeletedSearches', () => {
     );
   });
 
-  test('should not allow undo soft deletion for a search created by a different user', async () => {
+  test('should not allow undo soft deletion for a search created by a different user', async ({
+    app,
+  }) => {
     const { authCookie: authCookieForAnotherUser } = await createAndSignInUser(
       app!,
       {
@@ -1135,7 +1128,7 @@ describe('searches.undoSoftDeletedSearches', () => {
     expect(updatedSearches[1].deletedBy).not.toBeNull();
   });
 
-  test('should be a protected route', async () => {
+  test('should be a protected route', async ({ app }) => {
     const res = await supertest(app!)
       .post('/api/trpc/searches.undoSoftDeletedSearches')
       .send({});

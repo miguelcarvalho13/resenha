@@ -1,24 +1,13 @@
-import { reset } from 'drizzle-seed';
-import { type Server } from 'http';
 import supertest from 'supertest';
-import { afterEach, beforeEach, expect, test } from 'vitest';
+import { expect } from 'vitest';
 
 import { db } from '@api/db';
 import * as schema from '@api/db/schema';
-import { startApp } from '@api/server';
+import { test } from '@api/tests/testExtend';
 
-let app: Server | null = null;
-
-beforeEach(() => {
-  app = startApp({ port: 3001 });
-});
-
-afterEach(async () => {
-  app?.close();
-  await reset(db, schema);
-});
-
-test('POST /api/auth/sign-up/email should be correctly handled', async () => {
+test('POST /api/auth/sign-up/email should be correctly handled', async ({
+  app,
+}) => {
   expect((await db.select().from(schema.users)).length).toBe(0);
 
   const res = await supertest(app!).post('/api/auth/sign-up/email').send({
@@ -32,7 +21,9 @@ test('POST /api/auth/sign-up/email should be correctly handled', async () => {
   expect((await db.select().from(schema.users)).length).toBe(1);
 });
 
-test('POST /api/auth/sign-in/email should fail if user does not exist', async () => {
+test('POST /api/auth/sign-in/email should fail if user does not exist', async ({
+  app,
+}) => {
   expect((await db.select().from(schema.users)).length).toBe(0);
 
   const res = await supertest(app!).post('/api/auth/sign-in/email').send({
@@ -43,7 +34,9 @@ test('POST /api/auth/sign-in/email should fail if user does not exist', async ()
   expect(res.status).toBe(401);
 });
 
-test('POST /api/auth/sign-in/email should fail if user exists but incorrect credentials are sent', async () => {
+test('POST /api/auth/sign-in/email should fail if user exists but incorrect credentials are sent', async ({
+  app,
+}) => {
   expect((await db.select().from(schema.users)).length).toBe(0);
 
   await supertest(app!).post('/api/auth/sign-up/email').send({
@@ -60,7 +53,9 @@ test('POST /api/auth/sign-in/email should fail if user exists but incorrect cred
   expect(res.status).toBe(401);
 });
 
-test('POST /api/auth/sign-in/email should succeed if user exists and correct credentials are sent', async () => {
+test('POST /api/auth/sign-in/email should succeed if user exists and correct credentials are sent', async ({
+  app,
+}) => {
   expect((await db.select().from(schema.users)).length).toBe(0);
 
   await supertest(app!).post('/api/auth/sign-up/email').send({
@@ -77,7 +72,7 @@ test('POST /api/auth/sign-in/email should succeed if user exists and correct cre
   expect(res.status).toBe(200);
 });
 
-test('POST /api/auth/sign-out should be correctly handled', async () => {
+test('POST /api/auth/sign-out should be correctly handled', async ({ app }) => {
   expect((await db.select().from(schema.users)).length).toBe(0);
 
   await supertest(app!).post('/api/auth/sign-up/email').send({
