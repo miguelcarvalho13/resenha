@@ -9,16 +9,17 @@ import { type IncomingHttpHeaders } from 'http';
 import superjson from 'superjson';
 import { z, ZodError } from 'zod';
 
-import { auth } from '@api/auth';
+import type { AuthType } from '@api/auth';
 import { db } from '@api/db';
 import type { AppRouter } from '@api/router';
 
 export const createTRPCContext = async (opts: {
   headers: IncomingHttpHeaders;
+  auth: AuthType;
 }) => {
   const headers = fromNodeHeaders(opts.headers);
 
-  const authSession = await auth.api.getSession({
+  const authSession = await opts.auth.api.getSession({
     headers,
   });
 

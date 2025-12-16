@@ -6,13 +6,18 @@ import express from 'express';
 
 import { appRouter } from '@api/router';
 import { createTRPCContext } from '@api/trpc';
-import { auth } from '@api/auth';
+import { createAuth } from '@api/auth';
 
 export function startApp({
   port = process.env.PORT || 3000,
 }: {
   port?: string | number;
 } = {}) {
+  const enableEmailSignup =
+    process.env.FEATURE_ENABLE_EMAIL_SIGNUP === '1' ||
+    process.env.FEATURE_ENABLE_EMAIL_SIGNUP?.toLocaleLowerCase() === 'true';
+
+  const auth = createAuth({ enableEmailSignup });
   const app = express();
 
   app.use(
@@ -31,7 +36,8 @@ export function startApp({
     '/api/trpc',
     createExpressMiddleware({
       router: appRouter,
-      createContext: ({ req }) => createTRPCContext({ headers: req.headers }),
+      createContext: ({ req }) =>
+        createTRPCContext({ auth, headers: req.headers }),
       onError:
         process.env.NODE_ENV === 'development'
           ? ({ path, error }) => {

@@ -1,5 +1,5 @@
 import supertest from 'supertest';
-import { expect } from 'vitest';
+import { describe, expect } from 'vitest';
 
 import { db } from '@api/db';
 import * as schema from '@api/db/schema';
@@ -99,4 +99,28 @@ test('POST /api/auth/sign-out should be correctly handled', async ({ app }) => {
     .set('Cookie', authCookie);
 
   expect(res.status).toBe(200);
+});
+
+describe('FEATURE_ENABLE_EMAIL_SIGNUP=0', () => {
+  test.scoped({
+    env: {
+      FEATURE_ENABLE_EMAIL_SIGNUP: '0',
+    },
+  });
+
+  test('POST /api/auth/sign-up/email should return an error', async ({
+    app,
+  }) => {
+    expect((await db.select().from(schema.users)).length).toBe(0);
+
+    const res = await supertest(app!).post('/api/auth/sign-up/email').send({
+      name: 'Some Name',
+      email: 'some@example.com',
+      password: 'SomePassword123@',
+    });
+
+    expect(res.status).toBe(400);
+
+    expect((await db.select().from(schema.users)).length).toBe(0);
+  });
 });
