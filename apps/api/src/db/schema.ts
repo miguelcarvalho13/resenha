@@ -181,6 +181,13 @@ export const searches = pgTable('searches', {
     .references(() => users.id, { onDelete: 'cascade' }),
 });
 
+export const invites = pgTable('invites', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  code: text('code').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  usedAt: timestamp('used_at'),
+});
+
 // Relations
 export const notesRelations = relations(notes, ({ one }) => ({
   // Notes -> User

@@ -71,6 +71,13 @@
       "when": 1764633262137,
       "tag": "0009_nasty_inhumans",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1766002868691,
+      "tag": "0010_wealthy_shadow_king",
+      "breakpoints": true
     }
   ]
 }
