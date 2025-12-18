@@ -4,9 +4,10 @@ import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
 
-import { appRouter } from '@api/router';
-import { createTRPCContext } from '@api/trpc';
 import { createAuth } from '@api/auth';
+import { appRouter } from '@api/router';
+import { handleInvitesMiddleware } from '@api/router/auth';
+import { createTRPCContext } from '@api/trpc';
 
 export function startApp({
   port = process.env.PORT || 3000,
@@ -19,6 +20,7 @@ export function startApp({
 
   const auth = createAuth({ enableEmailSignup });
   const app = express();
+  const jsonParser = express.json();
 
   app.use(
     cors({
@@ -27,6 +29,8 @@ export function startApp({
       credentials: true,
     }),
   );
+
+  app.use('/api/auth/sign-up/*', jsonParser, handleInvitesMiddleware);
 
   app.all('/api/auth/*', toNodeHandler(auth));
 
