@@ -30,7 +30,7 @@ export const test = testBase.extend<ExtendedTestFixtures>({
     // eslint-disable-next-line no-empty-pattern
     async ({ env }, use) => {
       Object.entries(env).map(([name, value]) => vi.stubEnv(name, value));
-      const app: Server = startApp({ port: 3001 });
+      const app: Server = await startApp({ port: 3001 });
 
       // Expose the worker object on the test's context.
       await use(app);

@@ -1,17 +1,15 @@
 import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 
 import { db } from '@api/db';
 import * as schema from '@api/db/schema';
+import type { GlobalConfig } from '@api/domain/globalConfig';
 import { inviteCodePlugin } from '@api/utils/authPlugins/inviteCodePlugin';
-import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 
 export const createAuth = ({
-  enableEmailSignup,
-  enableInviteCodes,
-}: {
-  enableEmailSignup: boolean;
-  enableInviteCodes: boolean;
-}) =>
+  isEmailSignupEnabled,
+  isInviteCodesEnabled,
+}: GlobalConfig) =>
   betterAuth({
     database: drizzleAdapter(db, {
       provider: 'pg',
@@ -19,10 +17,10 @@ export const createAuth = ({
       usePlural: true,
     }),
     emailAndPassword: {
-      enabled: enableEmailSignup,
+      enabled: isEmailSignupEnabled,
     },
     trustedOrigins: [process.env.WEB_APP_URL ?? ''],
-    plugins: enableInviteCodes ? [inviteCodePlugin()] : undefined,
+    plugins: isInviteCodesEnabled ? [inviteCodePlugin()] : undefined,
   });
 
 export type AuthType = ReturnType<typeof createAuth>;

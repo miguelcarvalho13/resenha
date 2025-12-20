@@ -4,23 +4,19 @@ import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
 
+import GlobalConfigDrivenAdapter from '@api/adapters/driven/globalConfig';
 import { createAuth } from '@api/auth';
 import { appRouter } from '@api/router';
 import { createTRPCContext } from '@api/trpc';
 
-export function startApp({
+export async function startApp({
   port = process.env.PORT || 3000,
 }: {
   port?: string | number;
 } = {}) {
-  const enableEmailSignup =
-    process.env.FEATURE_ENABLE_EMAIL_SIGNUP === '1' ||
-    process.env.FEATURE_ENABLE_EMAIL_SIGNUP?.toLocaleLowerCase() === 'true';
-  const enableInviteCodes =
-    process.env.FEATURE_ENABLE_INVITES === '1' ||
-    process.env.FEATURE_ENABLE_INVITES?.toLocaleLowerCase() === 'true';
+  const globalConfig = await GlobalConfigDrivenAdapter.findAll();
 
-  const auth = createAuth({ enableEmailSignup, enableInviteCodes });
+  const auth = createAuth(globalConfig);
   const app = express();
 
   app.use(
