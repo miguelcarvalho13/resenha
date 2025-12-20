@@ -229,4 +229,27 @@ describe('FEATURE_ENABLE_INVITES=1', () => {
 
     expect(signInResponse.status).toBe(200);
   });
+
+  test('POST /api/auth/sign-up/email should return error if an invite code is correctly provided but sign-up fails', async ({
+    app,
+  }) => {
+    expect((await db.select().from(schema.users)).length).toBe(0);
+    const code = nanoid();
+    await db.insert(schema.invites).values({ code });
+
+    const res = await supertest(app!)
+      .post('/api/auth/sign-up/email')
+      .send({
+        name: 'Some Name',
+        email: 'some@example.com',
+        password: '1',
+        inviteCode: code,
+      })
+      .set('Accept', 'application/json');
+
+    expect(res.status).toBe(400);
+
+    expect((await db.select().from(schema.users)).length).toBe(0);
+    expect((await db.select().from(schema.invites))[0].usedAt).toBeFalsy();
+  });
 });

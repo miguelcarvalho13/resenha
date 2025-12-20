@@ -6,7 +6,6 @@ import express from 'express';
 
 import { createAuth } from '@api/auth';
 import { appRouter } from '@api/router';
-import { handleInvitesMiddleware } from '@api/router/auth';
 import { createTRPCContext } from '@api/trpc';
 
 export function startApp({
@@ -17,10 +16,12 @@ export function startApp({
   const enableEmailSignup =
     process.env.FEATURE_ENABLE_EMAIL_SIGNUP === '1' ||
     process.env.FEATURE_ENABLE_EMAIL_SIGNUP?.toLocaleLowerCase() === 'true';
+  const enableInviteCodes =
+    process.env.FEATURE_ENABLE_INVITES === '1' ||
+    process.env.FEATURE_ENABLE_INVITES?.toLocaleLowerCase() === 'true';
 
-  const auth = createAuth({ enableEmailSignup });
+  const auth = createAuth({ enableEmailSignup, enableInviteCodes });
   const app = express();
-  const jsonParser = express.json();
 
   app.use(
     cors({
@@ -29,8 +30,6 @@ export function startApp({
       credentials: true,
     }),
   );
-
-  app.use('/api/auth/sign-up/*', jsonParser, handleInvitesMiddleware);
 
   app.all('/api/auth/*', toNodeHandler(auth));
 
