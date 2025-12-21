@@ -32,7 +32,6 @@ export const test = testBase.extend<ExtendedTestFixtures>({
       Object.entries(env).map(([name, value]) => vi.stubEnv(name, value));
       const app: Server = await startApp({ port: 3001 });
 
-      // Expose the worker object on the test's context.
       await use(app);
 
       app.close();

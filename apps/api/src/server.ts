@@ -4,19 +4,27 @@ import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
 
-import GlobalConfigDrivenAdapter from '@api/adapters/driven/globalConfig';
+import ForGlobalConfigDrivenAdapter from '@api/adapters/driven/forGlobalConfig';
 import { createAuth } from '@api/auth';
+import type { DrivenContext, DriverContext } from '@api/domain/context';
 import { appRouter } from '@api/router';
 import { createTRPCContext } from '@api/trpc';
+import { ForGlobalConfigDriverAdapter } from './adapters/driver/forGlobalConfig';
 
 export async function startApp({
   port = process.env.PORT || 3000,
 }: {
   port?: string | number;
 } = {}) {
-  const globalConfig = await GlobalConfigDrivenAdapter.findAll();
+  const drivenContext: DrivenContext = {
+    forGlobalConfig: ForGlobalConfigDrivenAdapter,
+  };
 
-  const auth = createAuth(globalConfig);
+  const driverContext: DriverContext = {
+    forGlobalConfig: ForGlobalConfigDriverAdapter(drivenContext),
+  };
+
+  const auth = createAuth(await drivenContext.forGlobalConfig.findAll());
   const app = express();
 
   app.use(
@@ -34,7 +42,7 @@ export async function startApp({
   app.use(
     '/api/trpc',
     createExpressMiddleware({
-      router: appRouter,
+      router: appRouter(driverContext),
       createContext: ({ req }) =>
         createTRPCContext({ auth, headers: req.headers }),
       onError:

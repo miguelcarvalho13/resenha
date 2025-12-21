@@ -1,6 +1,6 @@
-import type { GlobalConfigFindAllPort } from '@api/domain/ports/driven/globalConfig';
+import type { ForGlobalConfigDrivenPort } from '@api/domain/ports/driven/forGlobalConfig';
 
-const findAll: GlobalConfigFindAllPort = async () => {
+const findAll: ForGlobalConfigDrivenPort['findAll'] = async () => {
   const isEmailSignupEnabled =
     process.env.FEATURE_ENABLE_EMAIL_SIGNUP === '1' ||
     process.env.FEATURE_ENABLE_EMAIL_SIGNUP?.toLocaleLowerCase() === 'true';
@@ -17,4 +17,4 @@ const findAll: GlobalConfigFindAllPort = async () => {
 
 export default {
   findAll,
-};
+} satisfies ForGlobalConfigDrivenPort;
