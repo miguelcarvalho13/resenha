@@ -1,3 +1,4 @@
+import { getGlobalConfigHandler } from './routes/globalConfig';
 import {
   getFindAllNotesHandler,
   postCreateNoteHandler,
@@ -31,6 +32,9 @@ import {
 } from './routes/tags';
 
 export const handlers = [
+  // global config
+  getGlobalConfigHandler(),
+
   // session
   getSessionHandler(),
   postSignInWithEmail(),

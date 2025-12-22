@@ -1,8 +1,10 @@
+import { createGlobalConfigMock } from './factories/globalConfig';
 import { createNoteMock } from './factories/notes';
 import { createSearchMock } from './factories/searches';
 import { createSessionMock } from './factories/session';
 import { createNoteTagMock, createTagMock } from './factories/tags';
 import { createUserMock } from './factories/user';
+import { globalConfigMock } from './models/globalConfig';
 import { noteMock } from './models/notes';
 import { searchMock } from './models/searches';
 import { sessionMock } from './models/sessions';
@@ -14,6 +16,7 @@ export const server = {
   timing: 0,
 
   // mocks
+  createGlobalConfigMock,
   createNoteMock,
   createNoteTagMock,
   createSearchMock,
@@ -24,6 +27,7 @@ export const server = {
     console.log('resetting mock server...');
     this.id = crypto.randomUUID();
     this.timing = 0;
+    globalConfigMock.clear();
     noteMock.clear();
     noteTagMock.clear();
     searchMock.clear();

@@ -62,6 +62,7 @@
   "signInSignUp": {
     "alreadyRegistered": "Already registered?",
     "fields": {
+      "inviteCode": "Invite code",
       "email": "Email",
       "name": "Name",
       "password": "Password"

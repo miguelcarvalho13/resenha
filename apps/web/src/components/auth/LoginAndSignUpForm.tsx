@@ -1,11 +1,13 @@
 import { Button, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { authClient } from '@/utils/authClient';
+import { useTRPC } from '@/utils/trpc';
 
 interface LoginAndSignUpFormProps {
   mode: 'sign-up' | 'sign-in';
@@ -19,6 +21,11 @@ export const signUpSchema = z.object({
     .min(6, { error: 'Password must be at least 6 characters' }),
 });
 
+export const signUpWithInviteCodeSchema = z.object({
+  ...signUpSchema.shape,
+  inviteCode: z.nanoid({ error: 'Invite code is required' }),
+});
+
 export const signInSchema = z.object({
   email: z.email({ error: 'Invalid email address' }),
   password: z
@@ -28,10 +35,18 @@ export const signInSchema = z.object({
 
 export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
   const { t } = useTranslation();
+  const trpc = useTRPC();
   const navigate = useNavigate();
+  const { data: globalConfig } = useQuery(
+    trpc.globalConfig.findAll.queryOptions(),
+  );
 
   const isSignUp = mode === 'sign-up';
-  const schema = isSignUp ? signUpSchema : signInSchema;
+  const isInviteCodeEnabled = isSignUp && globalConfig?.isInviteCodesEnabled;
+  const signUpSchema_ = isInviteCodeEnabled
+    ? signUpWithInviteCodeSchema
+    : signInSchema;
+  const schema = isSignUp ? signUpSchema_ : signInSchema;
 
   const form = useForm({
     mode: 'uncontrolled',
@@ -45,7 +60,10 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
   });
 
   const handleSubmit = async (
-    values: z.infer<typeof signInSchema> | z.infer<typeof signUpSchema>,
+    values:
+      | z.infer<typeof signInSchema>
+      | z.infer<typeof signUpSchema>
+      | z.infer<typeof signUpWithInviteCodeSchema>,
   ) => {
     if (isSignUp) {
       await authClient.signUp.email(
@@ -53,6 +71,9 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
           email: values.email,
           password: values.password,
           name: 'name' in values ? values.name : '',
+          ...(isInviteCodeEnabled
+            ? { inviteCode: 'inviteCode' in values ? values.inviteCode : '' }
+            : {}),
         },
         {
           onSuccess: () => {
@@ -110,6 +131,15 @@ export const LoginAndSignUpForm = ({ mode }: LoginAndSignUpFormProps) => {
           type="password"
           {...form.getInputProps('password')}
         />
+
+        {isInviteCodeEnabled && (
+          <TextInput
+            label={t(($) => $.signInSignUp.fields.inviteCode)}
+            placeholder={t(($) => $.signInSignUp.fields.inviteCode)}
+            key={form.key('inviteCode')}
+            {...form.getInputProps('inviteCode')}
+          />
+        )}
 
         {isSignUp ? (
           <Button type="submit">{t(($) => $.signInSignUp.signUp)}</Button>
