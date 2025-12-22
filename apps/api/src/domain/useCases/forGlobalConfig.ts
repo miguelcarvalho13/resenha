@@ -1,6 +1,6 @@
 import type { ForGlobalConfigDriverPort } from '@api/domain/ports/driver/forGlobalConfig';
 
-export const ForGlobalConfigDriverAdapter: ForGlobalConfigDriverPort = ({
+export const forGlobalConfigUseCase: ForGlobalConfigDriverPort = ({
   forGlobalConfig,
 }) => ({
   findAll: () => forGlobalConfig.findAll(),

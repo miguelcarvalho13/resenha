@@ -9,7 +9,7 @@ import { createAuth } from '@api/auth';
 import type { DrivenContext, DriverContext } from '@api/domain/context';
 import { appRouter } from '@api/router';
 import { createTRPCContext } from '@api/trpc';
-import { ForGlobalConfigDriverAdapter } from './adapters/driver/forGlobalConfig';
+import { forGlobalConfigUseCase } from './domain/useCases/forGlobalConfig';
 
 export async function startApp({
   port = process.env.PORT || 3000,
@@ -21,7 +21,7 @@ export async function startApp({
   };
 
   const driverContext: DriverContext = {
-    forGlobalConfig: ForGlobalConfigDriverAdapter(drivenContext),
+    forGlobalConfig: forGlobalConfigUseCase(drivenContext),
   };
 
   const auth = createAuth(await drivenContext.forGlobalConfig.findAll());
