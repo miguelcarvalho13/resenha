@@ -1,5 +1,5 @@
 import type { DriverContext } from '@api/domain/context';
-import { globalConfigRouter } from '@api/router/globalConfig';
+import { globalConfigRouter } from '@api/adapters/driver/forGlobalConfigTrpc';
 import { helloRouter } from '@api/router/hello';
 import { notesRouter } from '@api/router/notes';
 import { searchesRouter } from '@api/router/searches';
