@@ -1,7 +1,7 @@
 import supertest from 'supertest';
 import { describe, expect } from 'vitest';
 
-import type { GlobalConfig } from '@api/domain/globalConfig';
+import type { GlobalConfig } from '@api/domain/entities/globalConfig';
 import { createAndSignInUser } from '@api/tests/sessionUtils';
 import { DEFAULT_TEST_ENV_VARS, test } from '@api/tests/testExtend';
 

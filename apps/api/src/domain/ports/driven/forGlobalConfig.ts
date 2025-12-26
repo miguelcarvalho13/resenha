@@ -1,4 +1,4 @@
-import type { GlobalConfig } from '@api/domain/globalConfig';
+import type { GlobalConfig } from '@api/domain/entities/globalConfig';
 
 export type ForGlobalConfigDrivenPort = {
   findAll: () => Promise<GlobalConfig>;

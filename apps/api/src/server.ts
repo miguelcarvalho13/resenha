@@ -5,11 +5,14 @@ import 'dotenv/config';
 import express from 'express';
 
 import ForGlobalConfigDrivenAdapter from '@api/adapters/driven/forGlobalConfig';
+import ForObtainingNotesDrivenAdapter from '@api/adapters/driven/forObtainingNotes';
+import ForUpdatingNotesDrivenAdapter from '@api/adapters/driven/forUpdatingNotes';
 import { createAuth } from '@api/auth';
 import type { DrivenContext, DriverContext } from '@api/domain/context';
+import { forGlobalConfigUseCase } from '@api/domain/useCases/forGlobalConfig';
+import { forNotesUseCase } from '@api/domain/useCases/forNotes';
 import { appRouter } from '@api/router';
 import { createTRPCContext } from '@api/trpc';
-import { forGlobalConfigUseCase } from './domain/useCases/forGlobalConfig';
 
 export async function startApp({
   port = process.env.PORT || 3000,
@@ -18,10 +21,13 @@ export async function startApp({
 } = {}) {
   const drivenContext: DrivenContext = {
     forGlobalConfig: ForGlobalConfigDrivenAdapter,
+    forObtainingNotes: ForObtainingNotesDrivenAdapter,
+    forUpdatingNotes: ForUpdatingNotesDrivenAdapter,
   };
 
   const driverContext: DriverContext = {
     forGlobalConfig: forGlobalConfigUseCase(drivenContext),
+    forNotes: forNotesUseCase(drivenContext),
   };
 
   const auth = createAuth(await drivenContext.forGlobalConfig.findAll());

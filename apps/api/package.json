@@ -25,6 +25,7 @@
     "dotenv": "^16.6.1",
     "drizzle-orm": "^0.44.5",
     "drizzle-seed": "^0.3.1",
+    "es-toolkit": "^1.42.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^9.0.2",
     "nanoid": "^5.1.6",

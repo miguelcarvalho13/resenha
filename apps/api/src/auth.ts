@@ -3,7 +3,7 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 
 import { db } from '@api/db';
 import * as schema from '@api/db/schema';
-import type { GlobalConfig } from '@api/domain/globalConfig';
+import type { GlobalConfig } from '@api/domain/entities/globalConfig';
 import { inviteCodePlugin } from '@api/utils/authPlugins/inviteCodePlugin';
 
 export const createAuth = ({
