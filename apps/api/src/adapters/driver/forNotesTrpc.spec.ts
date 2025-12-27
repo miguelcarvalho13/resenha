@@ -10,7 +10,7 @@ import {
   type HardDeleteNotesSchemaType,
   type SoftDeleteNotesSchemaType,
   type UndoSoftDeletedNotesSchemaType,
-} from '@api/schemas/notes';
+} from '@api/adapters/driver/forNotesTrpcInputs';
 import {
   createNoteThroughApi,
   softDeleteNotesThroughApi,
