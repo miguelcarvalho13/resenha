@@ -9,11 +9,11 @@ import {
 } from '@/mocks/factories/trpc';
 import { type RouterInput, type RouterOutput } from '@/utils/trpc';
 import { utils as apiUtils } from '@repo/api';
-import { noteMock } from '../models/notes';
-import { noteTagMock } from '../models/tags';
-import { server } from '../server';
 import { createSearchMock } from '../factories/searches';
+import { noteMock } from '../models/notes';
 import { searchMock } from '../models/searches';
+import { noteTagMock, type NoteTagMockSchemaType } from '../models/tags';
+import { server } from '../server';
 
 export const postCreateSearchHandler = ({ wait = 0 }: { wait?: number } = {}) =>
   http.post<PathParams, TrpcInput<RouterInput['searches']['createSearch']>>(
@@ -237,7 +237,7 @@ export const getSearchNotesHandler = ({ wait = 0 }: { wait?: number } = {}) =>
                 q.where({ noteId: note.id }),
                 q.where({ tagId: condition.tagId }),
                 q.where({
-                  value: (value) => {
+                  value: (value: NoteTagMockSchemaType['value']) => {
                     switch (condition.operator.type) {
                       case '=':
                         return 'value' in condition.operator

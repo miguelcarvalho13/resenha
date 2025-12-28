@@ -26,26 +26,35 @@ export const tagMockSchema = z.object({
   },
 }) satisfies z.ZodType<Tag>;
 
-export const noteTagMockSchema = z.object({
-  createdAt: z.date(),
-  name: z.string(),
-  get note() {
-    return noteMockSchema.optional();
-  },
-  noteId: z.uuid(),
-  get tag() {
-    return tagMockSchema.optional();
-  },
-  tagId: z.uuid(),
-  type: z.union([
-    z.literal('boolean'),
-    z.literal('date'),
-    z.literal('number'),
-    z.literal('string'),
+export const noteTagMockSchema = z.intersection(
+  z.object({
+    createdAt: z.date(),
+    createdBy: z.uuid(),
+    get createdByUser() {
+      return userMockSchema.optional();
+    },
+    name: z.string(),
+    get note() {
+      return noteMockSchema.optional();
+    },
+    noteId: z.uuid(),
+    get tag() {
+      return tagMockSchema.optional();
+    },
+    tagId: z.uuid(),
+    updatedAt: z.date(),
+    updatedBy: z.uuid(),
+    get updatedByUser() {
+      return userMockSchema.optional();
+    },
+  }),
+  z.discriminatedUnion('type', [
+    z.object({ type: z.literal('string'), value: z.string() }),
+    z.object({ type: z.literal('number'), value: z.number() }),
+    z.object({ type: z.literal('date'), value: z.iso.date() }),
+    z.object({ type: z.literal('boolean'), value: z.boolean() }),
   ]),
-  updatedAt: z.date(),
-  value: z.union([z.string(), z.number(), z.iso.date(), z.boolean()]),
-}) satisfies z.ZodType<NoteTag>;
+) satisfies z.ZodType<NoteTag>;
 
 export const tagMock = new Collection({ schema: tagMockSchema });
 export const noteTagMock = new Collection({ schema: noteTagMockSchema });
@@ -60,4 +69,6 @@ tagMock.defineRelations(({ one }) => ({
 noteTagMock.defineRelations(({ one }) => ({
   note: one(noteMock),
   tag: one(tagMock),
+  createdByUser: one(userMock),
+  updatedByUser: one(userMock),
 }));

@@ -5,6 +5,7 @@ import { server } from '@/mocks/server';
 import { createNotesPO } from '@/tests/pages/notes';
 import { renderWithRouter } from '@/tests/renderUtils';
 import { test } from '@/tests/testExtend';
+import { type NoteTagMockSchemaType } from '@/mocks/models/tags';
 
 test('should correctly edit a note', async () => {
   // create mock server data
@@ -163,28 +164,28 @@ test(`should only list new tags if there's no tag with the same name already in 
   await server.createNoteTagMock({
     note,
     tag: tag1,
-    type: tag1.type,
+    type: tag1.type as 'string',
     name: tag1.name,
     value: '123',
   });
   await server.createNoteTagMock({
     note,
     tag: tag2,
-    type: tag2.type,
+    type: tag2.type as 'number',
     name: tag2.name,
     value: 10,
   });
   await server.createNoteTagMock({
     note,
     tag: tag3,
-    type: tag3.type,
+    type: tag3.type as 'date',
     name: tag3.name,
     value: '2025-11-04',
   });
   await server.createNoteTagMock({
     note,
     tag: tag4,
-    type: tag4.type,
+    type: tag4.type as 'boolean',
     name: tag4.name,
     value: false,
   });
@@ -616,7 +617,12 @@ test.each([
     // create mock server data
     await server.createSessionMock();
     const note = await server.createNoteMock({ content: 'A' });
-    await server.createNoteTagMock({ name, value, type, note });
+    await server.createNoteTagMock({
+      name,
+      value,
+      type,
+      note,
+    } as Partial<NoteTagMockSchemaType>);
 
     await renderWithRouter();
 

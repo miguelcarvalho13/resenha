@@ -94,7 +94,7 @@ const setupCommonData = async () => {
     name: numberTag.name,
     note: noteA,
     tag: numberTag,
-    type: numberTag.type,
+    type: numberTag.type as 'number',
     value: 10,
   });
 
@@ -102,7 +102,7 @@ const setupCommonData = async () => {
     name: numberTag.name,
     note: noteB,
     tag: numberTag,
-    type: numberTag.type,
+    type: numberTag.type as 'number',
     value: 11,
   });
 
@@ -116,7 +116,7 @@ const setupCommonData = async () => {
     name: booleanTag.name,
     note: noteA,
     tag: booleanTag,
-    type: booleanTag.type,
+    type: booleanTag.type as 'boolean',
     value: false,
   });
 
@@ -124,7 +124,7 @@ const setupCommonData = async () => {
     name: booleanTag.name,
     note: noteB,
     tag: booleanTag,
-    type: booleanTag.type,
+    type: booleanTag.type as 'boolean',
     value: true,
   });
 
@@ -138,7 +138,7 @@ const setupCommonData = async () => {
     name: dateTag.name,
     note: noteA,
     tag: dateTag,
-    type: dateTag.type,
+    type: dateTag.type as 'string',
     value: '2025-10-10',
   });
 
@@ -146,7 +146,7 @@ const setupCommonData = async () => {
     name: dateTag.name,
     note: noteB,
     tag: dateTag,
-    type: dateTag.type,
+    type: dateTag.type as 'string',
     value: '2025-10-09',
   });
 

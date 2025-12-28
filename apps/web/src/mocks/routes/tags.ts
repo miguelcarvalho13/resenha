@@ -6,9 +6,13 @@ import {
   extractTrpcInput,
   type TrpcInput,
 } from '@/mocks/factories/trpc';
+import {
+  noteTagMock,
+  type NoteTagMockSchemaType,
+  tagMock,
+} from '@/mocks/models/tags';
 import { type RouterInput, type RouterOutput } from '@/utils/trpc';
 import { noteMock } from '../models/notes';
-import { noteTagMock, tagMock } from '../models/tags';
 import { server } from '../server';
 
 export const getFindAllTagsHandler = ({
@@ -60,7 +64,7 @@ export const postCreateNoteTagHandler = ({
         tag,
         type: input.type,
         value: 'value' in input ? input.value : input.name,
-      });
+      } as Partial<NoteTagMockSchemaType>);
 
       return createTrpcJson({
         success: true,
@@ -68,9 +72,6 @@ export const postCreateNoteTagHandler = ({
           ...noteTag,
           createdBy: tag.createdBy,
           updatedBy: tag.updatedBy,
-          valueBoolean: input.type === 'boolean' ? input.value : null,
-          valueDate: input.type === 'date' ? input.value : null,
-          valueNumber: input.type === 'number' ? input.value : null,
         },
         tag,
       } satisfies RouterOutput['tags']['createNoteTag']);
@@ -98,18 +99,6 @@ export const postDeleteNoteTagHandler = ({
           ...noteTag,
           createdBy: tag.createdBy,
           updatedBy: tag.updatedBy,
-          valueBoolean:
-            tag.type === 'boolean' && typeof noteTag.value === 'boolean'
-              ? noteTag.value
-              : null,
-          valueDate:
-            tag.type === 'date' && typeof noteTag.value === 'string'
-              ? noteTag.value
-              : null,
-          valueNumber:
-            tag.type === 'number' && typeof noteTag.value === 'number'
-              ? noteTag.value
-              : null,
         },
       } satisfies RouterOutput['tags']['deleteNoteTag']);
     },
@@ -148,18 +137,6 @@ export const postEditNoteTagHandler = ({ wait = 0 }: { wait?: number } = {}) =>
           ...updatedNoteTag,
           createdBy: tag.createdBy,
           updatedBy: tag.updatedBy,
-          valueBoolean:
-            tag.type === 'boolean' && typeof updatedNoteTag.value === 'boolean'
-              ? updatedNoteTag.value
-              : null,
-          valueDate:
-            tag.type === 'date' && typeof updatedNoteTag.value === 'string'
-              ? updatedNoteTag.value
-              : null,
-          valueNumber:
-            tag.type === 'number' && typeof updatedNoteTag.value === 'number'
-              ? updatedNoteTag.value
-              : null,
         },
         tag,
       } satisfies RouterOutput['tags']['editNoteTag']);
