@@ -6,8 +6,16 @@ export const onError = (error: unknown) => {
   if (error instanceof AppError) {
     switch (error.errorCode) {
       case ERROR_CODES.NOTE_NOT_FOUND:
+      case ERROR_CODES.NOTE_TAG_NOT_FOUND:
+      case ERROR_CODES.TAG_NOT_FOUND:
         throw new TRPCError({
           code: 'NOT_FOUND',
+          message: error.errorCode,
+          cause: error,
+        });
+      case ERROR_CODES.TAG_WRONG_VALUE_PROVIDED:
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
           message: error.errorCode,
           cause: error,
         });

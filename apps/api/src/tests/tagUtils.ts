@@ -7,7 +7,7 @@ import { noteTags, tags } from '@api/db/schema';
 import {
   type CreateNoteTagSchemaType,
   type CreateTagSchemaType,
-} from '@api/schemas/tags';
+} from '@api/adapters/driver/forTagsAndNoteTagsTrpcInput';
 import { createNoteThroughApi } from './noteUtils';
 
 export const createTagThroughApi = ({

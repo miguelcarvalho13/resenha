@@ -1,5 +1,5 @@
-import { and, eq, inArray } from 'drizzle-orm';
-import { invariant } from 'es-toolkit';
+import { and, asc, eq, inArray } from 'drizzle-orm';
+import { invariant, isString } from 'es-toolkit';
 
 import { db, type TransactionType } from '@api/db';
 import { noteTags, tags } from '@api/db/schema';
@@ -81,8 +81,29 @@ const findOneTag =
   (
     tx: TransactionType | typeof db,
   ): ForStoringTagsAndNoteTagsDrivenPort['findOneTag'] =>
-  async (id) => {
-    const [tag] = await tx.select().from(tags).where(eq(tags.id, id)).limit(1);
+  async (where) => {
+    const whereConditions = Object.keys(where).map((k) => {
+      const key = k as keyof typeof where;
+      const value = where[key];
+
+      switch (key) {
+        case 'id':
+        case 'name':
+        case 'createdBy':
+        case 'type':
+          invariant(isString(value), 'value must be a string');
+          return eq(tags[key], value);
+
+        default:
+          throw new Error('Unknown key');
+      }
+    });
+
+    const [tag] = await tx
+      .select()
+      .from(tags)
+      .where(and(...whereConditions))
+      .limit(1);
 
     return tag;
   };
@@ -105,7 +126,7 @@ const createNoteTag =
       })
       .returning();
 
-    const tag = await findOneTag(tx)(tagId);
+    const tag = await findOneTag(tx)({ id: tagId });
 
     return toNoteTag(tag!, newNoteTag);
   };
@@ -120,7 +141,7 @@ const deleteNoteTag =
       .where(and(eq(noteTags.tagId, tagId), eq(noteTags.noteId, noteId)))
       .returning();
 
-    const tag = await findOneTag(tx)(tagId);
+    const tag = await findOneTag(tx)({ id: tagId });
 
     return toNoteTag(tag!, deletedNoteTag);
   };
@@ -133,16 +154,15 @@ const editNoteTag =
     const [updatedNoteTag] = await tx
       .update(noteTags)
       .set({
-        noteId,
-        tagId,
         valueBoolean: type === 'boolean' ? value : null,
         valueDate: type === 'date' ? value : null,
         valueNumber: type === 'number' ? value : null,
         updatedBy,
       })
+      .where(and(eq(noteTags.noteId, noteId), eq(noteTags.tagId, tagId)))
       .returning();
 
-    const tag = await findOneTag(tx)(tagId);
+    const tag = await findOneTag(tx)({ id: tagId });
 
     return toNoteTag(tag!, updatedNoteTag);
   };
@@ -157,6 +177,9 @@ const findAllNoteTags =
       const value = where[key];
 
       switch (key) {
+        case 'createdBy':
+          invariant(isString(value), 'value must be a string');
+          return eq(noteTags.createdBy, value);
         case 'noteIds':
           invariant(Array.isArray(value), 'value must be an array');
           return inArray(noteTags.noteId, value);
@@ -173,7 +196,8 @@ const findAllNoteTags =
       .select()
       .from(noteTags)
       .where(and(...whereConditions))
-      .innerJoin(tags, eq(noteTags.tagId, tags.id));
+      .innerJoin(tags, eq(noteTags.tagId, tags.id))
+      .orderBy(asc(noteTags.createdAt));
 
     const foundNoteTags = queryResult.map(({ tags: tag, note_tags: noteTag }) =>
       toNoteTag(tag, noteTag),

@@ -6,7 +6,9 @@ export type ForStoringTagsAndNoteTagsDrivenPort = {
   // Tags
   findAllTags: (args: { where: Pick<Tag, 'createdBy'> }) => Promise<Tag[]>;
 
-  findOneTag: (id: Tag['id']) => Promise<Tag | null>;
+  findOneTag: (
+    args: Partial<Pick<Tag, 'id' | 'createdBy' | 'name' | 'type'>>,
+  ) => Promise<Tag | null>;
 
   createTag: (
     data: Pick<Tag, 'name' | 'type' | 'createdBy' | 'updatedBy'>,
@@ -16,7 +18,11 @@ export type ForStoringTagsAndNoteTagsDrivenPort = {
 
   // NoteTags
   findAllNoteTags: (args: {
-    where: { noteIds?: NoteTag['noteId'][]; tagIds?: NoteTag['tagId'][] };
+    where: {
+      createdBy: NoteTag['createdBy'];
+      noteIds?: NoteTag['noteId'][];
+      tagIds?: NoteTag['tagId'][];
+    };
   }) => Promise<NoteTag[]>;
 
   findOneNoteTag: (

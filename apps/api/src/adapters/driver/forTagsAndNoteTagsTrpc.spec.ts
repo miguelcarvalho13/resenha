@@ -11,7 +11,7 @@ import {
   type EditNoteTagSchemaType,
   type EditTagSchemaType,
   type FindAllNoteTagsSchemaType,
-} from '@api/schemas/tags';
+} from '@api/adapters/driver/forTagsAndNoteTagsTrpcInput';
 import { createNoteThroughApi } from '@api/tests/noteUtils';
 import { createAndSignInUser, createUser } from '@api/tests/sessionUtils';
 import {
@@ -969,11 +969,13 @@ describe('tags.findAllNoteTags', () => {
     expect(res.body.result.data.json.noteTags).to.deep.equal([
       {
         createdAt: allNotesTags[0].createdAt.toISOString(),
+        createdBy: allNotesTags[0].createdBy,
         name: allTags[0].name,
         noteId: allNotesTags[0].noteId,
         tagId: allNotesTags[0].tagId,
         type: allTags[0].type,
         updatedAt: allTags[0].updatedAt.toISOString(),
+        updatedBy: allTags[0].updatedBy,
         value: allTags[0].name,
       },
     ]);
@@ -1013,11 +1015,13 @@ describe('tags.findAllNoteTags', () => {
     expect(res.body.result.data.json.noteTags).to.deep.equal([
       {
         createdAt: allNotesTags[0].createdAt.toISOString(),
+        createdBy: allNotesTags[0].createdBy,
         name: allTags[0].name,
         noteId: allNotesTags[0].noteId,
         tagId: allNotesTags[0].tagId,
         type: allTags[0].type,
         updatedAt: allNotesTags[0].updatedAt.toISOString(),
+        updatedBy: allNotesTags[0].updatedBy,
         value: allNotesTags[0].valueNumber,
       },
     ]);
@@ -1057,11 +1061,13 @@ describe('tags.findAllNoteTags', () => {
     expect(res.body.result.data.json.noteTags).to.deep.equal([
       {
         createdAt: allNotesTags[0].createdAt.toISOString(),
+        createdBy: allNotesTags[0].createdBy,
         name: allTags[0].name,
         noteId: allNotesTags[0].noteId,
         tagId: allNotesTags[0].tagId,
         type: allTags[0].type,
         updatedAt: allNotesTags[0].updatedAt.toISOString(),
+        updatedBy: allNotesTags[0].updatedBy,
         value: allNotesTags[0].valueDate,
       },
     ]);
@@ -1101,11 +1107,13 @@ describe('tags.findAllNoteTags', () => {
     expect(res.body.result.data.json.noteTags).to.deep.equal([
       {
         createdAt: allNotesTags[0].createdAt.toISOString(),
+        createdBy: allNotesTags[0].createdBy,
         name: allTags[0].name,
         noteId: allNotesTags[0].noteId,
         tagId: allNotesTags[0].tagId,
         type: allTags[0].type,
         updatedAt: allNotesTags[0].updatedAt.toISOString(),
+        updatedBy: allNotesTags[0].createdBy,
         value: allNotesTags[0].valueBoolean,
       },
     ]);

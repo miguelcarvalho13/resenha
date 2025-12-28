@@ -4,6 +4,7 @@ import type { ForStoringTagsAndNoteTagsDrivenPort } from './ports/driven/forStor
 import type { ForUpdatingNotesDrivenPort } from './ports/driven/forUpdatingNotes';
 import type { ForGlobalConfigDriverPort } from './ports/driver/forGlobalConfig';
 import type { ForNotesDriverPort } from './ports/driver/forNotes';
+import type { ForTagsAndNoteTagsDriverPort } from './ports/driver/forTagsAndNoteTags';
 
 export type DrivenContext = {
   forGlobalConfig: ForGlobalConfigDrivenPort;
@@ -17,4 +18,5 @@ export type DrivenContext = {
 export type DriverContext = {
   forGlobalConfig: ReturnType<ForGlobalConfigDriverPort>;
   forNotes: ReturnType<ForNotesDriverPort>;
+  forTagsAndNoteTags: ReturnType<ForTagsAndNoteTagsDriverPort>;
 };
