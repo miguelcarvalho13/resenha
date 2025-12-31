@@ -4,14 +4,16 @@ import { describe, expect } from 'vitest';
 
 import { db } from '@api/db';
 import * as schema from '@api/db/schema';
+import type {
+  BooleanOperatorsType,
+  DateOperatorsType,
+  NumberOperatorsType,
+} from '@api/domain/entities/searches';
 import {
-  type BooleanOperatorsType,
   type CreateSearchSchemaType,
-  type DateOperatorsType,
   type EditSearchSchemaType,
   type FindSearchByIdSchemaType,
   type HardDeleteSearchesSchemaType,
-  type NumberOperatorsType,
   type SearchNotesSchemaType,
   type SoftDeleteSearchesSchemaType,
   type UndoSoftDeletedSearchesSchemaType,

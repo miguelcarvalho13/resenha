@@ -4,9 +4,9 @@ import { alias } from 'drizzle-orm/pg-core';
 
 import { db } from '@api/db';
 import { notes, noteTags, searches } from '@api/db/schema';
+import { type DateOperatorsType } from '@api/domain/entities/searches';
 import {
   createSearchSchema,
-  type DateOperatorsType,
   editSearchSchema,
   findSearchByIdSchema,
   hardDeleteSearchesSchema,
