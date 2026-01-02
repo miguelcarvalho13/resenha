@@ -2,18 +2,20 @@ import type { Search } from '@api/domain/entities/searches';
 
 export type ForStoringSearchesDrivenPort = {
   findAll: (args: {
-    where: Partial<Pick<Search, 'deletedAt' | 'createdBy'>>;
+    where: Partial<Pick<Search, 'deletedAt' | 'createdBy'>> & {
+      ids?: Search['id'][];
+    };
   }) => Promise<Search[]>;
 
   findOne: (args: Pick<Search, 'id'>) => Promise<Search | null>;
 
   create: (
-    data: Omit<Search, 'content' | 'createdBy' | 'updatedBy'>,
+    data: Pick<Search, 'content' | 'createdBy' | 'updatedBy'>,
   ) => Promise<Search>;
 
   edit: (
     data: Partial<Pick<Search, 'content' | 'favorited' | 'name'>> &
-      Pick<Search, 'updatedBy'>,
+      Pick<Search, 'id' | 'updatedBy'>,
   ) => Promise<Search>;
 
   hardDelete: (ids: Search['id'][]) => Promise<Search[]>;

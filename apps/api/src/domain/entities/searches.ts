@@ -108,7 +108,7 @@ export const searchSchema = () =>
     deletedBy: z.uuid().nullable(),
     favorited: z.boolean(),
     id: z.uuid(),
-    name: z.string(),
+    name: z.string().nullable(),
     updatedAt: z.date(),
     updatedBy: z.uuid(),
   });

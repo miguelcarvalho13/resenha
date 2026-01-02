@@ -6,6 +6,7 @@ import express from 'express';
 
 import ForGlobalConfigDrivenAdapter from '@api/adapters/driven/forGlobalConfig';
 import ForObtainingNotesDrivenAdapter from '@api/adapters/driven/forObtainingNotes';
+import ForStoringSearchesDrivenAdapter from '@api/adapters/driven/forStoringSearches';
 import ForStoringTagsAndNoteTagsDrivenAdapter from '@api/adapters/driven/forStoringTagsAndNoteTags';
 import ForUpdatingNotesDrivenAdapter from '@api/adapters/driven/forUpdatingNotes';
 import { createAuth } from '@api/auth';
@@ -26,6 +27,7 @@ export async function startApp({
     forObtainingNotes: ForObtainingNotesDrivenAdapter,
     forUpdatingNotes: ForUpdatingNotesDrivenAdapter,
     forStoringTagsAndNoteTags: ForStoringTagsAndNoteTagsDrivenAdapter,
+    forStoringSearches: ForStoringSearchesDrivenAdapter,
   };
 
   const driverContext: DriverContext = {
