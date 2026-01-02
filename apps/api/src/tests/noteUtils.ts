@@ -7,7 +7,7 @@ import { notes } from '@api/db/schema';
 import {
   type SoftDeleteNotesSchemaType,
   type CreateNoteSchemaType,
-} from '@api/adapters/driver/forNotesTrpcInputs';
+} from '@api/adapters/driver/trpc/forNotesTrpcInputs';
 
 export const createNoteThroughApi = async ({
   app,

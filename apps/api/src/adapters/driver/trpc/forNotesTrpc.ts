@@ -4,7 +4,7 @@ import {
   hardDeleteNotesSchema,
   softDeleteNotesSchema,
   undoSoftDeletedNotesSchema,
-} from '@api/adapters/driver/forNotesTrpcInputs';
+} from '@api/adapters/driver/trpc/forNotesTrpcInputs';
 import type { DriverContext } from '@api/domain/context';
 import { protectedProcedure, router } from '@api/trpc';
 import { onError } from './trpcError';

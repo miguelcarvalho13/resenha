@@ -45,7 +45,7 @@ export const UpdateSearchAlert = () => {
   if (
     isLoading ||
     !query?.length ||
-    isEqual(query, searchData?.search.content.query)
+    isEqual(query, searchData?.search?.content.query)
   ) {
     return null;
   }

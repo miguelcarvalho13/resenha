@@ -5,7 +5,7 @@ import {
   editNoteTagSchema,
   editTagSchema,
   findAllNoteTagsSchema,
-} from '@api/adapters/driver/forTagsAndNoteTagsTrpcInput';
+} from '@api/adapters/driver/trpc/forTagsAndNoteTagsTrpcInput';
 import type { DriverContext } from '@api/domain/context';
 import { TAG_TYPES } from '@api/domain/entities/tagTypes';
 import { protectedProcedure, router } from '@api/trpc';

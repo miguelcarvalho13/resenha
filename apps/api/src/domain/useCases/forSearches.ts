@@ -37,22 +37,17 @@ export const forSearchesUseCase: ForSearchesDriverPort = ({
   findOne: async (id, session) => {
     const search = await forStoringSearches.findOne({ id });
 
-    if (!search) {
+    if (!search || search?.createdBy !== session.user.id) {
       throw new AppError('Search not found', ERROR_CODES.SEARCH_NOT_FOUND);
-    }
-
-    if (search.createdBy !== session.user.id) {
-      throw new AppError(
-        'Not enough privileges',
-        ERROR_CODES.NOT_ENOUGH_PRIVILEGES,
-      );
     }
 
     return search;
   },
 
   findAll: async (session) =>
-    forStoringSearches.findAll({ where: { createdBy: session.user.id } }),
+    forStoringSearches.findAll({
+      where: { createdBy: session.user.id, deletedAt: null },
+    }),
 
   hardDelete: async (ids, session) => {
     const requestedSearches = await forStoringSearches.findAll({

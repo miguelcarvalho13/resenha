@@ -11,7 +11,7 @@ import { z, ZodError } from 'zod';
 
 import type { AuthType } from '@api/auth';
 import { db } from '@api/db';
-import type { AppRouter } from '@api/router';
+import type { AppRouter } from '@api/adapters/driver/trpc';
 
 export const createTRPCContext = async (opts: {
   headers: IncomingHttpHeaders;

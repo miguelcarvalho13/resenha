@@ -7,7 +7,7 @@ import { searches } from '@api/db/schema';
 import {
   type CreateSearchSchemaType,
   type SoftDeleteSearchesSchemaType,
-} from '@api/schemas/searches';
+} from '@api/adapters/driver/trpc/forSearchesTrpcInput';
 
 export const createSearchThroughApi = async ({
   app,

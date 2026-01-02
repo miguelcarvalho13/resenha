@@ -9,12 +9,13 @@ import ForObtainingNotesDrivenAdapter from '@api/adapters/driven/forObtainingNot
 import ForStoringSearchesDrivenAdapter from '@api/adapters/driven/forStoringSearches';
 import ForStoringTagsAndNoteTagsDrivenAdapter from '@api/adapters/driven/forStoringTagsAndNoteTags';
 import ForUpdatingNotesDrivenAdapter from '@api/adapters/driven/forUpdatingNotes';
+import { appRouter } from '@api/adapters/driver/trpc';
 import { createAuth } from '@api/auth';
 import type { DrivenContext, DriverContext } from '@api/domain/context';
 import { forGlobalConfigUseCase } from '@api/domain/useCases/forGlobalConfig';
 import { forNotesUseCase } from '@api/domain/useCases/forNotes';
+import { forSearchesUseCase } from '@api/domain/useCases/forSearches';
 import { forTagsAndNoteTagsUseCase } from '@api/domain/useCases/forTagsAndNoteTags';
-import { appRouter } from '@api/router';
 import { createTRPCContext } from '@api/trpc';
 
 export async function startApp({
@@ -34,6 +35,7 @@ export async function startApp({
     forGlobalConfig: forGlobalConfigUseCase(drivenContext),
     forNotes: forNotesUseCase(drivenContext),
     forTagsAndNoteTags: forTagsAndNoteTagsUseCase(drivenContext),
+    forSearches: forSearchesUseCase(drivenContext),
   };
 
   const auth = createAuth(await drivenContext.forGlobalConfig.findAll());

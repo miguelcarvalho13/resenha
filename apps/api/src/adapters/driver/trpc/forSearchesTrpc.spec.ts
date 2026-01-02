@@ -17,7 +17,7 @@ import {
   type SearchNotesSchemaType,
   type SoftDeleteSearchesSchemaType,
   type UndoSoftDeletedSearchesSchemaType,
-} from '@api/schemas/searches';
+} from '@api/adapters/driver/trpc/forSearchesTrpcInput';
 import {
   createNoteThroughApi,
   softDeleteNotesThroughApi,

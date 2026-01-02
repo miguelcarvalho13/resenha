@@ -11,7 +11,7 @@ import {
   type EditNoteTagSchemaType,
   type EditTagSchemaType,
   type FindAllNoteTagsSchemaType,
-} from '@api/adapters/driver/forTagsAndNoteTagsTrpcInput';
+} from '@api/adapters/driver/trpc/forTagsAndNoteTagsTrpcInput';
 import { createNoteThroughApi } from '@api/tests/noteUtils';
 import { createAndSignInUser, createUser } from '@api/tests/sessionUtils';
 import {
