@@ -32,6 +32,11 @@ export const forNotesUseCase: ForNotesDriverPort = ({
   findAll: async (session) =>
     forObtainingNotes.findAll({ where: { createdBy: session.user.id } }),
 
+  findAllBySearch: async (search, session) =>
+    forObtainingNotes.findAllBySearch({
+      where: { search, createdBy: session.user.id },
+    }),
+
   hardDeleteNotes: async (ids, session) => {
     const requestedNotes = await forObtainingNotes.findAll({ where: { ids } });
 

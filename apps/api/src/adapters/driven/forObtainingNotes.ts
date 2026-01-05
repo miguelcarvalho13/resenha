@@ -1,13 +1,17 @@
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
+import dayjs from 'dayjs';
+import { and, desc, eq, gt, gte, inArray, isNull, lt, lte } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import {
   invariant,
   isDate,
   isNull as isNullPredicate,
   isString,
+  partition,
 } from 'es-toolkit';
 
 import { db } from '@api/db';
-import { notes } from '@api/db/schema';
+import { notes, noteTags } from '@api/db/schema';
+import type { DateOperatorsType } from '@api/domain/entities/searches';
 import type { ForObtainingNotesDrivenPort } from '@api/domain/ports/driven/forObtainingNotes';
 
 const findAll: ForObtainingNotesDrivenPort['findAll'] = async ({ where }) => {
@@ -58,6 +62,109 @@ const findAll: ForObtainingNotesDrivenPort['findAll'] = async ({ where }) => {
     .orderBy(desc(notes.updatedAt));
 };
 
+const whereFactory = (type: DateOperatorsType['type']) => {
+  switch (type) {
+    case '=':
+      return eq;
+    case '<':
+      return lt;
+    case '<=':
+      return lte;
+    case '>':
+      return gt;
+    case '>=':
+      return gte;
+  }
+};
+
+const findAllBySearch: ForObtainingNotesDrivenPort['findAllBySearch'] = async ({
+  where: { search, createdBy },
+}) => {
+  const query = db
+    .select({
+      note: notes,
+    })
+    .from(notes)
+    .orderBy(desc(notes.updatedAt))
+    .$dynamic();
+
+  const [fieldFilters, tagFilters] = partition(
+    search.query,
+    (q) => 'field' in q,
+  );
+
+  const queryFilteredByTag = tagFilters.reduce((builder, q, index) => {
+    const where = whereFactory(q.operator.type);
+
+    const noteTagAlias = alias(noteTags, `noteTags${index}`);
+
+    switch (q.type) {
+      case 'string':
+        return builder.innerJoin(
+          noteTagAlias,
+          and(
+            eq(notes.id, noteTagAlias.noteId),
+            eq(noteTagAlias.tagId, q.tagId),
+          ),
+        );
+      case 'number':
+        return builder.innerJoin(
+          noteTagAlias,
+          and(
+            eq(notes.id, noteTagAlias.noteId),
+            eq(noteTagAlias.tagId, q.tagId),
+            where(noteTagAlias.valueNumber, q.operator.value),
+          ),
+        );
+      case 'boolean':
+        return builder.innerJoin(
+          noteTagAlias,
+          and(
+            eq(notes.id, noteTagAlias.noteId),
+            eq(noteTagAlias.tagId, q.tagId),
+            where(noteTagAlias.valueBoolean, q.operator.value),
+          ),
+        );
+      case 'date':
+        return builder.innerJoin(
+          noteTagAlias,
+          and(
+            eq(notes.id, noteTagAlias.noteId),
+            eq(noteTagAlias.tagId, q.tagId),
+            where(noteTagAlias.valueDate, q.operator.value),
+          ),
+        );
+      default:
+        throw new Error('Wrong type provided');
+    }
+  }, query);
+
+  const hasDeletedFilter = fieldFilters.some((f) => f.field === 'deleted');
+
+  const allNotes = await queryFilteredByTag.where(
+    and(
+      ...[
+        eq(notes.createdBy, createdBy),
+        ...(hasDeletedFilter ? [] : [isNull(notes.deletedAt)]),
+        ...fieldFilters.map((filter) => {
+          const where = whereFactory(filter.operator.type);
+          const value = dayjs(filter.operator.value).toDate();
+
+          switch (filter.field) {
+            case 'deleted':
+              return where(notes.deletedAt, value);
+
+            default:
+              throw new Error('Wrong type provided');
+          }
+        }),
+      ],
+    ),
+  );
+
+  return allNotes.map(({ note }) => note);
+};
+
 const findOne: ForObtainingNotesDrivenPort['findOne'] = async (id) => {
   const [note] = await db.select().from(notes).where(eq(notes.id, id)).limit(1);
 
@@ -66,5 +173,6 @@ const findOne: ForObtainingNotesDrivenPort['findOne'] = async (id) => {
 
 export default {
   findAll,
+  findAllBySearch,
   findOne,
 } satisfies ForObtainingNotesDrivenPort;

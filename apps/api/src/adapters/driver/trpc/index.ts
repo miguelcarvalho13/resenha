@@ -17,7 +17,7 @@ export const appRouter = ({
   router({
     globalConfig: globalConfigRouter({ forGlobalConfig }),
     notes: notesRouter({ forNotes }),
-    searches: searchesRouter({ forSearches }),
+    searches: searchesRouter({ forNotes, forSearches }),
     tags: tagsRouter({ forTagsAndNoteTags }),
   });
 
