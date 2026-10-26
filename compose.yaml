@@ -1,5 +1,4 @@
 services:
-
   db:
     image: postgres:17.6
     restart: always
@@ -17,6 +16,19 @@ services:
     restart: always
     ports:
       - 127.0.0.1:8585:8080
+
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+      target: dev
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/resenha"
+      FEATURE_ENABLE_EMAIL_SIGNUP: 1
+    restart: always
+    ports:
+      - 127.0.0.1:3000:3000
 
 volumes:
   db:
