@@ -18,13 +18,13 @@ services:
       - 127.0.0.1:8585:8080
 
   api:
-    container_name: api
     build:
       context: .
       dockerfile: ./apps/api/Dockerfile
       target: dev
-    env_file: ./apps/api/.env
     restart: always
+    volumes:
+      - ./apps/api/:/app/apps/api/
     ports:
       - 127.0.0.1:3000:3000
 
