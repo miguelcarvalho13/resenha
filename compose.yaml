@@ -23,9 +23,7 @@ services:
       context: .
       dockerfile: ./apps/api/Dockerfile
       target: dev
-    environment:
-      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/resenha"
-      FEATURE_ENABLE_EMAIL_SIGNUP: 1
+    env_file: ./apps/api/.env
     restart: always
     ports:
       - 127.0.0.1:3000:3000
