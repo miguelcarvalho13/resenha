@@ -44,9 +44,11 @@ cp ./apps/api/.env.example ./apps/api/.env
 ### Local development with docker (Recommended)
 
 Run:
+
 ```
 docker compose up
 ```
+
 This should spin up the db, api, and web containers with the volumes bound to the host machine project folder, so the live server should work as usual.
 
 ### Local development in the host machine
@@ -81,6 +83,6 @@ To run all apps and packages in development mode, run the following command:
 pnpm dev
 ```
 
-----
+---
 
 In either of the above modes, the app should be accessible at http://localhost:5200/.
