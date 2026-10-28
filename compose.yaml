@@ -28,5 +28,16 @@ services:
     ports:
       - 127.0.0.1:3000:3000
 
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+      target: dev
+    restart: always
+    volumes:
+      - ./apps/web/:/app/apps/web/
+    ports:
+      - 127.0.0.1:5200:5200
+
 volumes:
   db:
