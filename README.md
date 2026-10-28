@@ -29,13 +29,7 @@ This Turborepo has some additional tools already setup for you:
 
 ## Setup
 
-To get started, clone the repository and install the dependencies:
-
-```
-pnpm install
-```
-
-Then, copy the `.env.example` file to `.env` in the apps/web/ folder and fill in the necessary environment variables. For local development, the default value will work. If you want to deploy the app, you will need to specify where the backend is hosted.
+To get started, clone the repository and copy the `.env.example` file to `.env` in the apps/web/ folder and fill in the necessary environment variables. For local development, the default value will work. If you want to deploy the app, you will need to specify where the backend is hosted.
 
 ```
 cp ./apps/web/.env.example ./apps/web/.env
@@ -47,6 +41,22 @@ Then, copy the `.env.example` file to `.env` in the apps/api/ and generate the B
 cp ./apps/api/.env.example ./apps/api/.env
 ```
 
+### Local development with docker (Recommended)
+
+Run:
+```
+docker compose up
+```
+This should spin up the db, api, and web containers with the volumes bound to the host machine project folder, so the live server should work as usual.
+
+### Local development in the host machine
+
+Install the dependencies:
+
+```
+pnpm install
+```
+
 ### Build
 
 To build all apps and packages, run the following command:
@@ -55,7 +65,7 @@ To build all apps and packages, run the following command:
 pnpm build
 ```
 
-### Develop
+### Database
 
 To run the local database:
 
@@ -71,4 +81,6 @@ To run all apps and packages in development mode, run the following command:
 pnpm dev
 ```
 
-Access the app on http://localhost:5200/.
+----
+
+In either of the above modes, the app should be accessible at http://localhost:5200/.
